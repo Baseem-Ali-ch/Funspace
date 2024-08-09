@@ -1,0 +1,1211 @@
+<%- include('../layout/header.ejs') %>
+
+  <style>
+    /* CSS for alert messages */
+    .alert-message {
+      position: fixed;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 15px 20px;
+      background-color: #4caf50;
+      color: white;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      display: none;
+      /* Initially hidden */
+    }
+
+    .alert-error {
+      background-color: #f44336;
+      /* Red for errors */
+    }
+  </style>
+
+  <div class="page-wrapper">
+    <header class="header">
+      <div class="header-top">
+        <div class="container">
+          <div class="header-left col-lg-7">
+            <nav aria-label="breadcrumb" class="breadcrumb-nav border-0 mb-0">
+              <div class="container breadcrumbs">
+                <ol class="breadcrumb">
+                  <% breadcrumbs.forEach((crumb, index)=> { %>
+                    <% if (index < breadcrumbs.length - 1) { %>
+                      <!-- Breadcrumbs with links -->
+                      <li class="breadcrumb-item">
+                        <a href="<%= crumb.url %>">
+                          <%= crumb.name %>
+                        </a>
+                      </li>
+                      <% } else { %>
+                        <!-- Current page breadcrumb without link -->
+                        <li class="breadcrumb-item active" aria-current="page">
+                          <%= crumb.name %>
+                        </li>
+                        <% } %>
+                          <% }); %>
+                </ol>
+              </div>
+              <!-- End .container -->
+            </nav>
+            <!-- End .breadcrumb-nav -->
+          </div>
+          <!-- End .header-left -->
+
+          <div class="header-right " style="padding: 14px;">
+            <ul class="top-menu">
+              <li>
+                <a href="#">Links</a>
+                <ul>
+
+                  <li>
+                    <a href="/wishlist"><i class="icon-heart-o"></i>Wishlist
+                      <% if(wishlistItems){ %>
+                        <span>
+                          (<%= wishlistItems.length %>)
+                        </span>
+                        <% }else{ %>
+                          <span>
+                            (0)
+                          </span>
+                          <% } %>
+
+                    </a>
+                  </li>
+                  <li><a href="about.html">About Us</a></li>
+                  <li><a href="/contact-us">Contact Us</a></li>
+                  <% if(user){ %>
+                    <li>
+                      <a href="/account"><i class="icon-user"></i>
+                        <%= user.name %>
+                      </a>
+                      <% }else{ %>
+                    </li>
+
+                    <li>
+                      <a href="/login"><i class="icon-user"></i>Login</a>
+                      <% } %>
+                    </li>
+                </ul>
+              </li>
+            </ul>
+            <!-- End .top-menu -->
+          </div>
+          <!-- End .header-right -->
+        </div>
+        <!-- End .container -->
+      </div>
+      <!-- End .header-top -->
+
+      <div class="header-middle sticky-header">
+        <div class="container">
+          <div class="header-left">
+            <button class="mobile-menu-toggler">
+              <span class="sr-only">Toggle mobile menu</span>
+              <i class="icon-bars"></i>
+            </button>
+
+            <a href="/home" class="logo">
+              <img src="/assets/images/furnspace logo black.png" alt="Molla Logo" width="105" height="25" />
+            </a>
+
+            <nav class="main-nav">
+              <ul class="menu sf-arrows">
+                <li class="megamenu-container active">
+                  <a href="/home" class="">Home</a>
+                </li>
+                <li>
+                  <a href="/product-list" ">Product</a>
+              </li>
+
+              <li>
+                <a href=" #" class="sf-with-ul">Category</a>
+                  <ul>
+                    <% categories.forEach(function(category) { %>
+
+                      <li><a href="/category/<%= category._id %>">
+                          <%= category.title %>
+                        </a></li>
+
+                      <% }) %>
+                  </ul>
+                </li>
+
+
+
+
+
+
+                <li>
+                  <a href=" #" class="sf-with-ul">Brand</a>
+                  <ul>
+                    <li><a href="#">IKEA</a></li>
+                    <li><a href="#">DURIAN</a></li>
+                    <li><a href="#">URBAN LADDER</a></li>
+                    <li><a href="#">FURNITURE PARK</a></li>
+                    <li><a href="#">HOME TOWN</a></li>
+                    <li><a href="#">WOODEN STREET</a></li>
+                  </ul>
+                </li>
+
+                <li>
+                  <a href="#" class="sf-with-ul">Pages</a>
+
+                  <ul>
+                    <!-- <li><a href="about.html">About</a></li> -->
+                    <li><a href="/contact-us">Contact</a></li>
+                    <li><a href="/login">Login</a></li>
+
+                    <!-- <li><a href="coming-soon.html">Coming Soon</a></li> -->
+                  </ul>
+                </li>
+              </ul>
+              <!-- End .menu -->
+            </nav>
+            <!-- End .main-nav -->
+          </div>
+          <!-- End .header-left -->
+
+          <div class="header-right">
+            <div class="header-search">
+              <a href="#" class="search-toggle" role="button" title="Search"><i class="icon-search"></i></a>
+              <form action="#" method="get">
+                <div class="header-search-wrapper">
+                  <label for="q" class="sr-only">Search</label>
+                  <input type="search" class="form-control" name="q" id="searchInput" placeholder="Search in..."
+                    required />
+                </div>
+                <!-- End .header-search-wrapper -->
+              </form>
+            </div>
+
+
+
+            <div class=" cart-dropdown">
+              <a href="/wallet" class="dropdown-toggle" style="font-size: 23px;">
+                <i class="fa-solid fa-wallet"></i>
+              </a>
+            </div>
+
+
+            <div class="dropdown cart-dropdown">
+              <a href="/cart" class="dropdown-toggle">
+                <i class="icon-shopping-cart"></i>
+                <% if(cartItems){ %>
+                  <span class="cart-count">
+                    <%= cartItems.length %>
+                  </span>
+                  <% }else{ %>
+                    <span class="cart-count">0</span>
+                    <% } %>
+              </a>
+            </div>
+            <!-- End .cart-dropdown -->
+          </div>
+          <!-- End .header-right -->
+        </div>
+        <!-- End .container -->
+      </div>
+      <!-- End .header-middle -->
+    </header>
+    <!-- End .header -->
+
+    <main class="main">
+      <div class="page-header text-center" style="background-image: url('/assets/images/page-header-bg.jpg')">
+        <div class="container">
+          <h1 class="page-title">Product<span>Shop</span></h1>
+        </div>
+        <!-- End .container -->
+      </div>
+      <!-- End .page-header -->
+
+
+      <div class="page-content">
+        <div class="container">
+          <div id="alertMessage" class="alert-message"></div>
+          <div class="row">
+            <div class="col-lg-9">
+              <div class="toolbox">
+                <div class="toolbox-left">
+
+                  <!-- End .toolbox-info -->
+                </div>
+                <!-- End .toolbox-left -->
+
+                <div class="toolbox-right">
+
+
+                </div>
+                <!-- End .toolbox-right -->
+              </div>
+              <!-- End .toolbox -->
+
+              <div class="products mb-3">
+                <div class="row justify-content-center" id="product-list">
+                  <% products.forEach(product=> { %>
+                    <div class="col-6 col-md-4 col-lg-4 product"
+                      data-category-id="<%= product.category ? product.category._id : '' %>">
+                      <div class="product product-7 text-center">
+                        <figure class="product-media">
+                          <span class="product-label label-new" style="background-color: rgba(223, 223, 223, 0.925);">
+                            <% if (product.stock> 10) { %>
+                              <p style="color: #50C878;">In stock</p>
+                              <% } else if (product.stock> 0 && product.stock <= 10) { %>
+                                  <p style="color: #dbba00;">Few left</p>
+                                  <% } else { %>
+                                    <p style="color: #DC143C;">Out of stock</p>
+                                    <% } %>
+                          </span>
+                          <a href="/product/<%= product._id %>">
+                            <img src="<%= product.imageUrl_1 %>" alt="Product image" class="product-image" />
+                          </a>
+                          <div class="product-action-vertical">
+                            <a href="#" class="btn-product-icon btn-wishlist btn-expandable"
+                              onclick="addToWishlist('<%= product._id %>',1); return false;">
+                              <span>Add to Wishlist</span>
+                            </a>
+                          </div>
+                          <div class="product-action">
+                            <% if(product.status==='unavailable' || product.stock===0) { %>
+                              <a href="#" class="btn-product btn-cart" style="pointer-events: none;">
+                                <span>Sold out</span>
+                              </a>
+                              <% } else { %>
+                                <a href="#" class="btn-product btn-cart" id="btn-cart-<%= product._id %>"
+                                  onclick="addToCart('<%= product._id %>')">
+                                  <span>Add to cart</span>
+                                </a>
+                                <% } %>
+                          </div>
+                        </figure>
+                        <div class="product-body">
+                          <div class="product-cat">
+                            <% if(product.category) { %>
+                              <a href="#">
+                                <%= product.category.title %>
+                              </a>
+                              <% } else { %>
+                                <a href="#">No Category</a>
+                                <% } %>
+                          </div>
+                          <h3 class="product-title">
+                            <a href="product.html">
+                              <%= product.name %>
+                            </a>
+                          </h3>
+                          <% if(product.discountedPrice && product.price> product.discountedPrice) { %>
+                            <div class="row">
+                              <div class="product-price mx-3">
+                                ₹<%= product.discountedPrice %>
+                              </div>
+                              <div class="product-price mx-3" style="font-size: 13px;">
+                                <del>₹<%= product.price %></del>
+                              </div>
+                              <% const discountPercentage=Math.round(((product.price - product.discountedPrice) /
+                                product.price) * 100); %>
+                                <div class="product-price" style="font-size: 13px;">
+                                  <%= discountPercentage %>% off
+                                </div>
+                            </div>
+                            <% } else { %>
+                              <div class="product-price">
+                                ₹<%= product.price %>
+                              </div>
+                              <% } %>
+                                <div class="ratings-container">
+                                  <div class="ratings">
+                                    <div class="ratings-val" style="width: 20%"></div>
+                                  </div>
+                                  <span class="ratings-text">( 2 Reviews )</span>
+                                </div>
+                        </div>
+                      </div>
+                    </div>
+                    <% }) %>
+                </div>
+              </div>
+              <!-- End .products -->
+
+              <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                  <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                    <a class="page-link page-link-prev" href="?page=<%= currentPage - 1 %>" aria-label="Previous"
+                      tabindex="-1" aria-disabled="<%= currentPage === 1 %>">
+                      <span aria-hidden="true"><i class="icon-long-arrow-left"></i></span> Prev
+                    </a>
+                  </li>
+                  <% for (let i=1; i <=totalPages; i++) { %>
+                    <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                      <a class="page-link" href="?page=<%= i %>">
+                        <%= i %>
+                      </a>
+                    </li>
+                    <% } %>
+                      <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                        <a class="page-link page-link-next" href="?page=<%= currentPage + 1 %>" aria-label="Next">
+                          Next <span aria-hidden="true"><i class="icon-long-arrow-right"></i></span>
+                        </a>
+                      </li>
+                </ul>
+              </nav>
+            </div>
+            <!-- End .col-lg-9 -->
+            <aside class="col-lg-3 order-lg-first">
+              <div class="sidebar sidebar-shop">
+                <div class="widget widget-clean">
+                  <label>Filters:</label>
+                  <a href="#" class="sidebar-filter-clear" id="clear-filters">Clean All</a>
+                </div><!-- End .widget widget-clean -->
+
+                <div class="widget widget-collapsible">
+                  <h3 class="widget-title">
+                    <a data-toggle="collapse" href="#widget-1" role="button" aria-expanded="true"
+                      aria-controls="widget-1">
+                      Category
+                    </a>
+                  </h3>
+                  <!-- End .widget-title -->
+
+                  <div class="collapse show" id="widget-1">
+                    <div class="widget-body">
+                      <div class="filter-items filter-items-count">
+                        <div class="filter-item">
+                          <% const uniqueCategories=[]; products.forEach(product=> {
+                            if (product.category && !uniqueCategories.some(cat => cat._id === product.category._id)) {
+                            uniqueCategories.push(product.category);
+                            }
+                            }); %>
+                            <% uniqueCategories.forEach((category, index)=> { %>
+                              <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input category-checkbox"
+                                  id="cat-<%= category._id %>" value="<%= category._id %>"
+                                  onchange="filterProducts()" />
+                                <label class="custom-control-label" for="cat-<%= category._id %>">
+                                  <%= category.title %>
+                                </label>
+                              </div>
+                              <% }); %>
+
+                                <!-- Uncategorized option -->
+                                <div class="custom-control custom-checkbox" style="display: none;">
+                                  <input type="checkbox" class="custom-control-input" id="cat-uncategorized"
+                                    value="uncategorized" checked onchange="filterProducts()" />
+                                  <label class="custom-control-label" for="cat-uncategorized">
+                                    Uncategorized
+                                  </label>
+                                </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- End .widget-body -->
+                </div>
+                <!-- End .collapse -->
+              </div>
+              <!-- End .widget -->
+
+              <div class="widget widget-collapsible">
+                <h3 class="widget-title">
+                  <a data-toggle="collapse" href="#widget-2" role="button" aria-expanded="true"
+                    aria-controls="widget-2">
+                    Sort
+                  </a>
+                </h3>
+                <div class="collapse show" id="widget-2">
+                  <div class="widget-body">
+                    <div class="filter-items">
+                      <div class="filter-item">
+                        <div class="custom-control custom-checkbox">
+                          <input type="checkbox" class="custom-control-input sort-checkbox" id="sort-1"
+                            value="name_asc">
+                          <label class="custom-control-label" for="sort-1">Name(A-Z)</label>
+                        </div>
+                      </div>
+                      <div class="filter-item">
+                        <div class="custom-control custom-checkbox">
+                          <input type="checkbox" class="custom-control-input sort-checkbox" id="sort-2"
+                            value="name_desc">
+                          <label class="custom-control-label" for="sort-2">Name(Z-A)</label>
+                        </div>
+                      </div>
+                      <div class="filter-item">
+                        <div class="custom-control custom-checkbox">
+                          <input type="checkbox" class="custom-control-input sort-checkbox" id="sort-3"
+                            value="price_asc">
+                          <label class="custom-control-label" for="sort-3">Price(Low to High)</label>
+                        </div>
+                      </div>
+                      <div class="filter-item">
+                        <div class="custom-control custom-checkbox">
+                          <input type="checkbox" class="custom-control-input sort-checkbox" id="sort-4"
+                            value="price_desc">
+                          <label class="custom-control-label" for="sort-4">Price(High to Low)</label>
+                        </div>
+                      </div>
+                      <div class="filter-item">
+                        <div class="custom-control custom-checkbox">
+                          <input type="checkbox" class="custom-control-input sort-checkbox" id="sort-5" value="newest">
+                          <label class="custom-control-label" for="sort-5">Newest First</label>
+                        </div>
+                      </div>
+                      <div class="filter-item">
+                        <div class="custom-control custom-checkbox">
+                          <input type="checkbox" class="custom-control-input sort-checkbox" id="sort-6" value="oldest">
+                          <label class="custom-control-label" for="sort-6">Oldest First</label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+
+          </div><!-- End .sidebar sidebar-shop -->
+          </aside>
+          <!-- End .col-lg-3 -->
+        </div>
+        <!-- End .row -->
+      </div>
+      <!-- End .container -->
+  </div>
+  <!-- End .page-content -->
+  </main>
+  <!-- End .main -->
+
+  <footer class="footer">
+    <div class="footer-middle">
+      <div class="container">
+        <div class="row">
+          <div class="col-sm-6 col-lg-3">
+            <div class="widget widget-about">
+              <img src="/assets/images/furnspace logo black.png" class="footer-logo" alt="Footer Logo" width="105"
+                height="25" />
+              <p>
+                Praesent dapibus, neque id cursus ucibus, tortor neque egestas
+                augue, eu vulputate magna eros eu erat.
+              </p>
+
+              <div class="social-icons">
+                <a href="#" class="social-icon" target="_blank" title="Facebook"><i class="icon-facebook-f"></i></a>
+                <a href="#" class="social-icon" target="_blank" title="Twitter"><i class="icon-twitter"></i></a>
+                <a href="#" class="social-icon" target="_blank" title="Instagram"><i class="icon-instagram"></i></a>
+                <a href="#" class="social-icon" target="_blank" title="Youtube"><i class="icon-youtube"></i></a>
+                <a href="#" class="social-icon" target="_blank" title="Pinterest"><i class="icon-pinterest"></i></a>
+              </div>
+              <!-- End .soial-icons -->
+            </div>
+            <!-- End .widget about-widget -->
+          </div>
+          <!-- End .col-sm-6 col-lg-3 -->
+
+          <div class="col-sm-6 col-lg-3">
+            <div class="widget">
+              <h4 class="widget-title">Useful Links</h4>
+              <!-- End .widget-title -->
+
+              <ul class="widget-list">
+                <li><a href="about.html">About Molla</a></li>
+                <li><a href="#">How to shop on Molla</a></li>
+                <li><a href="#">FAQ</a></li>
+                <li><a href="contact.html">Contact us</a></li>
+                <li><a href="login.html">Log in</a></li>
+              </ul>
+              <!-- End .widget-list -->
+            </div>
+            <!-- End .widget -->
+          </div>
+          <!-- End .col-sm-6 col-lg-3 -->
+
+          <div class="col-sm-6 col-lg-3">
+            <div class="widget">
+              <h4 class="widget-title">Customer Service</h4>
+              <!-- End .widget-title -->
+
+              <ul class="widget-list">
+                <li><a href="#">Payment Methods</a></li>
+                <li><a href="#">Money-back guarantee!</a></li>
+                <li><a href="#">Returns</a></li>
+                <li><a href="#">Shipping</a></li>
+                <li><a href="#">Terms and conditions</a></li>
+                <li><a href="#">Privacy Policy</a></li>
+              </ul>
+              <!-- End .widget-list -->
+            </div>
+            <!-- End .widget -->
+          </div>
+          <!-- End .col-sm-6 col-lg-3 -->
+
+          <div class="col-sm-6 col-lg-3">
+            <div class="widget">
+              <h4 class="widget-title">My Account</h4>
+              <!-- End .widget-title -->
+
+              <ul class="widget-list">
+                <li><a href="#">Sign In</a></li>
+                <li><a href="cart.html">View Cart</a></li>
+                <li><a href="#">My Wishlist</a></li>
+                <li><a href="#">Track My Order</a></li>
+                <li><a href="#">Help</a></li>
+              </ul>
+              <!-- End .widget-list -->
+            </div>
+            <!-- End .widget -->
+          </div>
+          <!-- End .col-sm-6 col-lg-3 -->
+        </div>
+        <!-- End .row -->
+      </div>
+      <!-- End .container -->
+    </div>
+    <!-- End .footer-middle -->
+
+    <div class="footer-bottom">
+      <div class="container">
+        <p class="footer-copyright">
+          Copyright © 2019 Molla Store. All Rights Reserved.
+        </p>
+        <!-- End .footer-copyright -->
+        <figure class="footer-payments">
+          <img src="/assets/images/payments.png" alt="Payment methods" width="272" height="20" />
+        </figure>
+        <!-- End .footer-payments -->
+      </div>
+      <!-- End .container -->
+    </div>
+    <!-- End .footer-bottom -->
+  </footer>
+  <!-- End .footer -->
+  </div>
+  <!-- End .page-wrapper -->
+  <button id="scroll-top" title="Back to Top">
+    <i class="icon-arrow-up"></i>
+  </button>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu-overlay"></div>
+  <!-- End .mobil-menu-overlay -->
+
+  <div class="mobile-menu-container">
+    <div class="mobile-menu-wrapper">
+      <span class="mobile-menu-close"><i class="icon-close"></i></span>
+
+      <form action="#" method="get" class="mobile-search">
+        <label for="mobile-search" class="sr-only">Search</label>
+        <input type="search" class="form-control" name="mobile-search" id="productSearch" placeholder="Search in..."
+          required />
+        <button class="btn btn-primary" type="submit" onclick="searchProducts()">
+          <i class="icon-search"></i>
+        </button>
+      </form>
+
+      <nav class="mobile-nav">
+        <ul class="mobile-menu">
+          <li class="active">
+            <a href="index.html">Home</a>
+
+            <ul>
+              <li><a href="index-1.html">01 - furniture store</a></li>
+              <li><a href="index-2.html">02 - furniture store</a></li>
+              <li><a href="index-3.html">03 - electronic store</a></li>
+              <li><a href="index-4.html">04 - electronic store</a></li>
+              <li><a href="index-5.html">05 - fashion store</a></li>
+              <li><a href="index-6.html">06 - fashion store</a></li>
+              <li><a href="index-7.html">07 - fashion store</a></li>
+              <li><a href="index-8.html">08 - fashion store</a></li>
+              <li><a href="index-9.html">09 - fashion store</a></li>
+              <li><a href="index-10.html">10 - shoes store</a></li>
+              <li><a href="index-11.html">11 - furniture simple store</a></li>
+              <li><a href="index-12.html">12 - fashion simple store</a></li>
+              <li><a href="index-13.html">13 - market</a></li>
+              <li><a href="index-14.html">14 - market fullwidth</a></li>
+              <li><a href="index-15.html">15 - lookbook 1</a></li>
+              <li><a href="index-16.html">16 - lookbook 2</a></li>
+              <li><a href="index-17.html">17 - fashion store</a></li>
+              <li>
+                <a href="index-18.html">18 - fashion store (with sidebar)</a>
+              </li>
+              <li><a href="index-19.html">19 - games store</a></li>
+              <li><a href="index-20.html">20 - book store</a></li>
+              <li><a href="index-21.html">21 - sport store</a></li>
+              <li><a href="index-22.html">22 - tools store</a></li>
+              <li>
+                <a href="index-23.html">23 - fashion left navigation store</a>
+              </li>
+              <li><a href="index-24.html">24 - extreme sport store</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="category.html">Shop</a>
+            <ul>
+              <li><a href="category-list.html">Shop List</a></li>
+              <li><a href="category-2cols.html">Shop Grid 2 Columns</a></li>
+              <li><a href="category.html">Shop Grid 3 Columns</a></li>
+              <li><a href="category-4cols.html">Shop Grid 4 Columns</a></li>
+              <li>
+                <a href="category-boxed.html"><span>Shop Boxed No Sidebar<span class="tip tip-hot">Hot</span></span></a>
+              </li>
+              <li>
+                <a href="category-fullwidth.html">Shop Fullwidth No Sidebar</a>
+              </li>
+              <li>
+                <a href="product-category-boxed.html">Product Category Boxed</a>
+              </li>
+              <li>
+                <a href="product-category-fullwidth.html"><span>Product Category Fullwidth<span
+                      class="tip tip-new">New</span></span></a>
+              </li>
+              <li><a href="cart.html">Cart</a></li>
+              <li><a href="checkout.html">Checkout</a></li>
+              <li><a href="wishlist.html">Wishlist</a></li>
+              <li><a href="#">Lookbook</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="product.html" class="sf-with-ul">Product</a>
+            <ul>
+              <li><a href="product.html">Default</a></li>
+              <li><a href="product-centered.html">Centered</a></li>
+              <li>
+                <a href="product-extended.html"><span>Extended Info<span class="tip tip-new">New</span></span></a>
+              </li>
+              <li><a href="product-gallery.html">Gallery</a></li>
+              <li><a href="product-sticky.html">Sticky Info</a></li>
+              <li><a href="product-sidebar.html">Boxed With Sidebar</a></li>
+              <li><a href="product-fullwidth.html">Full Width</a></li>
+              <li><a href="product-masonry.html">Masonry Sticky Info</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="#">Pages</a>
+            <ul>
+              <li>
+                <a href="about.html">About</a>
+
+
+              </li>
+              <li>
+                <a href="contact.html">Contact</a>
+
+
+              </li>
+              <li><a href="login.html">Login</a></li>
+              <li><a href="faq.html">FAQs</a></li>
+              <li><a href="404.html">Error 404</a></li>
+              <li><a href="coming-soon.html">Coming Soon</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="blog.html">Blog</a>
+
+            <ul>
+              <li><a href="blog.html">Classic</a></li>
+              <li><a href="blog-listing.html">Listing</a></li>
+              <li>
+                <a href="#">Grid</a>
+                <ul>
+                  <li><a href="blog-grid-2cols.html">Grid 2 columns</a></li>
+                  <li><a href="blog-grid-3cols.html">Grid 3 columns</a></li>
+                  <li><a href="blog-grid-4cols.html">Grid 4 columns</a></li>
+                  <li><a href="blog-grid-sidebar.html">Grid sidebar</a></li>
+                </ul>
+              </li>
+              <li>
+                <a href="#">Masonry</a>
+                <ul>
+                  <li><a href="blog-masonry-2cols.html">Masonry 2 columns</a></li>
+                  <li><a href="blog-masonry-3cols.html">Masonry 3 columns</a></li>
+                  <li><a href="blog-masonry-4cols.html">Masonry 4 columns</a></li>
+                  <li><a href="blog-masonry-sidebar.html">Masonry sidebar</a></li>
+                </ul>
+              </li>
+              <li>
+                <a href="#">Mask</a>
+                <ul>
+                  <li><a href="blog-mask-grid.html">Blog mask grid</a></li>
+                  <li><a href="blog-mask-masonry.html">Blog mask masonry</a></li>
+                </ul>
+              </li>
+              <li>
+                <a href="#">Single Post</a>
+                <ul>
+                  <li><a href="single.html">Default with sidebar</a></li>
+                  <li>
+                    <a href="single-fullwidth.html">Fullwidth no sidebar</a>
+                  </li>
+                  <li>
+                    <a href="single-fullwidth-sidebar.html">Fullwidth with sidebar</a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <a href="elements-list.html">Elements</a>
+            <ul>
+              <li><a href="elements-products.html">Products</a></li>
+              <li><a href="elements-typography.html">Typography</a></li>
+              <li><a href="elements-titles.html">Titles</a></li>
+              <li><a href="elements-banners.html">Banners</a></li>
+              <li>
+                <a href="elements-product-category.html">Product Category</a>
+              </li>
+              <li><a href="elements-video-banners.html">Video Banners</a></li>
+              <li><a href="elements-buttons.html">Buttons</a></li>
+              <li><a href="elements-accordions.html">Accordions</a></li>
+              <li><a href="elements-tabs.html">Tabs</a></li>
+              <li><a href="elements-testimonials.html">Testimonials</a></li>
+              <li><a href="elements-blog-posts.html">Blog Posts</a></li>
+              <li><a href="elements-portfolio.html">Portfolio</a></li>
+              <li><a href="elements-cta.html">Call to Action</a></li>
+              <li><a href="elements-icon-boxes.html">Icon Boxes</a></li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <!-- End .mobile-nav -->
+
+      <div class="social-icons">
+        <a href="#" class="social-icon" target="_blank" title="Facebook"><i class="icon-facebook-f"></i></a>
+        <a href="#" class="social-icon" target="_blank" title="Twitter"><i class="icon-twitter"></i></a>
+        <a href="#" class="social-icon" target="_blank" title="Instagram"><i class="icon-instagram"></i></a>
+        <a href="#" class="social-icon" target="_blank" title="Youtube"><i class="icon-youtube"></i></a>
+      </div>
+      <!-- End .social-icons -->
+    </div>
+    <!-- End .mobile-menu-wrapper -->
+  </div>
+  <!-- End .mobile-menu-container -->
+
+  <!-- Sign in / Register Modal -->
+  <div class="modal fade" id="signin-modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-body">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true"><i class="icon-close"></i></span>
+          </button>
+
+          <div class="form-box">
+            <div class="form-tab">
+              <ul class="nav nav-pills nav-fill" role="tablist">
+                <li class="nav-item">
+                  <a class="nav-link active" id="signin-tab" data-toggle="tab" href="#signin" role="tab"
+                    aria-controls="signin" aria-selected="true">Sign In</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" id="register-tab" data-toggle="tab" href="#register" role="tab"
+                    aria-controls="register" aria-selected="false">Register</a>
+                </li>
+              </ul>
+              <div class="tab-content" id="tab-content-5">
+                <div class="tab-pane fade show active" id="signin" role="tabpanel" aria-labelledby="signin-tab">
+                  <form action="#">
+                    <div class="form-group">
+                      <label for="singin-email">Username or email address *</label>
+                      <input type="text" class="form-control" id="singin-email" name="singin-email" required />
+                    </div>
+                    <!-- End .form-group -->
+
+                    <div class="form-group">
+                      <label for="singin-password">Password *</label>
+                      <input type="password" class="form-control" id="singin-password" name="singin-password"
+                        required />
+                    </div>
+                    <!-- End .form-group -->
+
+                    <div class="form-footer">
+                      <button type="submit" class="btn btn-outline-primary-2">
+                        <span>LOG IN</span>
+                        <i class="icon-long-arrow-right"></i>
+                      </button>
+
+                      <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="signin-remember" />
+                        <label class="custom-control-label" for="signin-remember">Remember Me</label>
+                      </div>
+                      <!-- End .custom-checkbox -->
+
+                      <a href="#" class="forgot-link">Forgot Your Password?</a>
+                    </div>
+                    <!-- End .form-footer -->
+                  </form>
+                  <div class="form-choice">
+                    <p class="text-center">or sign in with</p>
+                    <div class="row">
+                      <div class="col-sm-6">
+                        <a href="#" class="btn btn-login btn-g">
+                          <i class="icon-google"></i>
+                          Login With Google
+                        </a>
+                      </div>
+                      <!-- End .col-6 -->
+                      <div class="col-sm-6">
+                        <a href="#" class="btn btn-login btn-f">
+                          <i class="icon-facebook-f"></i>
+                          Login With Facebook
+                        </a>
+                      </div>
+                      <!-- End .col-6 -->
+                    </div>
+                    <!-- End .row -->
+                  </div>
+                  <!-- End .form-choice -->
+                </div>
+                <!-- .End .tab-pane -->
+                <div class="tab-pane fade" id="register" role="tabpanel" aria-labelledby="register-tab">
+                  <form action="#">
+                    <div class="form-group">
+                      <label for="register-email">Your email address *</label>
+                      <input type="email" class="form-control" id="register-email" name="register-email" required />
+                    </div>
+                    <!-- End .form-group -->
+
+                    <div class="form-group">
+                      <label for="register-password">Password *</label>
+                      <input type="password" class="form-control" id="register-password" name="register-password"
+                        required />
+                    </div>
+                    <!-- End .form-group -->
+
+                    <div class="form-footer">
+                      <button type="submit" class="btn btn-outline-primary-2">
+                        <span>SIGN UP</span>
+                        <i class="icon-long-arrow-right"></i>
+                      </button>
+
+                      <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="register-policy" required />
+                        <label class="custom-control-label" for="register-policy">I agree to the <a href="#">privacy
+                            policy</a> *</label>
+                      </div>
+                      <!-- End .custom-checkbox -->
+                    </div>
+                    <!-- End .form-footer -->
+                  </form>
+                  <div class="form-choice">
+                    <p class="text-center">or sign in with</p>
+                    <div class="row">
+                      <div class="col-sm-6">
+                        <a href="#" class="btn btn-login btn-g">
+                          <i class="icon-google"></i>
+                          Login With Google
+                        </a>
+                      </div>
+                      <!-- End .col-6 -->
+                      <div class="col-sm-6">
+                        <a href="#" class="btn btn-login btn-f">
+                          <i class="icon-facebook-f"></i>
+                          Login With Facebook
+                        </a>
+                      </div>
+                      <!-- End .col-6 -->
+                    </div>
+                    <!-- End .row -->
+                  </div>
+                  <!-- End .form-choice -->
+                </div>
+                <!-- .End .tab-pane -->
+              </div>
+              <!-- End .tab-content -->
+            </div>
+            <!-- End .form-tab -->
+          </div>
+          <!-- End .form-box -->
+        </div>
+        <!-- End .modal-body -->
+      </div>
+      <!-- End .modal-content -->
+    </div>
+    <!-- End .modal-dialog -->
+  </div>
+  <!-- End .modal -->
+
+  <!-- Plugins JS File -->
+  <script src="/assets/js/jquery.min.js"></script>
+  <script src="/assets/js/bootstrap.bundle.min.js"></script>
+  <script src="/assets/js/jquery.hoverIntent.min.js"></script>
+  <script src="/assets/js/jquery.waypoints.min.js"></script>
+  <script src="/assets/js/superfish.min.js"></script>
+  <script src="/assets/js/owl.carousel.min.js"></script>
+  <script src="/assets/js/wNumb.js"></script>
+  <script src="/assets/js/bootstrap-input-spinner.js"></script>
+  <script src="/assets/js/jquery.magnific-popup.min.js"></script>
+  <script src="/assets/js/nouislider.min.js"></script>
+  <!-- Main JS File -->
+  <script src="/assets/js/main.js"></script>
+
+
+  <script>
+    function filterAndSortProducts() {
+      console.log("filterAndSortProducts function called");
+      const categoryCheckboxes = document.querySelectorAll('.category-checkbox');
+      const uncategorizedCheckbox = document.getElementById('cat-uncategorized');
+      const sortCheckboxes = document.querySelectorAll('.sort-checkbox');
+
+      const selectedCategories = [];
+      let sortOption = '';
+
+      categoryCheckboxes.forEach(checkbox => {
+        if (checkbox.checked) {
+          selectedCategories.push(checkbox.value);
+        }
+      });
+
+      if (uncategorizedCheckbox.checked) {
+        selectedCategories.push('uncategorized');
+      }
+
+      sortCheckboxes.forEach(checkbox => {
+        if (checkbox.checked) {
+          sortOption = checkbox.value;
+        }
+      });
+
+      console.log("Selected categories:", selectedCategories);
+      console.log("Sort option:", sortOption);
+
+      // Make an AJAX call to the server
+      fetch('/filter-and-sort-products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ categories: selectedCategories, sort: sortOption }),
+      })
+        .then(response => response.json())
+        .then(data => {
+          updateProductList(data.products);
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+    }
+
+    function updateProductList(products) {
+      const productList = document.getElementById('product-list');
+      productList.innerHTML = ''; // Clear existing products
+
+      products.forEach(product => {
+        const productElement = createProductElement(product);
+        productList.appendChild(productElement);
+      });
+
+      console.log("Number of products displayed:", products.length);
+    }
+
+    function createProductElement(product) {
+      // Create and return a DOM element for the product
+      // This function will depend on your HTML structure
+      // Here's a basic example:
+      const div = document.createElement('div');
+      div.className = 'col-6 col-md-4 col-lg-4 product';
+      div.setAttribute('data-category-id', product.category ? product.category._id : '');
+      div.innerHTML = `
+        <div class="product product-7 text-center">
+          <figure class="product-media">
+            <a href="/product/${product._id}">
+              <img src="${product.imageUrl_1}" alt="Product image" class="product-image" />
+            </a>
+            <!-- Add other product details here -->
+          </figure>
+          <div class="product-body">
+            <h3 class="product-title">
+              <a href="/product/${product._id}">${product.name}</a>
+            </h3>
+            <div class="product-price">
+              ₹${product.price}
+            </div>
+            <!-- Add other product details here -->
+          </div>
+        </div>
+      `;
+      return div;
+    }
+
+    // Add event listeners to checkboxes
+    document.querySelectorAll('.category-checkbox, #cat-uncategorized, .sort-checkbox').forEach(checkbox => {
+      checkbox.addEventListener('change', filterAndSortProducts);
+    });
+
+    document.getElementById('clear-filters').addEventListener('click', function (event) {
+      event.preventDefault();
+      // Uncheck all checkboxes
+      document.querySelectorAll('.category-checkbox, #cat-uncategorized, .sort-checkbox').forEach(checkbox => {
+        checkbox.checked = false;
+      });
+      filterAndSortProducts(); // Refresh the product list
+    });
+  </script>
+
+
+  <!-- <script>
+  function addToWishlist(productId) {
+      console.log('Button clicked! Product ID:', productId); // Debugging line
+
+      fetch('/wishlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').getAttribute('content') : ''
+        },
+        body: JSON.stringify({ productId })
+      })
+      .then(response => {
+        console.log('Response received:', response); // Debugging line
+        return response.json();
+      })
+      .then(data => {
+        console.log('Data received:', data); // Debugging line
+        if (data.message) {
+          alert(data.message);
+        } else {
+          window.location.href = '/wishlist';
+        }
+      })
+      .catch(error => console.error('Error adding to wishlist:', error));
+    }
+</script> -->
+
+  <script>
+    function addToWishlist(productId) {
+      console.log('Button clicked! Product ID:', productId); // Debugging line
+
+      fetch('/wishlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ productId })
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log('Data received:', data); // Debugging line
+          if (data.message) {
+            showAlert(data.message, data.error ? 'error' : 'success');
+          }
+        })
+        .catch(error => {
+          console.error('Error adding to wishlist:', error);
+          showAlert('Error adding to wishlist ! Please login and continue', 'error');
+        });
+    }
+
+    function showAlert(message, type) {
+      const alertMessage = document.getElementById('alertMessage');
+      alertMessage.textContent = message;
+      alertMessage.className = 'alert-message'; // Reset classes
+      if (type === 'error') {
+        alertMessage.classList.add('alert-error');
+      }
+      alertMessage.style.display = 'block';
+
+      setTimeout(() => {
+        alertMessage.style.display = 'none';
+      }, 3000); // Hide after 3 seconds
+    }
+
+
+
+
+
+
+    // Function to add product to the cart
+    function addToCart(productId) {
+      const quantity = 1; // Set quantity to 1
+      console.log('Adding to cart:', productId, quantity); // Log productId and quantity
+
+      fetch('/cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ productId, quantity })
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            showAlert(data.message, 'success'); // Show success message
+            // Change button to "View Cart"
+            const btnCart = document.getElementById(`btn-cart-${productId}`);
+            btnCart.innerHTML = '<span>view cart</span>';
+            btnCart.setAttribute('onclick', 'viewCart()');
+
+          } else {
+            showAlert(data.message, 'error'); // Show error message
+          }
+        })
+        .catch(error => {
+          console.error('Error adding item to cart:', error);
+          showAlert('Error adding item to cart', 'error');
+        });
+    }
+
+    // Function to redirect to the cart page
+    function viewCart() {
+      window.location.href = '/cart'; // Redirect to the cart page
+    }
+
+    // Function to show alert messages
+    function showAlert(message, type) {
+      const alertMessage = document.getElementById('alertMessage');
+      alertMessage.textContent = message;
+      alertMessage.className = 'alert-message';
+      alertMessage.classList.add(type === 'error' ? 'alert-error' : 'alert-success');
+      alertMessage.style.display = 'block';
+
+      setTimeout(() => {
+        alertMessage.style.display = 'none';
+      }, 3000);
+    }
+  </script>
+
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const searchInput = document.getElementById('searchInput');
+      const productElements = document.querySelectorAll('.product');
+      const productsContainer = document.querySelector('.products .row');
+
+      function searchProducts() {
+        const searchTerm = searchInput.value.toLowerCase();
+        let visibleProductsCount = 0;
+
+        productElements.forEach(productElement => {
+          const productName = productElement.querySelector('.product-title a').textContent.toLowerCase();
+          const productCategory = productElement.querySelector('.product-cat a').textContent.toLowerCase();
+
+          if (productName.includes(searchTerm) || productCategory.includes(searchTerm)) {
+            productElement.style.display = '';
+            visibleProductsCount++;
+          } else {
+            productElement.style.display = 'none';
+          }
+        });
+
+        // Handle no results
+        const noResultsElement = document.querySelector('.no-results');
+        if (visibleProductsCount === 0) {
+          if (!noResultsElement) {
+            const noResults = document.createElement('p');
+            noResults.className = 'no-results';
+            noResults.textContent = 'No products found.';
+            productsContainer.before(noResults);
+          }
+        } else if (noResultsElement) {
+          noResultsElement.remove();
+        }
+      }
+
+      searchInput.addEventListener('input', searchProducts);
+    });
+  </script>
+  f
+
+  <%- include('../layout/footer.ejs') %>

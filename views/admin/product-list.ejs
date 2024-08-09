@@ -1,0 +1,1040 @@
+<%- include('../admin-layout/header.ejs') %>
+
+  <style>
+    /* Add CSS to style the table */
+    #product-list tr:nth-child(even) {
+      background-color: #f2f2f2;
+      /* Light grey background for even rows */
+    }
+
+    #product-list tr:nth-child(odd) {
+      background-color: #ffffff;
+      /* White background for odd rows */
+    }
+
+    .product-title {
+      width: 200px;
+      /* Set width of product title column */
+    }
+
+    .fixed-width {
+      width: 100px;
+      /* Adjust width as needed */
+      white-space: nowrap;
+      /* Prevent text wrapping */
+      overflow: hidden;
+      /* Hide overflow text */
+      text-overflow: ellipsis;
+      /* Show ellipsis if text overflows */
+    }
+
+    .fixed-width.editable {
+      background-color: #f0f0f0;
+      /* Optional: Highlight editable fields */
+      border: 1px solid #ccc;
+      /* Optional: Add border for visual cue */
+    }
+  </style>
+
+
+  <!-- ?PROD Only: Google Tag Manager (noscript) (Default ThemeSelection: GTM-5DDHKGP, PixInvent: GTM-5J3LMKC) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5DDHKGP" height="0" width="0"
+      style="display: none; visibility: hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+
+  <!-- Layout wrapper -->
+  <div class="layout-wrapper layout-content-navbar  ">
+    <div class="layout-container">
+
+
+
+
+
+
+
+      <!-- Menu -->
+
+      <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+
+
+        <div class="app-brand demo ">
+          <a href="index.html" class="app-brand-link">
+            <!-- <span class="app-brand-logo demo me-1">
+
+      <span class="app-brand-text demo menu-text fw-semibold ms-2">Materio</span> -->
+
+            <img src="/assets/images/admin logo.png" alt="Furnspace Logo" width="105" height="50" />
+          </a>
+
+          <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
+            <i class="menu-toggle-icon d-xl-block align-middle"></i>
+          </a>
+        </div>
+
+        <div class="menu-inner-shadow"></div>
+
+
+
+        <ul class="menu-inner py-1">
+
+
+
+          <!-- e-commerce-app menu start -->
+          <li class="menu-item active open">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+              <i class='menu-icon tf-icons ri-shopping-bag-3-line'></i>
+              <div data-i18n="eCommerce">eCommerce</div>
+            </a>
+            <ul class="menu-sub">
+              <li class="menu-item">
+                <a href="/admin/dashboard" class="menu-link">
+                  <div data-i18n="Dashboard">Dashboard</div>
+                </a>
+              </li>
+              <li class="menu-item  open">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                  <div data-i18n="Products">Products</div>
+                </a>
+                <ul class="menu-sub">
+                  <li class="menu-item active">
+                    <a href="/admin/product-list" class="menu-link">
+                      <div data-i18n="Product List">Product List</div>
+                    </a>
+                  </li>
+                  <li class="menu-item">
+                    <a href="/admin/add-product" class="menu-link">
+                      <div data-i18n="Add Product">Add Product</div>
+                    </a>
+                  </li>
+                  <li class="menu-item">
+                    <a href="/admin/category-list" class="menu-link">
+                      <div data-i18n="Category List">Category List</div>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+              <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                  <div data-i18n="Order">Order</div>
+                </a>
+                <ul class="menu-sub">
+                  <li class="menu-item">
+                    <a href="/admin/order-list" class="menu-link">
+                      <div data-i18n="Order List">Order List</div>
+                    </a>
+                  </li>
+                  <li class="menu-item">
+                    <a href="/admin/order-details" class="menu-link">
+                      <div data-i18n="Order Details">Order Details</div>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+              <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                  <div data-i18n="Customer">Customer</div>
+                </a>
+                <ul class="menu-sub">
+                  <li class="menu-item">
+                    <a href="/admin/allCustomer" class="menu-link">
+                      <div data-i18n="All Customers">All Customers</div>
+                    </a>
+                  </li>
+                  <li class="menu-item">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                      <div data-i18n="Customer Details">Customer Details</div>
+                    </a>
+                    <ul class="menu-sub">
+                      <li class="menu-item">
+                        <a href="app-ecommerce-customer-details-overview.html" class="menu-link">
+                          <div data-i18n="Overview">Overview</div>
+                        </a>
+                      </li>
+                      <li class="menu-item">
+                        <a href="app-ecommerce-customer-details-security.html" class="menu-link">
+                          <div data-i18n="Security">Security</div>
+                        </a>
+                      </li>
+                      <li class="menu-item">
+                        <a href="app-ecommerce-customer-details-billing.html" class="menu-link">
+                          <div data-i18n="Address & Billing">Address & Billing</div>
+                        </a>
+                      </li>
+                      <li class="menu-item">
+                        <a href="app-ecommerce-customer-details-notifications.html" class="menu-link">
+                          <div data-i18n="Notifications">Notifications</div>
+                        </a>
+                      </li>
+
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+              <li class="menu-item ">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                  <div data-i18n="Coupon">Coupon</div>
+                </a>
+                <ul class="menu-sub">
+                  <li class="menu-item">
+                    <a href="/admin/add-coupon" class="menu-link">
+                      <div data-i18n="Add coupon">Add coupon</div>
+                    </a>
+                  </li>
+                  <li class="menu-item ">
+                    <a href="/admin/list-coupon" class="menu-link">
+                      <div data-i18n="Coupon List">Coupon List</div>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+              <li class="menu-item">
+                <a href="app-ecommerce-manage-reviews.html" class="menu-link">
+                  <div data-i18n="Manage Reviews">Manage Reviews</div>
+                </a>
+              </li>
+              <li class="menu-item">
+                <a href="app-ecommerce-referral.html" class="menu-link">
+                  <div data-i18n="Referrals">Referrals</div>
+                </a>
+              </li>
+              <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                  <div data-i18n="Settings">Settings</div>
+                </a>
+                <ul class="menu-sub">
+                  <li class="menu-item">
+                    <a href="app-ecommerce-settings-detail.html" class="menu-link">
+                      <div data-i18n="Store Details">Store Details</div>
+                    </a>
+                  </li>
+                  <li class="menu-item">
+                    <a href="app-ecommerce-settings-payments.html" class="menu-link">
+                      <div data-i18n="Payments">Payments</div>
+                    </a>
+                  </li>
+                  <li class="menu-item">
+                    <a href="app-ecommerce-settings-checkout.html" class="menu-link">
+                      <div data-i18n="Checkout">Checkout</div>
+                    </a>
+                  </li>
+                  <li class="menu-item">
+                    <a href="app-ecommerce-settings-shipping.html" class="menu-link">
+                      <div data-i18n="Shipping & Delivery">Shipping & Delivery</div>
+                    </a>
+                  </li>
+                  <li class="menu-item">
+                    <a href="app-ecommerce-settings-locations.html" class="menu-link">
+                      <div data-i18n="Locations">Locations</div>
+                    </a>
+                  </li>
+                  <li class="menu-item">
+                    <a href="app-ecommerce-settings-notifications.html" class="menu-link">
+                      <div data-i18n="Notifications">Notifications</div>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+
+          <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+              <i class='menu-icon tf-icons ri-bill-line'></i>
+              <div data-i18n="Invoice">Invoice</div>
+              <div class="badge bg-danger rounded-pill ms-auto"></div>
+            </a>
+            <ul class="menu-sub">
+              <li class="menu-item">
+                <a href="app-invoice-list.html" class="menu-link">
+                  <div data-i18n="List">List</div>
+                </a>
+              </li>
+              <li class="menu-item">
+                <a href="app-invoice-preview.html" class="menu-link">
+                  <div data-i18n="Preview">Preview</div>
+                </a>
+              </li>
+              <li class="menu-item">
+                <a href="app-invoice-edit.html" class="menu-link">
+                  <div data-i18n="Edit">Edit</div>
+                </a>
+              </li>
+              <li class="menu-item">
+                <a href="app-invoice-add.html" class="menu-link">
+                  <div data-i18n="Add">Add</div>
+                </a>
+              </li>
+            </ul>
+          </li>
+          <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+              <i class="menu-icon tf-icons ri-user-line"></i>
+              <div data-i18n="Users">Users</div>
+            </a>
+            <ul class="menu-sub">
+              <li class="menu-item">
+                <a href="app-user-list.html" class="menu-link">
+                  <div data-i18n="List">List</div>
+                </a>
+              </li>
+
+              <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                  <div data-i18n="View">View</div>
+                </a>
+                <ul class="menu-sub">
+                  <li class="menu-item">
+                    <a href="app-user-view-account.html" class="menu-link">
+                      <div data-i18n="Account">Account</div>
+                    </a>
+                  </li>
+                  <li class="menu-item">
+                    <a href="app-user-view-security.html" class="menu-link">
+                      <div data-i18n="Security">Security</div>
+                    </a>
+                  </li>
+                  <li class="menu-item">
+                    <a href="app-user-view-billing.html" class="menu-link">
+                      <div data-i18n="Billing & Plans">Billing & Plans</div>
+                    </a>
+                  </li>
+                  <li class="menu-item">
+                    <a href="app-user-view-notifications.html" class="menu-link">
+                      <div data-i18n="Notifications">Notifications</div>
+                    </a>
+                  </li>
+                  <li class="menu-item">
+                    <a href="app-user-view-connections.html" class="menu-link">
+                      <div data-i18n="Connections">Connections</div>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+
+
+
+
+      </aside>
+      <!-- / Menu -->
+
+
+
+      <!-- Layout container -->
+      <div class="layout-page">
+
+
+
+
+
+        <!-- Navbar -->
+
+        <nav
+          class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
+          id="layout-navbar">
+
+
+
+
+
+
+
+
+
+          <div class="layout-menu-toggle navbar-nav align-items-xl-center me-4 me-xl-0   d-xl-none ">
+            <a class="nav-item nav-link px-0 me-xl-6" href="javascript:void(0)">
+              <i class="ri-menu-fill ri-24px"></i>
+            </a>
+          </div>
+
+
+          <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+            <!-- <nav aria-label="breadcrumb" class="breadcrumb-nav border-0 mb-0">
+          <div class="container breadcrumbs">
+            <ol class="breadcrumb">
+              <% breadcrumbs.forEach(crumb => { %>
+                <li class="breadcrumb-item">
+                  <a href="<%= crumb.url %>"> <%= crumb.name %> </a>
+                </li>
+              <% }); %>
+            </ol>
+          </div>
+        </nav> -->
+
+            <!-- Search -->
+
+            <!-- /Search -->
+
+
+
+
+
+            <ul class="navbar-nav flex-row align-items-center ms-auto">
+
+
+
+
+
+
+
+              <!-- User -->
+              <li class="nav-item navbar-dropdown dropdown-user dropdown">
+                <a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);" data-bs-toggle="dropdown">
+                  <div class="avatar avatar-online">
+                    <img src="/dashboard-assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle">
+                  </div>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end mt-3 py-2">
+                  <li>
+                    <a class="dropdown-item" href="pages-account-settings-account.html">
+                      <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 me-2">
+                          <div class="avatar avatar-online">
+                            <img src="/dashboard-assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle">
+                          </div>
+                        </div>
+                        <div class="flex-grow-1">
+                          <h6 class="mb-0 small">
+                            <%= isAdmin.name %>
+                          </h6>
+                          <small class="text-muted">Admin</small>
+
+                        </div>
+                      </div>
+                    </a>
+                  </li>
+                  <li>
+                    <div class="dropdown-divider"></div>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="/profile">
+                      <i class="ri-user-3-line ri-22px me-2"></i>
+                      <span class="align-middle">My Profile</span>
+                    </a>
+                  </li>
+
+                  <li>
+                    <div class="d-grid px-4 pt-2 pb-1">
+                      <a class="btn btn-danger d-flex" href="/admin">
+                        <small class="align-middle">Logout</small>
+                        <i class="ri-logout-box-r-line ms-2 ri-16px"></i>
+                      </a>
+                    </div>
+                  </li>
+                </ul>
+              </li>
+              <!--/ User -->
+
+
+
+            </ul>
+          </div>
+
+
+          <!-- Search Small Screens -->
+          <div class="navbar-search-wrapper search-input-wrapper  d-none">
+            <input type="text" class="form-control search-input container-xxl border-0" placeholder="Search..."
+              aria-label="Search...">
+            <i class="ri-close-fill search-toggler cursor-pointer"></i>
+          </div>
+
+
+
+        </nav>
+
+        <!-- / Navbar -->
+
+
+
+        <!-- Content wrapper -->
+        <div class="content-wrapper">
+
+          <!-- Content -->
+
+          <div class="container-xxl flex-grow-1 container-p-y">
+
+
+            <!-- Product List Widget -->
+            <div class="card mb-6">
+              <!-- <div class="card-widget-separator-wrapper">
+    <div class="card-body card-widget-separator">
+      <div class="row gy-4 gy-sm-1">
+        <div class="col-sm-6 col-lg-3">
+          <div class="d-flex justify-content-between align-items-start card-widget-1 border-end pb-4 pb-sm-0">
+            <div>
+              <p class="mb-1">In-store Sales</p>
+              <h4 class="mb-1">$5,345.43</h4>
+              <p class="mb-0"><span class="me-2">5k orders</span><span class="badge rounded-pill bg-label-success">+5.7%</span></p>
+            </div>
+            <div class="avatar me-sm-6">
+              <span class="avatar-initial rounded bg-label-secondary text-heading">
+                <i class="ri-home-6-line ri-24px"></i>
+              </span>
+            </div>
+          </div>
+          <hr class="d-none d-sm-block d-lg-none me-6">
+        </div>
+        <div class="col-sm-6 col-lg-3">
+          <div class="d-flex justify-content-between align-items-start card-widget-2 border-end pb-4 pb-sm-0">
+            <div>
+              <p class="mb-1">Website Sales</p>
+              <h4 class="mb-1">$674,347.12</h4>
+              <p class="mb-0"><span class="me-2">21k orders</span><span class="badge rounded-pill bg-label-success">+12.4%</span></p>
+            </div>
+            <div class="avatar me-lg-6">
+              <span class="avatar-initial rounded bg-label-secondary text-heading">
+                <i class="ri-computer-line ri-24px"></i>
+              </span>
+            </div>
+          </div>
+          <hr class="d-none d-sm-block d-lg-none">
+        </div>
+        <div class="col-sm-6 col-lg-3">
+          <div class="d-flex justify-content-between align-items-start border-end pb-4 pb-sm-0 card-widget-3">
+            <div>
+              <p class="mb-1">Discount</p>
+              <h4 class="mb-1">$14,235.12</h4>
+              <p class="mb-0">6k orders</p>
+            </div>
+            <div class="avatar me-sm-6">
+              <span class="avatar-initial rounded bg-label-secondary text-heading">
+                <i class="ri-gift-line ri-24px"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <p class="mb-1">Affiliate</p>
+              <h4 class="mb-1">$8,345.23</h4>
+              <p class="mb-0"><span class="me-2">150 orders</span><span class="badge rounded-pill bg-label-danger">-3.5%</span></p>
+            </div>
+            <div class="avatar">
+              <span class="avatar-initial rounded bg-label-secondary text-heading">
+                <i class="ri-money-dollar-circle-line ri-24px"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div> -->
+            </div>
+
+            <!-- Product List Table -->
+            <div class="card">
+
+              <div class="card-datatable table-responsive">
+                <div id="DataTables_Table_0_wrapper" class="dataTables_wrapper dt-bootstrap5 no-footer">
+                  <div class="card-header d-flex border-top rounded-0 flex-wrap pb-md-0 pt-0">
+                    <div class="me-5 ms-n2">
+                      <div id="DataTables_Table_0_filter" class="dataTables_filter">
+                        <label>
+                          <input type="search" class="form-control form-control-sm" placeholder="Search"
+                            id="search-input" onkeyup="searchTable()">
+                        </label>
+                      </div>
+                    </div>
+                    <div class="d-flex justify-content-start justify-content-md-end align-items-baseline">
+                      <div
+                        class="dt-action-buttons d-flex align-items-start align-items-md-center justify-content-sm-center gap-4 pt-0">
+                        <div class="dataTables_length" id="DataTables_Table_0_length">
+                        </div>
+                        <div class="dt-buttons btn-group flex-wrap d-flex">
+
+                          <a href="/admin/add-product">
+                            <button class="btn btn-secondary add-new btn-primary waves-effect waves-light" tabindex="0"
+                              aria-controls="DataTables_Table_0" type="button">
+                              <span>
+                                <i class="ri-add-line ri-16px me-0 me-sm-2 align-baseline"></i>
+                                <span class="d-none d-sm-inline-block">Add Product</span>
+                              </span>
+                            </button>
+                          </a>
+
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+
+
+
+
+
+                  <table class="datatables-products table dataTable no-footer dtr-column collapsed"
+                    id="DataTables_Table_0" aria-describedby="DataTables_Table_0_info" style="width: 1043px;">
+                    <thead>
+                      <tr>
+                        <th>s/n</th>
+                        <th class="" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
+                          style="width: 439px;" aria-label="product: activate to sort column descending" aria-sort="">
+                          Product</th>
+                        <th class="" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
+                          style="width: 136px;" aria-label="category: activate to sort column ascending">Category</th>
+                        <th class="" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
+                          style="width: 56px;" aria-label="stock: activate to sort column ascending">Stock</th>
+                        <th class="" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
+                          style="width: 100px;" aria-label="price: activate to sort column ascending">Price</th>
+                        <th class="" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
+                          style="width: 100px;" aria-label="price: activate to sort column ascending">Discount price
+                        </th>
+                        <th class="" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
+                          style="width: 100px;" aria-label="price: activate to sort column ascending">Status</th>
+                        <th class="" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
+                          style="width: 100px;" aria-label="price: activate to sort column ascending">Action</th>
+
+                      </tr>
+                    </thead>
+                    <tbody id="category-table-body">
+                      <% products.forEach(function(product,index) { %>
+                        <tr>
+                          <td>
+                            <%= index + 1 %>
+                          </td>
+                          <td class="product-name">
+                            <div class="d-flex justify-content-start align-items-center">
+                              <div class="avatar-wrapper me-3">
+                                <div class="avatar rounded-3 bg-label-secondary">
+                                  <img src="<%= product.imageUrl_1 %>" alt="Product image" class="rounded-2">
+                                </div>
+                              </div>
+                              <div class="d-flex flex-column">
+                                <span class="text-nowrap text-heading fw-medium">
+                                  <%= product.name %>
+                                </span>
+                              </div>
+                            </div>
+                          </td>
+                          <td class="category-title">
+                            <%= product.category ? product.category.title : 'No Category' %>
+                          </td>
+                          <td class="stock">
+                            <%= product.stock %>
+                          </td>
+                          <td>
+                            <%= product.price %>
+                          </td>
+                          <td>
+                            <% if(product.discountedPrice){ %>
+                              <%= product.discountedPrice %>
+                                <% }else{ %>
+                                  N/A
+                                  <% } %>
+
+                          </td>
+                          <td>
+                            <% if(product.isListed==='true' ){ %>
+                              <div class="text-sm-end"> Active </div>
+                              <% }else{ %>
+                                <div class="text-sm-end"> InActive </div>
+                                <% } %>
+                          </td>
+
+                          <td>
+                            <button
+                              class="btn btn-sm btn-primary btn-icon btn-text-secondary waves-effect waves-light rounded-pill edit-btn mx-2"
+                              data-bs-toggle="modal" data-bs-target="#editProductModal"
+                              onclick="populateModal(<%= JSON.stringify(product) %>)">
+                              <i class="ri-edit-box-line ri-22px"></i>
+                            </button>
+                          </td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                  </table>
+
+                  <!-- Pagination controls -->
+                  <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                      <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                        <a class="page-link page-link-prev" href="?page=<%= currentPage - 1 %>" aria-label="Previous"
+                          tabindex="-1" aria-disabled="<%= currentPage === 1 %>">
+                          <span aria-hidden="true"><i class="icon-long-arrow-left"></i></span> Prev
+                        </a>
+                      </li>
+                      <% for (let i=1; i <=totalPages; i++) { %>
+                        <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                          <a class="page-link" href="?page=<%= i %>">
+                            <%= i %>
+                          </a>
+                        </li>
+                        <% } %>
+                          <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                            <a class="page-link page-link-next" href="?page=<%= currentPage + 1 %>" aria-label="Next">
+                              Next <span aria-hidden="true"><i class="icon-long-arrow-right"></i></span>
+                            </a>
+                          </li>
+                    </ul>
+                  </nav>
+
+
+
+
+                  <div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="editProductModalLabel">Edit Product</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                          <form id="editProductForm" enctype="multipart/form-data">
+                            <div class="mb-3">
+                              <label for="productName" class="form-label">Product Name</label>
+                              <input type="text" class="form-control" id="productName" name="name">
+                            </div>
+                            <div class="mb-3">
+                              <label for="productDescription" class="form-label">Description</label>
+                              <textarea class="form-control" id="productDescription" name="description"></textarea>
+                            </div>
+                            <div class="mb-3">
+                              <label for="productCategory" class="form-label">Category</label>
+                              <select class="form-control" id="productCategory" name="category">
+                                <% categories.forEach(category=> { %>
+                                  <option value="<%= category._id %>" <%=category._id.equals(category._id) ? 'selected'
+                                    : '' %>>
+                                    <%= category.title %>
+                                  </option>
+                                  <% }) %>
+                              </select>
+                            </div>
+                            <div class="mb-3">
+                              <label for="productPrice" class="form-label">Price</label>
+                              <input type="number" class="form-control" id="productPrice" name="price">
+                            </div>
+                            <div class="mb-3">
+                              <label for="productPrice" class="form-label">Discount price</label>
+                              <input type="number" class="form-control" id="discountProductPrice" name="discountPrice">
+                            </div>
+                            <div class="mb-3">
+                              <label for="productStock" class="form-label">Stock</label>
+                              <input type="number" class="form-control" id="productStock" name="stock">
+                            </div>
+                            <div class="mb-3">
+                              <label for="productStatus" class="form-label">Status</label>
+                              <select class="form-control" id="productStatus" name="status">
+                                <option value="" disabled selected>Select Status</option>
+                                <option value='true'>Active</option>
+                                <option value='false'>Inactive</option>
+                              </select>
+                            </div>
+                            <div class="mb-3">
+                              <label for="productImages" class="form-label">Product Images</label>
+                              <div id="productImages" class="row">
+                                <div class="col-md-4 mb-3">
+                                  <img id="modalImage1" src="#" alt="Product Image 1" class="img-thumbnail">
+                                  <input type="file" class="form-control mt-2" id="modalInputImage1"
+                                    accept=".jpeg, .jpg, .png" name="productImage1"
+                                    onchange="replaceModalImage(this, 'modalImage1')">
+                                  <div class="d-flex justify-content-between mt-2">
+                                    <button type="button" class="btn btn-warning btn-sm"
+                                      onclick="triggerInputClick('modalInputImage1');">Replace</button>
+                                    <button type="button" class="btn btn-danger btn-sm"
+                                      onclick="deleteModalImage('modalImage1');">Remove</button>
+                                  </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                  <img id="modalImage2" src="#" alt="Product Image 2" class="img-thumbnail">
+                                  <input type="file" class="form-control mt-2" id="modalInputImage2"
+                                    accept=".jpeg, .jpg, .png" name="productImage2"
+                                    onchange="replaceModalImage(this, 'modalImage2')">
+                                  <div class="d-flex justify-content-between mt-2">
+                                    <button type="button" class="btn btn-warning btn-sm"
+                                      onclick="triggerInputClick('modalInputImage2');">Replace</button>
+                                    <button type="button" class="btn btn-danger btn-sm"
+                                      onclick="deleteModalImage('modalImage2');">Remove</button>
+                                  </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                  <img id="modalImage3" src="#" alt="Product Image 3" class="img-thumbnail">
+                                  <input type="file" class="form-control mt-2" id="modalInputImage3"
+                                    accept=".jpeg, .jpg, .png" name="productImage3"
+                                    onchange="replaceModalImage(this, 'modalImage3')">
+                                  <div class="d-flex justify-content-between mt-2">
+                                    <button type="button" class="btn btn-warning btn-sm"
+                                      onclick="triggerInputClick('modalInputImage3');">Replace</button>
+                                    <button type="button" class="btn btn-danger btn-sm"
+                                      onclick="deleteModalImage('modalImage3');">Remove</button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <button type="button" class="btn btn-primary" onclick="editProduct()">Save</button>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- / Content -->
+                  <div class="content-backdrop fade"></div>
+                </div>
+                <!-- Content wrapper -->
+              </div>
+              <!-- / Layout page -->
+            </div>
+            <!-- Overlay -->
+            <div class="layout-overlay layout-menu-toggle"></div>
+            <!-- Drag Target Area To SlideIn Menu On Small Screens -->
+            <div class="drag-target"></div>
+
+          </div>
+          <!-- / Layout wrapper -->
+
+
+
+
+
+
+
+
+
+
+
+
+          <!-- Core JS -->
+          <!-- build:js assets/vendor/js/core.js -->
+          <script src="/dashboard-assets/vendor/libs/jquery/jquery.js"></script>
+          <script src="/dashboard-assets/vendor/libs/popper/popper.js"></script>
+          <script src="/dashboard-assets/vendor/js/bootstrap.js"></script>
+          <script src="/dashboard-assets/vendor/libs/node-waves/node-waves.js"></script>
+          <script src="/dashboard-assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+          <script src="/dashboard-assets/vendor/libs/hammer/hammer.js"></script>
+          <script src="/dashboard-assets/vendor/libs/i18n/i18n.js"></script>
+          <script src="/dashboard-assets/vendor/libs/typeahead-js/typeahead.js"></script>
+          <script src="/dashboard-assets/vendor/js/menu.js"></script>
+          <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+          <!-- endbuild -->
+
+          <!-- Vendors JS -->
+          <script src="/dashboard-assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
+          <script src="/dashboard-assets/vendor/libs/select2/select2.js"></script>
+
+          <!-- Main JS -->
+          <script src="/dashboard-assets/js/main.js"></script>
+
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
+          <!-- Page JS -->
+          <!-- <script src="/dashboard-assets/js/app-ecommerce-product-list.js"></script> -->
+
+
+
+          <script>
+            function replaceModalImage(input, imageId) {
+              const file = input.files[0];
+              const reader = new FileReader();
+
+              reader.onload = function (e) {
+                document.getElementById(imageId).src = e.target.result;
+              }
+
+              if (file) {
+                reader.readAsDataURL(file);
+              }
+            }
+
+            function deleteModalImage(imageId) {
+              const imageElement = document.getElementById(imageId);
+              imageElement.src = '#';
+              const inputElement = document.getElementById('modalInput' + imageId.replace('modalImage', ''));
+              inputElement.value = '';
+            }
+
+            function triggerInputClick(inputId) {
+              document.getElementById(inputId).click();
+            }
+
+            function editProduct() {
+              const form = document.getElementById('editProductForm');
+              const formData = new FormData(form);
+              // Perform your AJAX request to save the form data
+            }
+          </script>
+
+
+
+
+
+          <script>
+            let originalProductData = {};
+
+            // Populate the modal with product data and store the original data
+            function populateModal(product) {
+              originalProductData = {
+                name: product.name,
+                description: product.description,
+                category: product.category ? product.category._id : '',
+                price: product.price,
+                discountPrice: product.discountedPrice,
+                stock: product.stock,
+                status: product.isListed,
+                image1: product.imageUrl_1,
+                image2: product.imageUrl_2,
+                image3: product.imageUrl_3
+              };
+
+              document.getElementById('productName').value = product.name;
+              document.getElementById('productDescription').value = product.description;
+              document.getElementById('productCategory').value = product.category ? product.category._id : '';
+              document.getElementById('productPrice').value = product.price;
+              document.getElementById('discountProductPrice').value = product.discountedPrice;
+              document.getElementById('productStock').value = product.stock;
+              document.getElementById('productStatus').value = product.isListed;
+              document.getElementById('modalImage1').src = product.imageUrl_1;
+              document.getElementById('modalImage2').src = product.imageUrl_2;
+              document.getElementById('modalImage3').src = product.imageUrl_3;
+
+              document.getElementById('editProductForm').dataset.productId = product._id;
+            }
+
+            // Check if there are any changes
+            function hasChanges() {
+              const form = document.getElementById('editProductForm');
+              const currentName = form.querySelector('#productName').value;
+              const currentDescription = form.querySelector('#productDescription').value;
+              const currentCategory = form.querySelector('#productCategory').value;
+              const currentPrice = form.querySelector('#productPrice').value;
+              const currentStock = form.querySelector('#productStock').value;
+              const currentStatus = form.querySelector('#productStatus').value;
+
+              // Check for changes in images
+              const currentImage1 = document.getElementById('modalInputImage1').files.length > 0
+                ? '/uploads/' + document.getElementById('modalInputImage1').files[0].name
+                : originalProductData.image1;
+              const currentImage2 = document.getElementById('modalInputImage2').files.length > 0
+                ? '/uploads/' + document.getElementById('modalInputImage2').files[0].name
+                : originalProductData.image2;
+              const currentImage3 = document.getElementById('modalInputImage3').files.length > 0
+                ? '/uploads/' + document.getElementById('modalInputImage3').files[0].name
+                : originalProductData.image3;
+
+              return originalProductData.name !== currentName ||
+                originalProductData.description !== currentDescription ||
+                originalProductData.category !== currentCategory ||
+                originalProductData.price !== currentPrice ||
+                originalProductData.stock !== currentStock ||
+                originalProductData.status !== currentStatus ||
+                currentImage1 !== originalProductData.image1 ||
+                currentImage2 !== originalProductData.image2 ||
+                currentImage3 !== originalProductData.image3;
+            }
+
+            // Handle form submission
+            async function editProduct() {
+              const form = document.getElementById('editProductForm');
+              const productId = form.dataset.productId;
+
+              if (!hasChanges()) {
+                swal({
+                  title: "No Changes",
+                  text: "No changes were made to the product.",
+                  icon: "info",
+                  button: "OK"
+                });
+                return;
+              }
+
+              const formData = new FormData(form);
+
+              try {
+                const response = await fetch(`/admin/update-product/${productId}`, {
+                  method: 'PATCH',
+                  body: formData
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                  swal({
+                    title: "Success",
+                    text: "Product updated successfully.",
+                    icon: "success",
+                    button: "OK"
+                  }).then(() => {
+                    location.reload();
+                  });
+                } else {
+                  swal({
+                    title: "Error",
+                    text: "Error updating product: " + (data.message || "Unknown error"),
+                    icon: "error",
+                    button: "OK"
+                  });
+                }
+              } catch (error) {
+                console.error('Error:', error);
+                swal({
+                  title: "Error",
+                  text: "Error updating product: " + error.message,
+                  icon: "error",
+                  button: "OK"
+                });
+              }
+            }
+          </script>
+
+
+
+
+
+
+
+
+
+
+
+
+          <script>
+            function searchTable() {
+              const input = document.getElementById('search-input');
+              const filter = input.value.toLowerCase();
+              const tableBody = document.getElementById('category-table-body');
+              const rows = tableBody.getElementsByTagName('tr');
+
+              for (let i = 0; i < rows.length; i++) {
+                const productName = rows[i].querySelector('.product-name .text-nowrap').textContent.toLowerCase();
+                const category = rows[i].querySelector('.category-title').textContent.toLowerCase();
+                const stock = rows[i].querySelector('.stock').textContent.toLowerCase();
+
+                if (productName.includes(filter) || category.includes(filter) || stock.includes(filter)) {
+                  rows[i].style.display = '';
+                } else {
+                  rows[i].style.display = 'none';
+                }
+
+                // Highlight matching text
+                highlightMatch(rows[i], filter);
+              }
+            }
+
+            function highlightMatch(row, searchText) {
+              // Clear previous highlights
+              row.querySelectorAll('.highlighted').forEach(el => {
+                el.innerHTML = el.textContent; // Reset to original text
+              });
+
+              // Highlight new matches
+              const cells = row.querySelectorAll('.product-name .text-nowrap, .category-title, .stock');
+
+              cells.forEach(cell => {
+                let html = cell.textContent;
+                const regex = new RegExp(`(${searchText})`, 'gi');
+                html = html.replace(regex, '<span class="highlight">$1</span>');
+                cell.innerHTML = html;
+              });
+            }
+          </script>
+
+
+
+
+
+
+
+
+
+          <%- include('../admin-layout/footer.ejs') %>
+
+            <!-- beautify ignore:end -->

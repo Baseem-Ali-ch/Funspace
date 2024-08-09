@@ -1,0 +1,900 @@
+<%- include('../admin-layout/header.ejs') %>
+
+  <!DOCTYPE html>
+
+  <!-- =========================================================
+* Materio - Bootstrap Material Design Admin Template | v2.0.1
+==============================================================
+
+* Product Page: https://themeselection.com/item/materio-bootstrap-html-admin-template/
+* Created by: ThemeSelection
+* License: You must have a valid license purchased in order to legally use the theme for your project.
+* Copyright ThemeSelection (https://themeselection.com)
+
+=========================================================
+ -->
+  <!-- beautify ignore:start -->
+
+<html
+  lang="en"
+  class="light-style layout-navbar-fixed layout-menu-fixed layout-compact"
+  dir="ltr"
+  data-theme="theme-default"
+  data-assets-path="/assets/"
+  data-template="vertical-menu-template"
+  data-style="light"
+>
+  <!-- Mirrored from demos.themeselection.com/materio-bootstrap-html-admin-template/html/vertical-menu-template/app-ecommerce-order-list.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 25 Jun 2024 05:50:32 GMT -->
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <title>eCommerce Order List - Apps | Materialize - Material Design HTML Admin Template</title>
+
+    
+    <meta name="description" content="Materialize – is the most developer friendly &amp; highly customizable Admin Dashboard Template.">
+    <meta name="keywords" content="dashboard, material, material design, bootstrap 5 dashboard, bootstrap 5 design, bootstrap 5">
+    <!-- Canonical SEO -->
+    <link rel="canonical" href="https://1.envato.market/materialize_admin">
+    
+    
+    <!-- ? PROD Only: Google Tag Manager (Default ThemeSelection: GTM-5DDHKGP, PixInvent: GTM-5J3LMKC) -->
+    <script async="" src="https://www.googletagmanager.com/gtm.js?id=GTM-5J3LMKC"></script><script>(function (w, d, s, l, i) {
+        w[l] = w[l] || []; w[l].push({
+          'gtm.start':
+            new Date().getTime(), event: 'gtm.js'
+        }); var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+            'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+      })(window, document, 'script', 'dataLayer', 'GTM-5J3LMKC');</script>
+    <!-- End Google Tag Manager -->
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/dashboard-assets/img/favicon/favicon.ico">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;ampdisplay=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="/dashboard-assets/vendor/fonts/remixicon/remixicon.css">
+    <link rel="stylesheet" href="/dashboard-assets/vendor/fonts/flag-icons.css">
+    
+    <!-- Menu waves for no-customizer fix -->
+    <link rel="stylesheet" href="/dashboard-assets/vendor/libs/node-waves/node-waves.css">
+
+    <!-- Core CSS -->
+    
+    
+    <link rel="stylesheet" href="/dashboard-assets/css/demo.css">
+    
+    <!-- Vendors CSS -->
+    <link rel="stylesheet" href="/dashboard-assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css">
+    <link rel="stylesheet" href="/dashboard-assets/vendor/libs/typeahead-js/typeahead.css"> 
+    <link rel="stylesheet" href="/dashboard-assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css">
+<link rel="stylesheet" href="/dashboard-assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css">
+<link rel="stylesheet" href="/dashboard-assets/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css">
+<link rel="stylesheet" href="/dashboard-assets/vendor/libs/datatables-checkboxes-jquery/datatables.checkboxes.css">
+
+    <!-- Page CSS -->
+    
+
+    <!-- Helpers -->
+    <script src="/dashboard-assets/vendor/js/helpers.js"></script><style type="text/css">
+.layout-menu-fixed .layout-navbar-full .layout-menu,
+.layout-menu-fixed-offcanvas .layout-navbar-full .layout-menu {
+  top: 64px !important;
+}
+.layout-page {
+  padding-top: 64px !important;
+}
+.content-wrapper {
+  padding-bottom: 52.625px !important;
+}</style>
+    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
+    <!--? Template customizer: To hide customizer set displayCustomizer value false in config.js.  -->
+    
+    <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
+    <script src="/dashboard-assets/js/config.js"></script><link rel="stylesheet" type="text/css" href="/dashboard-assets/vendor/css/rtl/core.css" class="template-customizer-core-css"><link rel="stylesheet" type="text/css" href="/dashboard-assets/vendor/css/rtl/theme-default.css" class="template-customizer-theme-css">
+    
+
+   <style>
+    .modal-content {
+  border-radius: 8px;
+}
+
+.modal-header {
+  border-bottom: 1px solid #dee2e6;
+}
+
+.modal-title {
+  font-weight: bold;
+}
+
+.form-label {
+  font-weight: bold;
+}
+
+.table thead th {
+  border-bottom: 2px solid #dee2e6;
+}
+
+.table td, .table th {
+  padding: 0.75rem;
+  vertical-align: top;
+  border-top: 1px solid #dee2e6;
+}
+
+   </style>
+
+    
+
+</head>
+
+<body>
+
+  
+  <!-- ?PROD Only: Google Tag Manager (noscript) (Default ThemeSelection: GTM-5DDHKGP, PixInvent: GTM-5J3LMKC) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5J3LMKC" height="0" width="0" style="display: none; visibility: hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+  
+  <!-- Layout wrapper -->
+<div class="layout-wrapper layout-content-navbar  ">
+  <div class="layout-container">
+
+    
+    
+
+
+
+
+<!-- Menu -->
+
+<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+
+
+  <div class="app-brand demo ">
+    <a href="index.html" class="app-brand-link">
+      <!-- <span class="app-brand-logo demo me-1">
+
+<span class="app-brand-text demo menu-text fw-semibold ms-2">Materio</span> -->
+
+      <img src="/assets/images/admin logo.png" alt="Furnspace Logo" width="105" height="50" />
+    </a>
+
+    <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
+      <i class="menu-toggle-icon d-xl-block align-middle"></i>
+    </a>
+  </div>
+
+  <div class="menu-inner-shadow"></div>
+
+
+
+  <ul class="menu-inner py-1">
+
+
+
+    <!-- e-commerce-app menu start -->
+    <li class="menu-item active open">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class='menu-icon tf-icons ri-shopping-bag-3-line'></i>
+        <div data-i18n="eCommerce">eCommerce</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item">
+          <a href="/admin/dashboard" class="menu-link">
+            <div data-i18n="Dashboard">Dashboard</div>
+          </a>
+        </li>
+        <li class="menu-item active open">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <div data-i18n="Products">Products</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item">
+              <a href="/admin/product-list" class="menu-link">
+                <div data-i18n="Product List">Product List</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="/admin/add-product" class="menu-link">
+                <div data-i18n="Add Product">Add Product</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="/admin/category-list" class="menu-link">
+                <div data-i18n="Category List">Category List</div>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li class="menu-item active open">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <div data-i18n="Order">Order</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item active">
+              <a href="/admin/order-list" class="menu-link">
+                <div data-i18n="Order List">Order List</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="/admin/order-details" class="menu-link">
+                <div data-i18n="Order Details">Order Details</div>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li class="menu-item">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <div data-i18n="Customer">Customer</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item">
+              <a href="/admin/allCustomer" class="menu-link">
+                <div data-i18n="All Customers">All Customers</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <div data-i18n="Customer Details">Customer Details</div>
+              </a>
+              <ul class="menu-sub">
+                <li class="menu-item">
+                  <a href="app-ecommerce-customer-details-overview.html" class="menu-link">
+                    <div data-i18n="Overview">Overview</div>
+                  </a>
+                </li>
+                <li class="menu-item">
+                  <a href="app-ecommerce-customer-details-security.html" class="menu-link">
+                    <div data-i18n="Security">Security</div>
+                  </a>
+                </li>
+                <li class="menu-item">
+                  <a href="app-ecommerce-customer-details-billing.html" class="menu-link">
+                    <div data-i18n="Address & Billing">Address & Billing</div>
+                  </a>
+                </li>
+                <li class="menu-item">
+                  <a href="app-ecommerce-customer-details-notifications.html" class="menu-link">
+                    <div data-i18n="Notifications">Notifications</div>
+                  </a>
+                </li>
+
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li class="menu-item">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <div data-i18n="Coupon">Coupon</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item">
+              <a href="/admin/add-coupon" class="menu-link">
+                <div data-i18n="Add coupon">Add coupon</div>
+              </a>
+            </li>
+            <li class="menu-item ">
+              <a href="/admin/list-coupon" class="menu-link">
+                <div data-i18n="Coupon List">Coupon List</div>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li class="menu-item">
+          <a href="app-ecommerce-manage-reviews.html" class="menu-link">
+            <div data-i18n="Manage Reviews">Manage Reviews</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="app-ecommerce-referral.html" class="menu-link">
+            <div data-i18n="Referrals">Referrals</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <div data-i18n="Settings">Settings</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item">
+              <a href="app-ecommerce-settings-detail.html" class="menu-link">
+                <div data-i18n="Store Details">Store Details</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="app-ecommerce-settings-payments.html" class="menu-link">
+                <div data-i18n="Payments">Payments</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="app-ecommerce-settings-checkout.html" class="menu-link">
+                <div data-i18n="Checkout">Checkout</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="app-ecommerce-settings-shipping.html" class="menu-link">
+                <div data-i18n="Shipping & Delivery">Shipping & Delivery</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="app-ecommerce-settings-locations.html" class="menu-link">
+                <div data-i18n="Locations">Locations</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="app-ecommerce-settings-notifications.html" class="menu-link">
+                <div data-i18n="Notifications">Notifications</div>
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+
+    <li class="menu-item">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class='menu-icon tf-icons ri-bill-line'></i>
+        <div data-i18n="Invoice">Invoice</div>
+        <div class="badge bg-danger rounded-pill ms-auto"></div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item">
+          <a href="app-invoice-list.html" class="menu-link">
+            <div data-i18n="List">List</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="app-invoice-preview.html" class="menu-link">
+            <div data-i18n="Preview">Preview</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="app-invoice-edit.html" class="menu-link">
+            <div data-i18n="Edit">Edit</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="app-invoice-add.html" class="menu-link">
+            <div data-i18n="Add">Add</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+    <li class="menu-item">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ri-user-line"></i>
+        <div data-i18n="Users">Users</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item">
+          <a href="app-user-list.html" class="menu-link">
+            <div data-i18n="List">List</div>
+          </a>
+        </li>
+
+        <li class="menu-item">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <div data-i18n="View">View</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item">
+              <a href="app-user-view-account.html" class="menu-link">
+                <div data-i18n="Account">Account</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="app-user-view-security.html" class="menu-link">
+                <div data-i18n="Security">Security</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="app-user-view-billing.html" class="menu-link">
+                <div data-i18n="Billing & Plans">Billing & Plans</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="app-user-view-notifications.html" class="menu-link">
+                <div data-i18n="Notifications">Notifications</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="app-user-view-connections.html" class="menu-link">
+                <div data-i18n="Connections">Connections</div>
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+
+
+
+
+</aside>
+<!-- / Menu -->
+
+    
+
+    <!-- Layout container -->
+    <div class="layout-page">
+      
+      
+
+
+
+<!-- Navbar -->
+
+<nav
+          class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
+          id="layout-navbar">
+
+
+
+
+
+
+
+
+
+          <div class="layout-menu-toggle navbar-nav align-items-xl-center me-4 me-xl-0   d-xl-none ">
+            <a class="nav-item nav-link px-0 me-xl-6" href="javascript:void(0)">
+              <i class="ri-menu-fill ri-24px"></i>
+            </a>
+          </div>
+
+
+          <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+
+
+            <!-- <nav aria-label="breadcrumb" class="breadcrumb-nav border-0 mb-0">
+          <div class="container breadcrumbs">
+            <ol class="breadcrumb">
+              <% breadcrumbs.forEach(crumb => { %>
+                <li class="breadcrumb-item">
+                  <a href="<%= crumb.url %>"> <%= crumb.name %> </a>
+                </li>
+              <% }); %>
+            </ol>
+          </div>
+        </nav> -->
+
+
+
+
+
+            <ul class="navbar-nav flex-row align-items-center ms-auto">
+
+
+
+
+
+              <!-- User -->
+              <li class="nav-item navbar-dropdown dropdown-user dropdown">
+                <a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);" data-bs-toggle="dropdown">
+                  <div class="avatar avatar-online">
+                    <img src="/dashboard-assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle">
+                  </div>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end mt-3 py-2">
+                  <li>
+                    <a class="dropdown-item" href="pages-account-settings-account.html">
+                      <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 me-2">
+                          <div class="avatar avatar-online">
+                            <img src="/dashboard-assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle">
+                          </div>
+                        </div>
+                        <div class="flex-grow-1">
+                          <h6 class="mb-0 small"></h6>
+                          <small class="text-muted">Admin</small>
+
+                        </div>
+                      </div>
+                    </a>
+                  </li>
+                  <li>
+                    <div class="dropdown-divider"></div>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="/admin/admin-profile">
+                      <i class="ri-user-3-line ri-22px me-2"></i>
+                      <span class="align-middle">My Profile</span>
+                    </a>
+                  </li>
+
+                  <li>
+                    <div class="d-grid px-4 pt-2 pb-1">
+                      <a class="btn btn-danger d-flex" href="/admin">
+                        <small class="align-middle">Logout</small>
+                        <i class="ri-logout-box-r-line ms-2 ri-16px"></i>
+                      </a>
+                    </div>
+                  </li>
+                </ul>
+              </li>
+              <!--/ User -->
+
+
+
+            </ul>
+          </div>
+
+
+          <!-- Search Small Screens -->
+          <div class="navbar-search-wrapper search-input-wrapper  d-none">
+            <input type="text" class="form-control search-input container-xxl border-0" placeholder="Search..."
+              aria-label="Search...">
+            <i class="ri-close-fill search-toggler cursor-pointer"></i>
+          </div>
+
+
+
+        </nav>
+
+<!-- / Navbar -->
+
+      
+
+      <!-- Content wrapper -->
+      <div class="content-wrapper">
+
+        <!-- Content -->
+        
+          <div class="container-xxl flex-grow-1 container-p-y">
+            
+            
+<!-- Order List Widget -->
+
+<div class="card mb-6">
+  
+</div>
+
+<!-- Order List Table -->
+<div class="card">
+  <div class="card-datatable table-responsive">
+    <div id="DataTables_Table_0_wrapper" class="dataTables_wrapper dt-bootstrap5 no-footer"><div class="card-header d-flex flex-column flex-md-row align-items-start align-items-md-center pb-md-0 pt-0"><div><div id="DataTables_Table_0_filter" class="dataTables_filter"><label><input type="search" class="form-control form-control-sm ms-0" placeholder="Search Order" aria-controls="DataTables_Table_0"></label></div></div><div class="d-flex align-items-md-center justify-content-md-end gap-4"><div class="dataTables_length" id="DataTables_Table_0_length"><label><select name="DataTables_Table_0_length" aria-controls="DataTables_Table_0" class="form-select form-select-sm"><option value="10">10</option><option value="40">40</option><option value="60">60</option><option value="80">80</option><option value="100">100</option></select></label></div><div class="dt-action-buttons pt-0"><div class="dt-buttons btn-group flex-wrap"><div class="btn-group"><button class="btn btn-secondary buttons-collection dropdown-toggle btn-outline-secondary waves-effect waves-light" tabindex="0" aria-controls="DataTables_Table_0" type="button" aria-haspopup="dialog" aria-expanded="false"><span><i class="ri-upload-2-line ri-16px me-2"></i> <span class="d-none d-sm-inline-block">Export</span></span></button></div> </div></div></div></div>
+    <table class="datatables-order table dataTable no-footer dtr-column collapsed" id="DataTables_Table_0" aria-describedby="DataTables_Table_0_info" style="width: 1045px;">
+      <thead>
+        <tr>
+          
+          <th class="sorting" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" style="width: 55px;" aria-label="order: activate to sort column ascending">order</th>
+          <th class="sorting sorting_asc" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" style="width: 143px;" aria-label="date: activate to sort column descending" aria-sort="ascending">date</th>
+          <th class="sorting" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" style="width: 281px;" aria-label="customers: activate to sort column ascending">customers</th>
+          <th class="sorting" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" style="width: 109px;" aria-label="payment: activate to sort column ascending">payment</th>
+          <th class="sorting" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" style="width: 124px;" aria-label="status: activate to sort column ascending">status</th>
+          <th class="sorting dtr-hidden" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" style="width: 0px; display: none;" aria-label="method: activate to sort column ascending">method</th>
+          <th class="sorting_disabled dtr-hidden" rowspan="1" colspan="1" style="width: 0px; display: none;" aria-label="Actions">Actions</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% orders.forEach(order=> { %>
+          <% order.items.forEach(item=> { %>
+        <tr class="even">
+          <td>
+            <a href="app-ecommerce-order-details.html">
+              <span><%= order.orderId %></span>
+            </a>
+          </td>
+          <td class="sorting_1">
+            <span class="text-nowrap"><%= order.createdAt.toLocaleDateString() %></span>
+          </td>
+          <td>
+            <div class="d-flex justify-content-start align-items-center user-name">
+              
+              <div class="d-flex flex-column">
+                <a href="pages-profile-user.html" class="text-truncate text-heading">
+                  <% if (order.user) { %>
+                    <span class="fw-medium"><%= order.user.name %></span>
+                  <% } else { %>
+                    <span class="fw-medium">Unknown User</span>
+                  <% } %>
+                </a>
+                <!-- <small class="text-truncate">ncornfordn@sogou.</small> -->
+              </div>
+            </div>
+          </td>
+          <td>
+            <h6 class="mb-0 w-px-100 d-flex align-items-center text-secondary">
+              <%= order.payment_status %>
+            </h6>
+          </td>
+          <td>
+            <span class="badge px-2 rounded-pill bg-label-primary text-capitalized"><%= order.order_status %></span>
+          </td>
+          <td class="dtr-hidden" style="display: none;">
+            <div class="d-flex align-items-center text-nowrap">
+              <img src="/dashboard-assets/img/icons/payments/paypal.png" alt="paypal" class="me-2" width="29">
+              <span>
+                <i class="ri-more-line"></i>@gmail.com
+              </span>
+            </div>
+          </td>
+          <td class="dtr-hidden" style="display: none;">
+            <div>
+              <button class="btn btn-sm btn-icon btn-text-secondary waves-effect waves-light rounded-pill dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                <i class="ri-more-2-line ri-20px"></i>
+              </button>
+              <div class="dropdown-menu dropdown-menu-end m-0">
+                <a href="app-ecommerce-order-details.html" class="dropdown-item">View</a>
+                <a href="javascript:0;" class="dropdown-item delete-record">Delete</a>
+              </div>
+            </div>
+          </td>
+          <td>
+            <button class="btn btn-sm btn-primary btn-icon btn-text-secondary waves-effect waves-light rounded-pill edit-btn mx-2" data-bs-toggle="modal" data-bs-target="#viewOrderModal<%= order._id %>">
+              View
+            </button>
+          </td>
+        </tr>
+      <% }) %>
+    <% }) %>
+      </tbody>
+    </table>
+
+    <!-- Pagination Controls -->
+    <nav aria-label="Page navigation">
+      <ul class="pagination justify-content-center">
+        <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+          <a class="page-link page-link-prev" href="?page=<%= currentPage - 1 %>" aria-label="Previous"
+            tabindex="-1" aria-disabled="<%= currentPage === 1 %>">
+            <span aria-hidden="true"><i class="icon-long-arrow-left"></i></span> Prev
+          </a>
+        </li>
+        <% for (let i=1; i <=totalPages; i++) { %>
+          <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+            <a class="page-link" href="?page=<%= i %>">
+              <%= i %>
+            </a>
+          </li>
+          <% } %>
+            <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+              <a class="page-link page-link-next" href="?page=<%= currentPage + 1 %>" aria-label="Next">
+                Next <span aria-hidden="true"><i class="icon-long-arrow-right"></i></span>
+              </a>
+            </li>
+      </ul>
+    </nav>
+
+
+    <!-- order details modal -->
+    <% orders.forEach(order => { %>
+      <div class="modal fade" id="viewOrderModal<%= order._id %>" tabindex="-1" aria-labelledby="viewOrderModalLabel<%= order._id %>" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="viewOrderModalLabel<%= order._id %>">Order Details</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="row mb-3">
+                <div class="col">
+                  <h6>Order Information</h6>
+                  <p><strong>Order ID:</strong> <%= order.orderId %></p>
+                  <p><strong>Order Date:</strong> <%= order.createdAt.toLocaleDateString() %></p>
+                  <p><strong>Total Amount:</strong> ₹<%= order.totalPrice %></p>
+                  <p><strong>Order Status:</strong> <%= order.order_status %></p>
+                  <p><strong>Payment Type:</strong> <%= order.paymentMethod %></p>
+                  <p><strong>Payment Status:</strong> <%= order.payment_status %></p>
+                </div>
+                <div class="col">
+                  <h6>Shipping Address</h6>
+                  <p><strong>Name:</strong><%= order.address.fullName %></p>
+                  <p><strong>Street:</strong><%= order.address.streetAddress %></p>
+                  <p><strong>City:</strong><%= order.address.city %> <%= order.address.postcode %></p>
+                  <p><strong>State:</strong><%= order.address.state %></p>
+                  <p><strong>Phone:</strong><%= order.address.phone %></p>
+                </div>
+              </div>
+              <h6>Order Items</h6>
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% order.items.forEach(item => { %>
+                  <tr>
+                    <td><%= item.product.name %></td>
+                    <td><%= item.quantity %></td>
+                    <td>₹<%= item.product.price %></td>
+                    <td>₹<%= item.quantity * item.product.price %></td>
+                  </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+              <form action="/admin/order-list/update-status" method="post" class="me-auto">
+                <input type="hidden" name="orderId" value="<%= order._id %>">
+                <select name="order_status" class="form-select" style="width: auto; display: inline-block;">
+                  <option value="" disabled selected>Update Status</option>
+                  
+                  <% if (order.order_status === 'Pending') { %>
+                    <option value="Pending" selected>Pending</option>
+                    <option value="Processing">Processing</option>
+                    <option value="Shipped">Shipped</option>
+                    <option value="Deliverd">Deliverd</option>
+                    <option value="Cancel">Cancel</option>
+                  <% } else if (order.order_status === 'Processing') { %>
+                    <option value="Processing" selected>Processing</option>
+                    <option value="Shipped">Shipped</option>
+                    <option value="Deliverd">Deliverd</option>
+                    <option value="Cancel">Cancel</option>
+                  <% } else if (order.order_status === 'Shipped') { %>
+                    <option value="Shipped" selected>Shipped</option>
+                    <option value="Deliverd">Deliverd</option>
+                    <option value="Cancel">Cancel</option>
+                  <% } else if (order.order_status === 'Deliverd') { %>
+                    <option value="Deliverd" selected>Deliverd</option>
+                  <% } else if (order.order_status === 'Cancel') { %>
+                    <option value="Cancel" selected>Cancel</option>
+                  <% } else if (order.order_status === 'Returned') { %>
+                    <option value="Returned" selected>Returned</option>
+                  <% } else { %>
+                    <option value="Pending">Pending</option>
+                    <option value="Processing">Processing</option>
+                    <option value="Shipped">Shipped</option>
+                    <option value="Deliverd">Deliverd</option>
+                    <option value="Cancel">Cancel</option>
+                  <% } %>
+                </select>
+                <button type="submit" class="btn btn-primary ms-2">Update</button>
+              </form>
+              
+              
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% }) %>
+    
+    
+    <div style="width: 1%;"></div><div style="width: 1%;"></div></div>
+  </div>
+</div>
+
+
+          </div>
+          <!-- / Content -->
+
+          
+          
+
+<!-- Footer -->
+<!-- <footer class="content-footer footer bg-footer-theme">
+  <div class="container-xxl">
+    <div class="footer-container d-flex align-items-center justify-content-between py-4 flex-md-row flex-column">
+      <div class="text-body mb-2 mb-md-0">
+        © <script>
+          document.write(new Date().getFullYear())
+
+        </script>2024, made with <span class="text-danger"><i class="tf-icons ri-heart-fill"></i></span> by <a href="https://pixinvent.com" target="_blank" class="footer-link">Pixinvent</a>
+      </div>
+      <div class="d-none d-lg-inline-block">
+        
+        <a href="https://themeforest.net/licenses/standard" class="footer-link me-4" target="_blank">License</a>
+        <a href="https://1.envato.market/pixinvent_portfolio" target="_blank" class="footer-link me-4">More Themes</a>
+        
+        <a href="https://demos.pixinvent.com/materialize-html-admin-template/documentation/" target="_blank" class="footer-link me-4">Documentation</a>
+        
+        
+        <a href="https://pixinvent.ticksy.com/" target="_blank" class="footer-link d-none d-sm-inline-block">Support</a>
+        
+      </div>
+    </div>
+  </div>
+</footer> -->
+<!-- / Footer -->
+
+          
+          <div class="content-backdrop fade"></div>
+        </div>
+        <!-- Content wrapper -->
+      </div>
+      <!-- / Layout page -->
+    </div>
+
+    
+    
+    <!-- Overlay -->
+    <div class="layout-overlay layout-menu-toggle"></div>
+    
+    
+    <!-- Drag Target Area To SlideIn Menu On Small Screens -->
+    <div class="drag-target" style="touch-action: pan-y; user-select: none; -webkit-user-drag: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></div>
+    
+  </div>
+  <!-- / Layout wrapper -->
+
+  
+  
+  
+
+  
+
+  <!-- Core JS -->
+  <!-- build:js assets/vendor/js/core.js -->
+  <script src="/dashboard-assets/vendor/libs/jquery/jquery.js"></script>
+  <script src="/dashboard-assets/vendor/libs/popper/popper.js"></script>
+  <script src="/dashboard-assets/vendor/js/bootstrap.js"></script>
+  <script src="/dashboard-assets/vendor/libs/node-waves/node-waves.js"></script>
+  <script src="/dashboard-assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+  <script src="/dashboard-assets/vendor/libs/hammer/hammer.js"></script>
+  <script src="/dashboard-assets/vendor/libs/i18n/i18n.js"></script>
+  <script src="/dashboard-assets/vendor/libs/typeahead-js/typeahead.js"></script>
+  <script src="/dashboard-assets/vendor/js/menu.js"></script>
+  
+  <!-- endbuild -->
+
+  <!-- Vendors JS -->
+  <script src="/dashboard-assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
+
+  <!-- Main JS -->
+  <script src="/dashboard-assets/js/main.js"></script>
+  
+
+  <!-- Page JS -->
+  <!-- <script src="/dashboard-assets/js/app-ecommerce-order-list.js"></script> -->
+  <script type="text/javascript" id="">console.log("PI:GTM Worked!");</script>
+
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const orderId = '<%= orders._id %>';
+      const statusSelect = document.getElementById(`orderStatusSelect_${orderId}`);
+      const currentStatus = statusSelect.value;
+
+      function updateOptions() {
+        const options = statusSelect.options;
+
+        for (let i = 0; i < options.length; i++) {
+          options[i].style.display = 'block'; // Reset all options to visible
+        }
+
+        if (currentStatus === 'Deliverd') {
+          for (let i = 0; i < options.length; i++) {
+            if (options[i].value !== 'Deliverd' && options[i].value !== '') {
+              options[i].style.display = 'none';
+            }
+          }
+        } else if (currentStatus === 'Shipped') {
+          for (let i = 0; i < options.length; i++) {
+            if (options[i].value === 'Pending' || options[i].value === 'Processing') {
+              options[i].style.display = 'none';
+            }
+          }
+        } else if (currentStatus === 'Processing') {
+          for (let i = 0; i < options.length; i++) {
+            if (options[i].value === 'Pending') {
+              options[i].style.display = 'none';
+            }
+          }
+        }
+      }
+
+      updateOptions();
+
+      statusSelect.addEventListener('change', function () {
+        updateOptions();
+      });
+    });
+  </script>
+
+  </body>
+
+  <!-- Mirrored from demos.themeselection.com/materio-bootstrap-html-admin-template/html/vertical-menu-template/app-ecommerce-order-list.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 25 Jun 2024 05:50:33 GMT -->
+</html>
+
+
+
+
+<%- include('../admin-layout/footer.ejs') %>

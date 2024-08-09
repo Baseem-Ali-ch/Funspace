@@ -1,0 +1,90 @@
+body {
+    background-image: url('/assets/images/slider/slide-1-480w.jpg');
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 90%;
+    max-width: 400px;
+}
+
+header {
+    font-size: 2rem;
+    color: #1f1f1f;
+    margin-bottom: 20px;
+}
+
+h4 {
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.input-field {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+    flex-direction: column;
+}
+
+.input-field label {
+    margin-bottom: 5px;
+    text-align: left;
+}
+
+.input-field input {
+    width: 95%;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+}
+
+.input-field input:focus {
+    border-color: #d4a373;
+}
+
+button {
+    border: 1px solid #d4a373;
+    background-color: transparent;
+    color: #d4a373;
+    padding: 10px 20px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s, color 0.3s;
+    text-decoration: none;
+    font-size: 1rem;
+}
+
+button:hover {
+    background-color: #c96;
+    color: white;
+}
+
+footer {
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+footer a {
+    color: #c96;
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}

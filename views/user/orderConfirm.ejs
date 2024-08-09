@@ -1,0 +1,511 @@
+<%- include('../layout/header.ejs') %>
+
+    <!DOCTYPE html>
+    <html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>FurnSpace</title>
+        <link rel="icon" href="/assets//images/logo icon 2.png" />
+
+
+        <style>
+            .order-summary-container {
+                max-width: 1000px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f9f9f9;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .order-summary h1,
+            .order-summary h2,
+            .order-summary h3 {
+                color: #333;
+            }
+
+            .order-summary table {
+                width: 100%;
+                margin-top: 20px;
+            }
+
+            .order-summary th,
+            .order-summary td {
+                padding: 12px;
+                text-align: left;
+            }
+
+            .order-summary th {
+                background-color: #007bff;
+                color: #fff;
+            }
+
+            .order-summary tbody tr:nth-child(even) {
+                background-color: #f2f2f2;
+            }
+
+            .variant-image {
+                width: 120px;
+                height: 150px;
+                object-fit: cover;
+            }
+
+            .order-details {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+            }
+
+            .address-details {
+                max-width: 50%;
+                text-align: right;
+            }
+
+            .order-summary-footer {
+                margin-top: 20px;
+                padding-top: 10px;
+                border-top: 1px solid #dee2e6;
+            }
+
+            .order-summary-footer .row {
+                margin-bottom: 10px;
+            }
+
+            .btn {
+                background-color: #fff;
+                color: #c96;
+                border: 1px solid #c96;
+            }
+
+            .btn:hover {
+                background-color: #c96;
+                color: #fff;
+            }
+        </style>
+    </head>
+
+    <body>
+
+
+        <header class="header">
+            <div class="header-top">
+                <div class="container" style="padding: 10px;">
+                    <div class="header-left col-lg-7">
+                        <!-- <nav aria-label="breadcrumb" class="breadcrumb-nav border-0 mb-0">
+                            <div class="container breadcrumbs">
+                                <ol class="breadcrumb">
+                                    <% breadcrumbs.forEach((crumb, index)=> { %>
+                                        <% if (index < breadcrumbs.length - 1) { %>
+                                            <li class="breadcrumb-item">
+                                                <a href="<%= crumb.url %>">
+                                                    <%= crumb.name %>
+                                                </a>
+                                            </li>
+                                            <% } else { %>
+                                                <li class="breadcrumb-item active" aria-current="page">
+                                                    <%= crumb.name %>
+                                                </li>
+                                                <% } %>
+                                                    <% }); %>
+                                </ol>
+                            </div>
+                           
+                        </nav> -->
+                        <!-- End .breadcrumb-nav -->
+                    </div><!-- End .header-left -->
+
+                    <div class="header-right">
+                        <ul class="top-menu">
+                            <li>
+                                <a href="#">Links</a>
+                                <ul>
+
+                                    <li>
+                                        <a href="/wishlist"><i class="icon-heart-o"></i>Wishlist
+                                            <% if(wishlistItems){ %>
+                                                <span>
+                                                    (<%= wishlistItems.length %>)
+                                                </span>
+                                                <% }else{ %>
+                                                    <span>
+                                                        (0)
+                                                    </span>
+                                                    <% } %>
+
+                                        </a>
+
+                                    </li>
+                            </li>
+                            <li><a href="about.html">About Us</a></li>
+                            <li><a href="/contact-us">Contact Us</a></li>
+                            <% if (user) { %>
+                                <li>
+                                    <a href="/account"><i class="icon-user"></i>
+                                        <%= user.name || user.displayName %>
+                                    </a>
+                                </li>
+                                <% } else { %>
+                                    <li>
+                                        <a href="/login"><i class="icon-user"></i>Login</a>
+                                    </li>
+                                    <% } %>
+                        </ul>
+                        </li>
+                        </ul><!-- End .top-menu -->
+                    </div><!-- End .header-right -->
+                </div><!-- End .container -->
+            </div><!-- End .header-top -->
+
+            <div class="header-middle sticky-header">
+                <div class="container">
+                    <div class="header-left">
+                        <button class="mobile-menu-toggler">
+                            <span class="sr-only">Toggle mobile menu</span>
+                            <i class="icon-bars"></i>
+                        </button>
+
+                        <a href="/home" class="logo">
+                            <img src="/assets/images/furnspace logo black.png " alt=Molla Logo" width="105" height="25">
+                        </a>
+
+                        <nav class="main-nav">
+                            <ul class="menu sf-arrows">
+                                <li class="megamenu-container active">
+                                    <a href="/home" class="">Home</a>
+                                </li>
+                                <li>
+                                    <a href="/product-list">Product</a>
+                                </li>
+
+
+                                <li>
+                                    <a href=" #" class="sf-with-ul">Brand</a>
+                                    <ul>
+                                        <li><a href="#">IKEA</a></li>
+                                        <li><a href="#">DURIAN</a></li>
+                                        <li><a href="#">URBAN LADDER</a></li>
+                                        <li><a href="#">FURNITURE PARK</a></li>
+                                        <li><a href="#">HOME TOWN</a></li>
+                                        <li><a href="#">WOODEN STREET</a></li>
+                                    </ul>
+                                </li>
+
+                                <li>
+                                    <a href="#" class="sf-with-ul">Pages</a>
+
+                                    <ul>
+                                        <li><a href="about.html">About</a></li>
+                                        <li><a href="/contact-us">Contact</a></li>
+                                        <li><a href="/login">Login</a></li>
+
+                                        <li><a href="coming-soon.html">Coming Soon</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                            <!-- End .menu -->
+                        </nav><!-- End .main-nav -->
+                    </div><!-- End .header-left -->
+
+                    <div class="header-right">
+                        <div class="header-search">
+                            <a href="#" class="search-toggle" role="button" title="Search"><i
+                                    class="icon-search"></i></a>
+                            <form action="#" method="get">
+                                <div class="header-search-wrapper">
+                                    <label for="search-input" class="sr-only">Search</label>
+                                    <input type="search" class="form-control" name="q" id="search-input"
+                                        placeholder="Search in..." required onkeyup="searchCart()" />
+                                </div>
+                                <!-- End .header-search-wrapper -->
+                            </form>
+                        </div><!-- End .header-search -->
+
+                        <div class=" cart-dropdown">
+                            <a href="/wallet" class="dropdown-toggle" style="font-size: 23px;">
+                              <i class="fa-solid fa-wallet"></i>
+                            </a>
+                          </div>
+
+
+                        <div class="dropdown cart-dropdown">
+                            <a href="/cart" class="dropdown-toggle">
+                                <i class="icon-shopping-cart"></i>
+                                <% if(cartItems){ %>
+                                    <span class="cart-count">
+                                        <%= cartItems.length %>
+                                    </span>
+                                    <% }else{ %>
+                                        <span class="cart-count">0</span>
+                                        <% } %>
+
+                            </a>
+                        </div>
+                    </div><!-- End .header-right -->
+                </div><!-- End .container -->
+            </div><!-- End .header-middle -->
+        </header><!-- End .header -->
+
+        <!-- <% function formatDate(date) { %>
+            <% const days=["Sun", "Mon" , "Tue" , "Wed" , "Thu" , "Fri" , "Sat" ]; %>
+                <% const months=["Jan", "Feb" , "Mar" , "Apr" , "May" , "Jun" , "Jul" , "Aug" , "Sep" , "Oct" , "Nov"
+                    , "Dec" ]; %>
+
+                    <% const dayOfWeek=days[date.getDay()]; %>
+                        <% const month=months[date.getMonth()]; %>
+                            <% const dayOfMonth=date.getDate(); %>
+
+                                <%= `${dayOfWeek}, ${month} ${dayOfMonth}` %>
+                                    <% } %>
+
+                                        <div class="container">
+                                            <div class="order-confirmation">
+                                                <div class="row">
+                                                    <div style="width: 9em; margin-left: 23em;">
+                                                        <img src="/assets//images/order-placed-purchased-icon.webp"
+                                                            alt="">
+                                                    </div>
+                                                    <div style="margin-left: 1em; margin-top: 3em;">
+                                                        <h3>Order placed for ₹<%= order.totalPrice %>
+                                                        </h3>
+                                                    </div>
+                                                </div>
+
+
+                                                <p style="    margin-left: 5em;margin-top: -1em;"><i
+                                                        class="fa-solid fa-truck"></i>Your item(s) will be delivered by
+                                                    <strong>
+                                                        <%= order.deliveryDate ? formatDate(new
+                                                            Date(order.deliveryDate)) : 'N/A' %> %>.
+                                                    </strong>
+                                                </p>
+                                            </div>
+
+                                            <div class="order-details">
+                                                <div class="delivery-address">
+                                                    <h6>Delivery Address</h6>
+                                                    <p>
+                                                        <strong>
+                                                            <%= order.address.name %>
+                                                        </strong> <br>
+                                                        <%= order.address.street %> <br>
+                                                            <%= order.address.town %>, <%= order.address.city %>,
+                                                                    <br>
+                                                                    <%= order.address.state %>, <%=
+                                                                            order.address.postcode %>
+                                                    </p>
+                                                    <p><strong>Phone number </strong>
+                                                        <%= order.address.phone %>
+                                                    </p>
+                                                    <p>
+                                                        <%= order.address.email %>
+                                                    </p>
+                                                </div>
+                                                <div class="product-details">
+                                                    <h6>Product Details</h6>
+                                                    <% order.items.forEach(function(item) { %>
+                                                        <div class="product-item">
+                                                            <a href="/product/<%= item.product._id %>"><img
+                                                                    src="<%= item.product.imageUrl_1 %>"
+                                                                    alt="<%= item.product.name %>"></a>
+                                                            <p style="margin-left: 15px;">
+                                                                <%= item.product.name %> <br>
+                                                                    Quantity: <%= item.quantity %> <br>
+                                                                        Price: ₹<%= item.product.price %> <br>
+                                                                            <i class="fa-solid fa-truck"></i>
+                                                                            Deleivery expected by <%= order.deliveryDate
+                                                                                ? formatDate(new
+                                                                                Date(order.deliveryDate)) : 'N/A' %>
+                                                            </p>
+
+                                                            <p style="margin-top: 78px;margin-left: 4em;"><strong>Total
+                                                                    ₹<%= item.product.price * item.quantity %></strong>
+                                                            </p>
+                                                        </div>
+                                                        <% }); %>
+                                                </div>
+                                            </div>
+                                        </div> -->
+
+        <div class="">
+            <div class="page-header text-center" style="background-image: url('/assets/images/page-header-bg.jpg')">
+                <div class="container">
+                    <h1 class="page-title">Order<span>Summary</span></h1>
+                </div><!-- End .container -->
+            </div>
+            <div class="order-summary order-summary-container">
+                <div class="order-details">
+                    <div class="order-info">
+                        <h4 class="mb-3">Order Details</h4>
+
+                        <p><strong>Order ID:</strong>
+                            <%= order.orderId %>
+                        </p>
+                        <p><strong>Total Amount:</strong> ₹ <%= order.totalPrice %>
+                        </p>
+                        <p><strong>Ordered Date:</strong>
+                            <%= order.deliveryDate ? formatDate(new Date(order.deliveryDate)) : 'N/A' %> %>.
+                        </p>
+                    </div>
+                    <div class="address-details">
+                        <h4>Address Details</h4>
+                        <p><strong>Ship to:</strong>
+                            <%= order.address.name %>
+                        </p>
+                        <p><strong>Delivery Address</strong><br>
+                            <%= order.address.street %><br>
+                                <%= order.address.town %>, <%= order.address.city %> <br>
+                                        <%= order.address.state %>, <%= order.address.postcode %><br>
+                                                <%= order.address.phone %>
+                        </p>
+                    </div>
+                </div>
+                <h3 class="mt-4 mb-3">Products</h3>
+                <table class="table table-striped table-bordered">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th></th>
+                            <th>Product </th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% let subtotal=0; %>
+                            <% order.items.forEach(item=> { %>
+                                <% const product=item.productId; %>
+                                    <% const itemTotal=item.product.price * item.quantity; %>
+                                        <% subtotal +=itemTotal; %>
+
+
+                                            <tr>
+                                                <td><a href="/product/<%= item.product._id %>"><img style="width: 7em;"
+                                                            src="<%= item.product.imageUrl_1 %>"
+                                                            alt="<%= item.product.name %>"></a></td>
+                                                <td>
+                                                    <%= item.product.name %> <br>
+
+
+                                                </td>
+                                                <td>
+                                                    <%= item.quantity %>
+                                                </td>
+                                                <td>₹<%= item.product.price.toFixed(2) %>
+                                                </td>
+                                                <td>₹<%= itemTotal.toFixed(2) %>
+                                                </td>
+                                            </tr>
+                                            <% }); %>
+                    </tbody>
+                </table>
+                <div class="order-summary-footer">
+                    <div class="row">
+                        <div class="col-md-12 text-right">
+                            <h6>Subtotal: <span>₹<%= subtotal.toFixed(2) %></span></h6>
+
+                            <h4 class="mt-4">Grand Total: <span>₹<%= subtotal.toFixed(2) %></span></h4>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="text-center mt-4">
+                    <a href="/product-list" class="btn btn-md mr-2">Continue Shopping</a>
+                    <a href="/download-invoice/<%= order.orderId %>" class="btn btn-md">Download
+                        Invoice</a>
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <footer class="footer">
+            <div class="footer-middle">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="widget widget-about">
+                                <img src="/assets/images/furnspace logo black.png" class="footer-logo" alt="Footer Logo"
+                                    width="105" height="25">
+                                <p>Praesent dapibus, neque id cursus ucibus, tortor
+                                    neque egestas augue, eu vulputate
+                                    magna eros eu erat. </p>
+
+                                <div class="social-icons">
+                                    <a href="#" class="social-icon" target="_blank" title="Facebook"><i
+                                            class="icon-facebook-f"></i></a>
+                                    <a href="#" class="social-icon" target="_blank" title="Twitter"><i
+                                            class="icon-twitter"></i></a>
+                                    <a href="#" class="social-icon" target="_blank" title="Instagram"><i
+                                            class="icon-instagram"></i></a>
+                                    <a href="#" class="social-icon" target="_blank" title="Youtube"><i
+                                            class="icon-youtube"></i></a>
+                                    <a href="#" class="social-icon" target="_blank" title="Pinterest"><i
+                                            class="icon-pinterest"></i></a>
+                                </div><!-- End .soial-icons -->
+                            </div><!-- End .widget about-widget -->
+                        </div><!-- End .col-sm-6 col-lg-3 -->
+
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="widget">
+                                <h4 class="widget-title">Useful Links</h4>
+                                <!-- End .widget-title -->
+
+                                <ul class="widget-list">
+                                    <li><a href="about.html">About Molla</a></li>
+                                    <li><a href="#">How to shop on Molla</a></li>
+                                    <li><a href="#">FAQ</a></li>
+                                    <li><a href="contact.html">Contact us</a></li>
+                                    <li><a href="login.html">Log in</a></li>
+                                </ul><!-- End .widget-list -->
+                            </div><!-- End .widget -->
+                        </div><!-- End .col-sm-6 col-lg-3 -->
+
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="widget">
+                                <h4 class="widget-title">Customer Service</h4>
+                                <!-- End .widget-title -->
+
+                                <ul class="widget-list">
+                                    <li><a href="#">Payment Methods</a></li>
+                                    <li><a href="#">Money-back guarantee!</a></li>
+                                    <li><a href="#">Returns</a></li>
+                                    <li><a href="#">Shipping</a></li>
+                                    <li><a href="#">Terms and conditions</a></li>
+                                    <li><a href="#">Privacy Policy</a></li>
+                                </ul><!-- End .widget-list -->
+                            </div><!-- End .widget -->
+                        </div><!-- End .col-sm-6 col-lg-3 -->
+
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="widget">
+                                <h4 class="widget-title">My Account</h4>
+                                <!-- End .widget-title -->
+
+                                <ul class="widget-list">
+                                    <li><a href="#">Sign In</a></li>
+                                    <li><a href="cart.html">View Cart</a></li>
+                                    <li><a href="#">My Wishlist</a></li>
+                                    <li><a href="#">Track My Order</a></li>
+                                    <li><a href="#">Help</a></li>
+                                </ul><!-- End .widget-list -->
+                            </div><!-- End .widget -->
+                        </div><!-- End .col-sm-6 col-lg-3 -->
+                    </div><!-- End .row -->
+                </div><!-- End .container -->
+            </div><!-- End .footer-middle -->
+
+            <div class="footer-bottom">
+                <div class="container">
+                    <p class="footer-copyright">Copyright © 2019 Molla Store. All Rights
+                        Reserved.</p>
+                    <!-- End .footer-copyright -->
+                    <figure class="footer-payments">
+                        <img src="assets/images/payments.png" alt="Payment methods" width="272" height="20">
+                    </figure><!-- End .footer-payments -->
+                </div><!-- End .container -->
+            </div><!-- End .footer-bottom -->
+        </footer><!-- End .footer -->

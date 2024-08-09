@@ -1,0 +1,92 @@
+<!-- views/salesReport.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Report</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container mt-4">
+        <h2>Sales Report</h2>
+        
+        <form action="/admin/sales-report" method="GET" class="mb-4">
+            <div class="form-group">
+              <label for="startDate">Start Date:</label>
+              <input type="date" id="startDate" name="startDate" class="form-control" value="<%= startDate %>">
+            </div>
+            <div class="form-group mt-2">
+              <label for="endDate">End Date:</label>
+              <input type="date" id="endDate" name="endDate" class="form-control" value="<%= endDate %>">
+            </div>
+            <button type="submit" class="btn btn-primary mt-2">Generate Report</button>
+          </form>
+      
+        <p>Total Revenue: $<%= totalRevenue.toFixed(2) %></p>
+        <p>Total Quantity Sold: <%= totalQuantity %></p>
+        
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Date</th>
+              <th>User</th>
+              <th>Items</th>
+              <th>Total Quantity</th>
+              <th>Total Amount</th>
+              <th>Payment Method</th>
+              <th>Payment Status</th>
+              <th>Order Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% salesData.forEach(sale => { %>
+              <tr>
+                <td><%= sale.orderId %></td>
+                <td><%= sale.date.toLocaleDateString() %></td>
+                <td><%= sale.user %></td>
+                <td>
+                  <ul>
+                    <% sale.items.forEach(item => { %>
+                      <li><%= item.product %> (x<%= item.quantity %>)</li>
+                    <% }); %>
+                  </ul>
+                </td>
+                <td><%= sale.totalQuantity %></td>
+                <td>$<%= sale.total.toFixed(2) %></td>
+                <td><%= sale.paymentMethod %></td>
+                <td><%= sale.paymentStatus %></td>
+                <td><%= sale.orderStatus %></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+      
+      <script>
+      flatpickr("#daterange", {
+        mode: "range",
+        dateFormat: "Y-m-d",
+        defaultDate: ["<%= startDate %>", "<%= endDate %>"],
+        onChange: function(selectedDates, dateStr, instance) {
+          if (selectedDates.length === 2) {
+            instance.setDate(selectedDates, true);
+          }
+        }
+      });
+      </script>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+</body>
+
+</html>

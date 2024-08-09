@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FurnSpace</title>
+  <link rel="icon" href="/assets/images/logo icon.png">
+  <link rel="stylesheet" href="/assets/css/otpstyle.css" />
+  <!-- Boxicons CSS -->
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body style="background-image: url('assets/images/slider/slide-1.jpg')">
+  <div class="container">
+    <header>
+      <i class="bx bxs-check-shield"></i>
+    </header>
+    <h4>Enter OTP Code</h4>
+
+    <form id="otp-form">
+      <input type="hidden" name="email" value="<%= email %>" />
+
+      <div class="input-field" id="otp-inputs">
+        <input type="text" maxlength="1" class="otp-digit" required />
+        <input type="text" maxlength="1" class="otp-digit" required />
+        <input type="text" maxlength="1" class="otp-digit" required />
+        <input type="text" maxlength="1" class="otp-digit" required />
+        <input type="text" maxlength="1" class="otp-digit" required />
+        <input type="text" maxlength="1" class="otp-digit" required />
+      </div>
+
+      <input type="hidden" name="otp" id="otp" />
+
+      <p id="otp-message">Check your email</p>
+      <button type="submit">Verify OTP</button>
+
+      <!-- Resend OTP Button (Initially Hidden) -->
+      <button type="button" id="resend-otp-btn" style="display: none" onclick="resendOTP()">
+        Resend OTP
+      </button>
+
+      <!-- Countdown Timer -->
+      <div id="timer-container">
+        <p id="timer-text">
+          Resend OTP in <span id="timer">60</span> seconds
+        </p>
+      </div>
+    </form>
+  </div>
+
+  <script>
+
+    document.getElementById("otp-form").addEventListener("submit", function (event) {
+      event.preventDefault();
+      const otpDigits = document.querySelectorAll(".otp-digit");
+      let otp = "";
+      otpDigits.forEach((input) => (otp += input.value));
+      document.getElementById("otp").value = otp;
+
+      $.ajax({
+        type: "POST",
+        url: "/verify-otp",
+        data: { email: "<%= email %>", otp: otp },
+        success: function (response) {
+          if (response.success) {
+            window.location.href = response.redirectUrl;
+          } else {
+            document.getElementById("otp-message").textContent = response.message;
+          }
+        },
+        error: function (xhr, status, error) {
+          console.error(error);
+          alert("Failed to verify OTP. Please try again.");
+        },
+      });
+    });
+
+
+    let timer;
+    const startTimer = () => {
+      let timeInSeconds = 60;
+      timer = setInterval(() => {
+        timeInSeconds--;
+        if (timeInSeconds <= 0) {
+          clearInterval(timer);
+          document.getElementById("resend-otp-btn").style.display = "block";
+          document.getElementById("timer-container").style.display = "none";
+        } else {
+          document.getElementById("timer").textContent = timeInSeconds;
+        }
+      }, 1000);
+    };
+
+
+    startTimer();
+
+    function resendOTP() {
+      clearInterval(timer);
+      document.getElementById("resend-otp-btn").style.display = "none";
+      document.getElementById("timer-container").style.display = "block";
+      document.getElementById("timer").textContent = "60";
+
+
+      $.ajax({
+        type: "GET",
+        url: "/resend-otp",
+        data: { email: "<%= email %>" },
+        success: function (response) {
+          console.log(response);
+          document.getElementById("otp-message").textContent = "OTP resent. Check your inbox.";
+          startTimer();
+        },
+        error: function (xhr, status, error) {
+          console.error(error);
+          alert("Failed to resend OTP. Please try again.");
+        },
+      });
+    }
+  </script>
+</body>
+
+</html>
