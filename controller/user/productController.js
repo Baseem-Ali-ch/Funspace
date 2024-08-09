@@ -3,7 +3,7 @@ const Wishlist = require("../../model/wishlistModel");
 const Cart = require("../../model/cartModel");
 const Product = require("../../model/productModel");
 const Category = require("../../model/categoryModel");
-
+const Offer = require("../../model/offerModel");
 const mongoose = require("mongoose");
 
 //load product detailed page for user
@@ -16,6 +16,19 @@ const loadProduct = async (req, res) => {
     const product = await Product.findById(productId).populate("category", "title");
     const categories = await Category.find({ isListed: "true" });
     const relatedProduct = await Product.find({ category: product.category, _id: { $ne: productId } }).limit(4);
+
+    const productOffer = await Offer.findOne({
+      productId: product._id,
+      offerType: "product",
+      status: "active",
+    }).exec();
+
+    // Find an active offer for the product's category
+    const categoryOffer = await Offer.findOne({
+      categoryId: product.category._id,
+      offerType: "category",
+      status: "active",
+    }).exec();
 
     let wishlistItems = [];
     if (userId) {
@@ -47,6 +60,8 @@ const loadProduct = async (req, res) => {
       breadcrumbs,
       categories,
       relatedProduct,
+      productOffer,
+      categoryOffer,
     });
   } catch (error) {
     console.error(error);
@@ -67,6 +82,26 @@ const loadProductList = async (req, res) => {
       .populate({ path: "category", match: { isListed: "true" }, select: "title" })
       .skip(skip)
       .limit(limit);
+
+    for (let product of products) {
+      // Find an active product-specific offer
+      const productOffer = await Offer.findOne({
+        offerType: "product",
+        status: "active",
+        productId: product._id,
+      }).exec();
+
+      // Find an active category-specific offer, if no product offer is found
+      let categoryOffer = null;
+      if (!productOffer) {
+        categoryOffer = await Offer.findOne({
+          offerType: "category",
+          status: "active",
+          categoryId: product.category._id,
+        }).exec();
+      }
+      product.offer = productOffer || categoryOffer;
+    }
 
     const totalProducts = await Product.countDocuments({
       isListed: "true",
@@ -147,14 +182,13 @@ const filterAndSortProducts = async (req, res) => {
 const loadWishlist = async (req, res) => {
   try {
     const user = req.session.user || req.user;
-    console.log("User from session:", user);
     const userId = user ? user._id : null;
 
     if (!userId) {
       return res.status(401).render("login", { message: "Please log in to view your wishlist" });
     }
 
-    const wishlistItems = await Wishlist.findOne({ userId }).populate("products.productId");
+    const wishlist = await Wishlist.findOne({ userId }).populate("products.productId");
     const categories = await Category.find({ isListed: "true" });
 
     let cartItems = [];
@@ -163,9 +197,42 @@ const loadWishlist = async (req, res) => {
       cartItems = cart ? cart.items : [];
     }
 
+    if (wishlist && wishlist.products && wishlist.products.length > 0) {
+      // Attach offers to each product in the wishlist
+      for (let item of wishlist.products) {
+        const productOffer = await Offer.findOne({
+          offerType: "product",
+          status: "active",
+          productId: item.productId._id,
+        }).exec();
+
+        const categoryOffer = await Offer.findOne({
+          offerType: "category",
+          status: "active",
+          categoryId: item.productId.category,
+        }).exec();
+
+        // Apply the highest offer available (either product or category)
+        let bestOffer = null;
+        if (productOffer && categoryOffer) {
+          bestOffer = productOffer.discount > categoryOffer.discount ? productOffer : categoryOffer;
+        } else {
+          bestOffer = productOffer || categoryOffer;
+        }
+
+        // Attach the best offer to the product
+        if (bestOffer) {
+          item.productId.offer = bestOffer;
+          item.productId.discountedPrice = (item.productId.price * (1 - bestOffer.discount / 100)).toFixed(2);
+        } else {
+          item.productId.discountedPrice = item.productId.price;
+        }
+      }
+    }
+
     res.render("wishlist", {
       user,
-      wishlistItems: wishlistItems ? wishlistItems.products : [], // Handle null wishlistItems
+      wishlistItems: wishlist && wishlist.products ? wishlist.products : [],
       categories,
       cartItems,
     });
@@ -267,6 +334,37 @@ const loadCart = async (req, res) => {
 
     const validCartItems = cart.items.filter((item) => item.productId != null);
 
+    // Calculate the offer price for each product in the cart
+    for (let item of validCartItems) {
+      const productOffer = await Offer.findOne({
+        offerType: "product",
+        status: "active",
+        productId: item.productId._id,
+      }).exec();
+
+      const categoryOffer = await Offer.findOne({
+        offerType: "category",
+        status: "active",
+        categoryId: item.productId.category,
+      }).exec();
+
+      // Apply the highest offer available (either product or category)
+      let bestOffer = null;
+      if (productOffer && categoryOffer) {
+        bestOffer = productOffer.discount > categoryOffer.discount ? productOffer : categoryOffer;
+      } else {
+        bestOffer = productOffer || categoryOffer;
+      }
+
+      // Attach the best offer to the product
+      if (bestOffer) {
+        item.productId.offer = bestOffer;
+        item.productId.discountedPrice = (item.productId.price * (1 - bestOffer.discount / 100)).toFixed(2);
+      } else {
+        item.productId.discountedPrice = item.productId.price;
+      }
+    }
+
     res.render("cart", {
       user,
       cartItems: validCartItems,
@@ -277,6 +375,7 @@ const loadCart = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+
 
 //add a product to cart
 const addToCart = async (req, res) => {

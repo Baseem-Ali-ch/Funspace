@@ -9,12 +9,13 @@ const Razorpay = require("razorpay");
 const crypto = require("crypto");
 const Wallet = require("../../model/walletModel");
 const Coupon = require("../../model/coupen");
+const Offer = require("../../model/offerModel");
+const Proudct = require("../../model/productModel");
 //load the check out page
 const loadCheckout = async (req, res) => {
   try {
     const user = req.session.user || req.user;
     const userId = user ? user._id : null;
-    console.log("user session", user);
 
     let wishlistItems = [];
     if (userId) {
@@ -28,6 +29,43 @@ const loadCheckout = async (req, res) => {
       cartItems = cart ? cart.items : [];
     }
 
+    // If there's a discount, set the discountedPrice for each cart item
+    cartItems = cartItems.map(async (item) => {
+      // Fetch the offers for the item
+      const productOffer = await Offer.findOne({
+        offerType: "product",
+        status: "active",
+        productId: item.productId._id,
+      }).exec();
+
+      const categoryOffer = await Offer.findOne({
+        offerType: "category",
+        status: "active",
+        categoryId: item.productId.category,
+      }).exec();
+
+      // Apply the highest offer available (either product or category)
+      let bestOffer = null;
+      if (productOffer && categoryOffer) {
+        bestOffer = productOffer.discount > categoryOffer.discount ? productOffer : categoryOffer;
+      } else {
+        bestOffer = productOffer || categoryOffer;
+      }
+
+      // Attach the best offer to the product
+      if (bestOffer) {
+        item.productId.offer = bestOffer;
+        item.productId.finalPrice = (item.productId.price * (1 - bestOffer.discount / 100)).toFixed(2);
+      } else {
+        item.productId.finalPrice = item.productId.price;
+      }
+
+      return item;
+    });
+
+    // Wait for all promises in cartItems.map to resolve
+    cartItems = await Promise.all(cartItems);
+
     const categories = await Category.find({ isListed: "true" });
     const addresses = await Address.find({ userId });
 
@@ -40,6 +78,7 @@ const loadCheckout = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    res.status(500).send("Server Error");
   }
 };
 
@@ -112,14 +151,41 @@ const placeOrder = async (req, res) => {
     }
 
     let totalPrice = 0;
-    const orderedItems = cart.items.map((item) => {
-      const itemTotal = item.productId.price * item.quantity;
-      totalPrice += itemTotal;
-      return {
-        product: item.productId._id,
-        quantity: item.quantity,
-      };
-    });
+    const orderedItems = await Promise.all(
+      cart.items.map(async (item) => {
+        // Fetch the best offer for the product
+        const productOffer = await Offer.findOne({
+          offerType: "product",
+          status: "active",
+          productId: item.productId._id,
+        }).exec();
+
+        const categoryOffer = await Offer.findOne({
+          offerType: "category",
+          status: "active",
+          categoryId: item.productId.category,
+        }).exec();
+
+        let bestOffer = null;
+        if (productOffer && categoryOffer) {
+          bestOffer = productOffer.discount > categoryOffer.discount ? productOffer : categoryOffer;
+        } else {
+          bestOffer = productOffer || categoryOffer;
+        }
+
+        // Apply the best offer to the product
+        const finalPrice = bestOffer ? (item.productId.price * (1 - bestOffer.discount / 100)).toFixed(2) : item.productId.price;
+
+        const itemTotal = finalPrice * item.quantity;
+        totalPrice += itemTotal;
+
+        return {
+          product: item.productId._id,
+          quantity: item.quantity,
+          price: finalPrice,
+        };
+      }),
+    );
 
     let couponDiscountAmt = 0;
     if (couponCode) {
@@ -190,6 +256,39 @@ const orderConfirm = async (req, res) => {
       return res.status(404).send("Order not found");
     }
 
+    // Apply offers to each product in the order
+    for (let item of order.items) {
+      if (item.product) {
+        const productOffer = await Offer.findOne({
+          offerType: "product",
+          status: "active",
+          productId: item.product._id,
+        }).exec();
+
+        const categoryOffer = await Offer.findOne({
+          offerType: "category",
+          status: "active",
+          categoryId: item.product.category,
+        }).exec();
+
+        // Apply the highest offer available (either product or category)
+        let bestOffer = null;
+        if (productOffer && categoryOffer) {
+          bestOffer = productOffer.discount > categoryOffer.discount ? productOffer : categoryOffer;
+        } else {
+          bestOffer = productOffer || categoryOffer;
+        }
+
+        // Attach the best offer to the product
+        if (bestOffer) {
+          item.product.offer = bestOffer;
+          item.product.discountedPrice = (item.product.price * (1 - bestOffer.discount / 100)).toFixed(2);
+        } else {
+          item.product.discountedPrice = item.product.price.toFixed(2);
+        }
+      }
+    }
+
     let wishlistItems = [];
     if (userId) {
       const wishlist = await Wishlist.findOne({ userId }).populate("products.productId");
@@ -213,7 +312,12 @@ const orderConfirm = async (req, res) => {
       order: {
         _id: order._id,
         orderId: order.orderId,
-        totalPrice: order.items.reduce((acc, item) => acc + item.product.price * item.quantity, 0),
+        totalPrice: order.items.reduce((acc, item) => {
+          if (item.product) {
+            return acc + item.product.discountedPrice * item.quantity;
+          }
+          return acc;
+        }, 0),
         deliveryDate: formatDate(deliveryDate),
         address: {
           name: address.fullName,
@@ -239,6 +343,7 @@ const orderConfirm = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
+
 
 function addDays(date, days) {
   const result = new Date(date);

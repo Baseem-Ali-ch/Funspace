@@ -327,9 +327,9 @@
 
                         <div class=" cart-dropdown">
                             <a href="/wallet" class="dropdown-toggle" style="font-size: 23px;">
-                              <i class="fa-solid fa-wallet"></i>
+                                <i class="fa-solid fa-wallet"></i>
                             </a>
-                          </div>
+                        </div>
 
 
                         <div class="dropdown cart-dropdown">
@@ -422,9 +422,8 @@
                                                             <td class="price-col ">
                                                                 <% if(item.productId.discountedPrice &&
                                                                     item.productId.price>
-                                                                    item.productId.discountedPrice){
-                                                                    %>
-                                                                    <div class="row ">
+                                                                    item.productId.discountedPrice) { %>
+                                                                    <div class="row">
                                                                         <div class="product-price mx-4">
                                                                             ₹<%= item.productId.discountedPrice %>
                                                                         </div>
@@ -447,6 +446,7 @@
                                                                         </div>
                                                                         <% } %>
 
+
                                                             </td>
                                                             <td class="quantity-col">
                                                                 <div class="cart-product-quantity">
@@ -460,13 +460,14 @@
                                                                 </div>
                                                             </td>
                                                             <td class="total-col">
-                                                                <% if(item.productId.discountedPrice){ %>
+                                                                <% if(item.productId.discountedPrice) { %>
                                                                     ₹<%= (item.productId.discountedPrice *
                                                                         item.quantity).toFixed(2) %>
-                                                                        <% }else{ %>
+                                                                        <% } else { %>
                                                                             ₹<%= (item.productId.price *
                                                                                 item.quantity).toFixed(2) %>
                                                                                 <% } %>
+
 
                                                             </td>
                                                             <td class="remove-col">
@@ -486,17 +487,7 @@
 
                                             <div class="cart-bottom">
                                                 <div class="cart-discount">
-                                                    <form action="#">
-                                                        <div class="input-group">
-                                                            <input type="text" class="form-control" required
-                                                                placeholder="coupon code">
-                                                            <div class="input-group-append">
-                                                                <button class="btn btn-outline-primary-2"
-                                                                    type="submit"><i
-                                                                        class="icon-long-arrow-right"></i></button>
-                                                            </div><!-- .End .input-group-append -->
-                                                        </div><!-- End .input-group -->
-                                                    </form>
+                                                    
                                                 </div><!-- End .cart-discount -->
 
                                                 <a href="/product-list" class="btn btn-outline-dark-2"><span>UPDATE

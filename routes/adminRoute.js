@@ -82,6 +82,13 @@ adminRoute.get('/sales-report/:type',isAdminAuthenticated, adminController.sales
 adminRoute.get('/sales-report/:type',isAdminAuthenticated, adminController.salesReportExcel);
 
 
+//offer 
+adminRoute.get('/add-offer', couponController.renderAddOfferPage);
+adminRoute.get('/offer-list', couponController.offerList);
+adminRoute.post('/add-offer', couponController.addOffer);
+adminRoute.put('/offer-list', couponController.editOffer);
+adminRoute.delete('/add-offer/delete/:offerId', couponController.deleteOffer);
+
 
 // Catch-all route for undefined paths
 adminRoute.get("*", (req, res) => {

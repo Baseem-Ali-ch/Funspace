@@ -318,25 +318,32 @@
                       </a>
                     </div>
                     <!-- <div class="product-price">₹<%= product.price %> -->
-                    <% if(product.discountedPrice && product.price> product.discountedPrice){ %>
-                      <div class="row ">
+                    <% if (productOffer) { %>
+                      <div class="row">
+                        <!-- Display the discounted price -->
                         <div class="product-price mx-3">
-                          ₹<%= product.discountedPrice %>
+                          ₹<%= (product.price - (product.price * (productOffer.discount / 100))).toFixed(2) %>
                         </div>
+
+                        <!-- Display the original price with a strikethrough -->
                         <div class="product-price mx-3" style="font-size: 16px;">
                           <del>₹<%= product.price %></del>
                         </div>
-                        <% const discountPercentage=Math.round(((product.price - product.discountedPrice) /
-                          product.price) * 100); %>
+
+                        <!-- Calculate and display the discount percentage -->
+                        <% const discountPercentage=Math.round(((product.price - (product.price - (product.price *
+                          (productOffer.discount / 100)))) / product.price) * 100); %>
                           <div class="product-price" style="font-size: 16px;">
                             <%= discountPercentage %>% off
                           </div>
                       </div>
                       <% } else { %>
+                        <!-- Display the regular price if no offer is available -->
                         <div class="product-price">
                           ₹<%= product.price %>
                         </div>
                         <% } %>
+
 
                   </div>
                   <div class="product-content mb-2">
@@ -417,6 +424,8 @@
                         <%= product.category.title %>
                       </a>
                     </div>
+
+
                     <div class="social-icons social-icons-sm">
                       <span class="social-label">Share:</span>
                       <a href="#" class="social-icon" title="Facebook" target="_blank">
@@ -432,6 +441,31 @@
                         <i class="icon-pinterest"></i>
                       </a>
                     </div>
+                    <% if (productOffer || categoryOffer) { %>
+                      <div class="offer-details">
+                        <h6 class="mt-2" style="text-decoration: underline;">Available offers</h6>
+                        <ul>
+                          <% if (productOffer) { %>
+                            <li>
+                              <span style="color: green;">
+                                <i class="fa fa-tag"></i> Product Offer:
+                              </span>
+                              <%= productOffer.offerName %> - <%= productOffer.discount %>% off
+                                  <a href="#"></a>
+                            </li>
+                            <% } %>
+                              <% if (categoryOffer) { %>
+                                <li>
+                                  <span style="color: green;">
+                                    <i class="fa fa-tag"></i> Category Offer:
+                                  </span>
+                                  <%= categoryOffer.offerName %> - <%= categoryOffer.discount %>% off
+                                      <a href="#"></a>
+                                </li>
+                                <% } %>
+                        </ul>
+                      </div>
+                      <% } %>
                   </div>
                 </div>
               </div>

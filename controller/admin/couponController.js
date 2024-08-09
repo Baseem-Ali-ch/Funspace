@@ -1,5 +1,9 @@
 const Coupon = require("../../model/coupen"); // Adjust the path as necessary
 const Cart = require("../../model/cartModel");
+const Category = require("../../model/categoryModel");
+const Product = require("../../model/productModel");
+const Offer = require("../../model/offerModel");
+
 // Get all coupons
 const getCoupons = async (req, res) => {
   try {
@@ -131,7 +135,7 @@ const applyCoupon = async (req, res) => {
 
     // Calculate discount
     let discount = 0;
-    discount = coupon.redeemAmount
+    discount = coupon.redeemAmount;
 
     // Apply discount to cart total
     const newTotal = cartTotal - discount;
@@ -156,6 +160,95 @@ const applyCoupon = async (req, res) => {
   }
 };
 
+const renderAddOfferPage = async (req, res) => {
+  try {
+    const products = await Product.find();
+    const categories = await Category.find();
+    const isAdmin = req.session.admin;
+    res.render("add-offer", {
+      isAdmin,
+      products,
+      categories,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const offerList = async (req, res) => {
+  try {
+    const isAdmin = req.session.admin;
+    const offers = await Offer.find().populate("productId categoryId").lean();
+    const products = await Product.find();
+    const categories = await Category.find();
+
+    res.render("list-offer", { offers, isAdmin, products, categories }); // Adjust the view path as needed
+  } catch (error) {
+    console.error("Error fetching offers:", error);
+    res.status(500).send("Server error");
+  }
+};
+
+const addOffer = async (req, res) => {
+  try {
+    const { offerType, offerName, discount, productId, categoryId, referralCode, startDate, endDate } = req.body;
+
+    const newOffer = new Offer({
+      offerType,
+      offerName,
+      discount,
+      productId: offerType === "product" ? productId : null,
+      categoryId: offerType === "category" ? categoryId : null,
+      referralCode: offerType === "referral" ? referralCode : null,
+    });
+
+    await newOffer.save();
+    res.status(200).json({ success: true, message: "Offer added successfully." });
+  } catch (error) {
+    console.error("Error adding offer:", error);
+    res.status(500).json({ success: false, message: "Error adding offer." });
+  }
+};
+
+const editOffer = async (req, res) => {
+  const { offerId } = req.body;
+  const { offerName, discount, offerType, status } = req.body;
+
+  try {
+    const offer = await Offer.findByIdAndUpdate(
+      offerId,
+      {
+        offerName,
+        discount,
+        offerType,
+        status,
+      },
+      { new: true },
+    );
+
+    if (offer) {
+      res.json({ success: true, offer });
+    } else {
+      res.json({ success: false, message: "Offer not found" });
+    }
+  } catch (error) {
+    console.error("Error updating offer:", error);
+    res.json({ success: false, message: "Error updating offer" });
+  }
+};
+
+const deleteOffer = async (req, res) => {
+  try {
+    const { offerId } = req.params;
+
+    await Offer.findByIdAndDelete(offerId);
+    res.status(200).json({ success: true, message: "Offer deleted successfully." });
+  } catch (error) {
+    console.error("Error deleting offer:", error);
+    res.status(500).json({ success: false, message: "Error deleting offer." });
+  }
+};
+
 module.exports = {
   getCoupons,
   newCouponForm,
@@ -165,4 +258,9 @@ module.exports = {
   deleteCoupon,
   getCoupon,
   applyCoupon,
+  renderAddOfferPage,
+  offerList,
+  addOffer,
+  editOffer,
+  deleteOffer,
 };

@@ -437,26 +437,25 @@
                         </div><!-- End .product -->
                       </td>
                       <td class="price-col" style="width: 230px;">
-                        <% if(item.productId.discountedPrice && item.productId.price> item.productId.discountedPrice){
-                          %>
-                          <div class="row " style="margin-top: 15px;">
+                        <% if (item.productId.offer) { %>
+                          <div class="row" style="margin-top: 15px;">
                             <div class="product-price mx-3 text-dark">
                               ₹<%= item.productId.discountedPrice %>
                             </div>
                             <div class="product-price mx-3 text-dark" style="font-size: 13px;">
                               <del>₹<%= item.productId.price %></del>
                             </div>
-                            <% const discountPercentage=Math.round(((item.productId.price -
-                              item.productId.discountedPrice) / item.productId.price) * 100); %>
-                              <div class="product-price text-dark" style="font-size: 13px;">
-                                <%= discountPercentage %>% off
-                              </div>
-                          </div>
-                          <% } else { %>
-                            <div class="product-price text-dark">
-                              ₹<%= item.productId.price %>
+                            <% const discountPercentage = Math.round(((item.productId.price - item.productId.discountedPrice) / item.productId.price) * 100); %>
+                            <div class="product-price text-dark" style="font-size: 13px;">
+                              <%= discountPercentage %>% off
                             </div>
-                            <% } %>
+                          </div>
+                        <% } else { %>
+                          <div class="product-price text-dark">
+                            ₹<%= item.productId.price %>
+                          </div>
+                        <% } %>
+
                       </td>
                       <td class="stock-col">
                         <span class="in-stock">

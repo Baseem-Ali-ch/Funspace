@@ -224,9 +224,9 @@
 
                         <div class=" cart-dropdown">
                             <a href="/wallet" class="dropdown-toggle" style="font-size: 23px;">
-                              <i class="fa-solid fa-wallet"></i>
+                                <i class="fa-solid fa-wallet"></i>
                             </a>
-                          </div>
+                        </div>
 
 
                         <div class="dropdown cart-dropdown">
@@ -345,7 +345,7 @@
                         <p><strong>Total Amount:</strong> ₹ <%= order.totalPrice %>
                         </p>
                         <p><strong>Ordered Date:</strong>
-                            <%= order.deliveryDate ? formatDate(new Date(order.deliveryDate)) : 'N/A' %> %>.
+                            <%= order.deliveryDate ? formatDate(new Date(order.deliveryDate)) : 'N/A' %>
                         </p>
                     </div>
                     <div class="address-details">
@@ -355,7 +355,7 @@
                         </p>
                         <p><strong>Delivery Address</strong><br>
                             <%= order.address.street %><br>
-                                <%= order.address.town %>, <%= order.address.city %> <br>
+                                <%= order.address.town %>, <%= order.address.city %><br>
                                         <%= order.address.state %>, <%= order.address.postcode %><br>
                                                 <%= order.address.phone %>
                         </p>
@@ -366,57 +366,55 @@
                     <thead class="thead-dark">
                         <tr>
                             <th></th>
-                            <th>Product </th>
+                            <th>Product</th>
                             <th>Quantity</th>
                             <th>Price</th>
+                            <th>Offer</th>
                             <th>Total</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <% let subtotal=0; %>
-                            <% order.items.forEach(item=> { %>
-                                <% const product=item.productId; %>
-                                    <% const itemTotal=item.product.price * item.quantity; %>
-                                        <% subtotal +=itemTotal; %>
-
-
-                                            <tr>
-                                                <td><a href="/product/<%= item.product._id %>"><img style="width: 7em;"
-                                                            src="<%= item.product.imageUrl_1 %>"
-                                                            alt="<%= item.product.name %>"></a></td>
-                                                <td>
-                                                    <%= item.product.name %> <br>
-
-
-                                                </td>
-                                                <td>
-                                                    <%= item.quantity %>
-                                                </td>
-                                                <td>₹<%= item.product.price.toFixed(2) %>
-                                                </td>
-                                                <td>₹<%= itemTotal.toFixed(2) %>
-                                                </td>
-                                            </tr>
-                                            <% }); %>
+                        <% let subtotal = 0; %>
+                        <% order.items.forEach(item => { %>
+                            <% const product = item.product; %>
+                            <% const itemTotal = product.discountedPrice * item.quantity; %>
+                            <% subtotal += itemTotal; %>
+                            <tr>
+                                <td>
+                                    <a href="/product/<%= product._id %>">
+                                        <img style="width: 7em;" src="<%= product.imageUrl_1 %>" alt="<%= product.name %>">
+                                    </a>
+                                </td>
+                                <td><%= product.name %></td>
+                                <td><%= item.quantity %></td>
+                                <td>
+                                    ₹ <%= product.price.toFixed(2) %>
+                                    <% if (product.offer) { %>
+                                        <br>
+                                        <small class="text-muted">(Discounted: ₹ <%= product.discountedPrice %>)</small>
+                                    <% } %>
+                                </td>
+                                <td><%= product.offer ? product.offer.discount + '%' : 'No Offer' %></td>
+                                <td>₹ <%= itemTotal.toFixed(2) %></td>
+                            </tr>
+                        <% }); %>
                     </tbody>
                 </table>
+                
                 <div class="order-summary-footer">
                     <div class="row">
                         <div class="col-md-12 text-right">
-                            <h6>Subtotal: <span>₹<%= subtotal.toFixed(2) %></span></h6>
-
-                            <h4 class="mt-4">Grand Total: <span>₹<%= subtotal.toFixed(2) %></span></h4>
+                            <h6>Subtotal: <span>₹ <%= subtotal.toFixed(2) %></span></h6>
+                            <h4 class="mt-4">Grand Total: <span>₹ <%= subtotal.toFixed(2) %></span></h4>
                         </div>
                     </div>
                 </div>
-
-
                 <div class="text-center mt-4">
                     <a href="/product-list" class="btn btn-md mr-2">Continue Shopping</a>
-                    <a href="/download-invoice/<%= order.orderId %>" class="btn btn-md">Download
-                        Invoice</a>
+                    <a href="/download-invoice/<%= order.orderId %>" class="btn btn-md">Download Invoice</a>
                 </div>
             </div>
+
         </div>
 
 

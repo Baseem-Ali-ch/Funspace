@@ -7,6 +7,7 @@ const Cart = require("../../model/cartModel");
 const Address = require("../../model/addressModel");
 const Order = require("../../model/orderModel");
 const Wallet = require("../../model/walletModel");
+const Offer = require('../../model/offerModel')
 
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
@@ -47,8 +48,47 @@ const loadProfile = async (req, res) => {
       const cart = await Cart.findOne({ userId }).populate("items.productId");
       cartItems = cart ? cart.items : [];
     }
+
     const categories = await Category.find({ isListed: "true" });
     const orders = await Order.find({ user: userId }).populate("items.product").populate("address");
+
+    // Calculate the total amount for each order based on the offer price or regular price
+    for (let order of orders) {
+      let totalPrice = 0;
+
+      for (let item of order.items) {
+        let finalPrice = item.product.price;
+
+        // Check for product and category offers
+        const productOffer = await Offer.findOne({
+          offerType: "product",
+          status: "active",
+          productId: item.product._id,
+        }).exec();
+
+        const categoryOffer = await Offer.findOne({
+          offerType: "category",
+          status: "active",
+          categoryId: item.product.category,
+        }).exec();
+
+        let bestOffer = null;
+        if (productOffer && categoryOffer) {
+          bestOffer = productOffer.discount > categoryOffer.discount ? productOffer : categoryOffer;
+        } else {
+          bestOffer = productOffer || categoryOffer;
+        }
+
+        if (bestOffer) {
+          finalPrice = item.product.price * (1 - bestOffer.discount / 100);
+        }
+
+        totalPrice += finalPrice * item.quantity;
+        item.product.finalPrice = finalPrice.toFixed(2); // Save the final price for display
+      }
+
+      order.totalPrice = totalPrice.toFixed(2);
+    }
 
     const userDetails = user
       ? {
@@ -58,7 +98,7 @@ const loadProfile = async (req, res) => {
           email: user.email,
         }
       : null;
-    console.log("user details", userDetails);
+
     res.render("account", {
       user: userDetails,
       categories,
@@ -68,8 +108,10 @@ const loadProfile = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    res.status(500).send("Internal Server Error");
   }
 };
+
 
 //user can edit their own
 const updateProfile = async (req, res) => {
@@ -330,8 +372,8 @@ const changedPassword = async (req, res) => {
 };
 
 const generateOrderId = () => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let orderId = '#';
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let orderId = "#";
   for (let i = 0; i < 5; i++) {
     orderId += chars.charAt(Math.floor(Math.random() * chars.length));
   }
@@ -359,7 +401,6 @@ const loadWallet = async (req, res) => {
 
     // Fetch the wallet
     const wallet = await Wallet.findOne({ user: userId });
-    
 
     res.render("wallet", {
       user,
@@ -367,7 +408,7 @@ const loadWallet = async (req, res) => {
       categories,
       cartItems,
       transactions: wallet.transactions,
-      wallet 
+      wallet,
     });
   } catch (error) {
     console.log(error);

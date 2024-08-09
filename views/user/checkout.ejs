@@ -277,20 +277,17 @@
                                                             <a href="/product/<%= item.productId._id %>">
                                                                 <%= item.productId.name %>
                                                             </a>
-
                                                         </td>
                                                         <td>
-                                                            <%= item.productId.price * item.quantity %>
-                                                                <% total +=item.productId.price * item.quantity %>
+                                                            ₹<%= (item.productId.finalPrice * item.quantity).toFixed(2)
+                                                                %>
+                                                                <% total +=item.productId.finalPrice * item.quantity %>
                                                         </td>
                                                     </tr>
                                                     <% }) %>
                                                         <tr class="summary-subtotal" id="subtotalAmount">
-                                                            <td>
-                                                                Subtotal
-                                                            </td>
-                                                            <td>
-                                                                <%= total %>
+                                                            <td>Subtotal</td>
+                                                            <td>₹<%= total.toFixed(2) %>
                                                             </td>
                                                         </tr><!-- End .summary-subtotal -->
                                                         <tr>
@@ -298,23 +295,19 @@
                                                             <td>Free shipping</td>
                                                         </tr>
                                                         <tr>
-                                                            <td>
-                                                                Coupon Amount:
-                                                            </td>
-                                                            <td id="couponStatus">
-
-                                                            </td>
+                                                            <td>Coupon Amount:</td>
+                                                            <td id="couponStatus"></td>
                                                         </tr>
                                                         <tr class="summary-total"
-                                                            style="font-weight: 400;font-size: 1.6rem;color: #c96;border-bottom: none;">
+                                                            style="font-weight: 400; font-size: 1.6rem; color: #c96; border-bottom: none;">
                                                             <td>Total:</td>
-                                                            <td id="totalAmount">
-                                                                <%= total %>
+                                                            <td id="totalAmount">₹<%= total.toFixed(2) %>
                                                             </td>
                                                         </tr><!-- End .summary-total -->
-
                                         </tbody>
+
                                     </table><!-- End .table table-summary -->
+
 
                                     <div class="accordion-summary" id="accordion-payment">
 
@@ -345,7 +338,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <button id="proceed-button" type="button" class="btn btn-primary">Place 
+                                            <button id="proceed-button" type="button" class="btn btn-primary">Place
                                                 Order</button>
 
                                             <!-- Include other form elements such as address selection, etc. -->

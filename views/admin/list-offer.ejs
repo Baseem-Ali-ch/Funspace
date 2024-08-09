@@ -340,21 +340,21 @@
                                             <div data-i18n="Add coupon">Add coupon</div>
                                         </a>
                                     </li>
-                                    <li class="menu-item active">
+                                    <li class="menu-item">
                                         <a href="/admin/list-coupon" class="menu-link">
                                             <div data-i18n="Coupon List">Coupon List</div>
                                         </a>
                                     </li>
                                     <li class="menu-item ">
                                         <a href="/admin/add-offer" class="menu-link">
-                                          <div data-i18n="Add offer">Add offer</div>
+                                            <div data-i18n="Add offer">Add offer</div>
                                         </a>
-                                      </li>
-                                      <li class="menu-item ">
+                                    </li>
+                                    <li class="menu-item active">
                                         <a href="/admin/offer-list" class="menu-link">
-                                          <div data-i18n="offer List">offer List</div>
+                                            <div data-i18n="offer List">offer List</div>
                                         </a>
-                                      </li>
+                                    </li>
                                 </ul>
                             </li>
                             <li class="menu-item">
@@ -700,44 +700,116 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <!-- Edit Offer Modal Form -->
+                                    <div class="modal fade" id="editOfferModal" tabindex="-1"
+                                        aria-labelledby="editOfferModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <form id="editOfferForm">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="editOfferModalLabel">Edit Offer</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                            aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+
+                                                        <input type="hidden" name="offerId" id="offerId">
+                                                        <div class="mb-3">
+                                                            <label for="offerName" class="form-label">Offer Name</label>
+                                                            <input type="text" class="form-control" id="offerName"
+                                                                name="offerName">
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="discount" class="form-label">Discount
+                                                                (%)</label>
+                                                            <input type="number" class="form-control" id="discount"
+                                                                name="discount">
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="offerType" class="form-label">Offer Type</label>
+                                                            <select class="form-select" id="offerType" name="offerType">
+                                                                <option value="product">Product</option>
+                                                                <option value="category">Category</option>
+                                                                <option value="referral">Referral</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="status" class="form-label">Status</label>
+                                                            <select class="form-select" id="status" name="status">
+                                                                <option value="active">Active</option>
+                                                                <option value="inactive">Inactive</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary"
+                                                            data-bs-dismiss="modal">Close</button>
+                                                        <button type="submit" class="btn btn-primary">Save
+                                                            changes</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+                                    <!-- Offer Cards -->
                                     <div class="row">
-                                        <% coupons.forEach(coupon=> { %>
-                                            <div class="col-md-4 mb-4">
-                                                <div class="card">
-                                                    <div class="card-body">
-                                                        <h5 class="card-title">
-                                                            <%= coupon.couponCode %>
-                                                        </h5>
-                                                        <p class="card-text" style="display: none;">
-                                                            <%= coupon._id %>
-                                                        </p>
-                                                        <p class="card-text">
-                                                            <%= coupon.description %>
-                                                        </p>
-                                                        <p class="card-text">Discount: <%= coupon.discount %> %</p>
-                                                        <p class="card-text">Minimum Amount: $<%= coupon.minAmount %>
-                                                        </p>
-                                                        <p class="card-text">Redeem Amount: $<%= coupon.redeemAmount %>
-                                                        </p>
-                                                        <p class="card-text">Expiry Date: <%=
-                                                                coupon.expiryDate.toDateString() %>
-                                                        </p>
-                                                        <p class="card-text">Status: <%= coupon.isListed ? 'Active'
-                                                                : 'inactive' %>
-                                                        </p>
-                                                        <button
-                                                            class="btn btn-primary btn-sm btn-icon btn-text-secondary waves-effect waves-light rounded-pill mx-2"
-                                                            data-bs-toggle="modal" data-bs-target="#editCouponModal"
-                                                            data-id="<%= coupon._id %>">
-                                                            <i class="ri-edit-box-line ri-22px"></i>
-                                                        </button>
-
-
+                                        <% if (Array.isArray(offers) && offers.length> 0) { %>
+                                            <% offers.forEach(offer=> { %>
+                                                <div class="col-md-4 mb-4">
+                                                    <div class="card">
+                                                        <div class="card-body">
+                                                            <h5 class="card-title">
+                                                                <%= offer.offerName %>
+                                                            </h5>
+                                                            <p class="card-text">Offer Type: <%= offer.offerType %>
+                                                            </p>
+                                                            <p class="card-text">Discount: <%= offer.discount %>%</p>
+                                                            <% if (offer.offerType==='product' ) { %>
+                                                                <p class="card-text">Product: <%= offer.productId ?
+                                                                        offer.productId.name : 'N/A' %>
+                                                                </p>
+                                                                <% } else if (offer.offerType==='category' ) { %>
+                                                                    <p class="card-text">Category: <%= offer.categoryId
+                                                                            ? offer.categoryId.name : 'N/A' %>
+                                                                    </p>
+                                                                    <% } else if (offer.offerType==='referral' ) { %>
+                                                                        <p class="card-text">Referral Code: <%=
+                                                                                offer.referralCode %>
+                                                                        </p>
+                                                                        <% } %>
+                                                                            <p class="card-text">Status: <%=
+                                                                                    offer.status %>
+                                                                            </p>
+                                                                            <button
+                                                                                class="btn btn-primary btn-sm btn-icon btn-text-secondary waves-effect waves-light rounded-pill mx-2"
+                                                                                data-bs-toggle="modal"
+                                                                                data-bs-target="#editOfferModal"
+                                                                                data-id="<%= offer._id %>"
+                                                                                data-offername="<%= offer.offerName %>"
+                                                                                data-discount="<%= offer.discount %>"
+                                                                                data-offertype="<%= offer.offerType %>"
+                                                                                data-status="<%= offer.status %>">
+                                                                                <i class="ri-edit-box-line ri-22px"></i>
+                                                                            </button>
+                                                                            <button
+                                                                                class="btn btn-danger btn-sm btn-icon waves-effect waves-light rounded-pill mx-2 btn-delete-offer"
+                                                                                data-id="<%= offer._id %>">
+                                                                                <i
+                                                                                    class="ri-delete-bin-line ri-22px"></i>
+                                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <% }) %>
+                                                <% }) %>
+                                                    <% } else { %>
+                                                        <p>No offers available.</p>
+                                                        <% } %>
                                     </div>
+
+
 
                                     <!-- <div class="row mx-1"><div class="col-sm-12 col-md-6"><div class="dataTables_info" id="DataTables_Table_0_info" role="status" aria-live="polite">Showing 1 to 7 of 14 entries</div></div><div class="col-sm-12 col-md-6"><div class="dataTables_paginate paging_simple_numbers" id="DataTables_Table_0_paginate"><ul class="pagination"><li class="paginate_button page-item previous disabled" id="DataTables_Table_0_previous"><a aria-controls="DataTables_Table_0" aria-disabled="true" role="link" data-dt-idx="previous" tabindex="-1" class="page-link">Previous</a></li><li class="paginate_button page-item active"><a href="#" aria-controls="DataTables_Table_0" role="link" aria-current="page" data-dt-idx="0" tabindex="0" class="page-link">1</a></li><li class="paginate_button page-item "><a href="#" aria-controls="DataTables_Table_0" role="link" data-dt-idx="1" tabindex="0" class="page-link">2</a></li><li class="paginate_button page-item next" id="DataTables_Table_0_next"><a href="#" aria-controls="DataTables_Table_0" role="link" data-dt-idx="next" tabindex="0" class="page-link">Next</a></li></ul></div></div></div><div style="width: 1%;"></div></div> -->
 
@@ -746,260 +818,196 @@
                                 </div>
                             </div>
 
-                            <!-- Offcanvas to add new category -->
-
-
-
-
-                            <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasEcommerceCategoryList"
-                                aria-labelledby="offcanvasEcommerceCategoryListLabel">
-                                <!-- Offcanvas Header -->
-                                <div class="offcanvas-header">
-                                    <h5 id="offcanvasEcommerceCategoryListLabel" class="offcanvas-title">Add Coupon</h5>
-                                    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
-                                        aria-label="Close"></button>
-                                </div>
-                                <!-- Offcanvas Body -->
-                                <div class="offcanvas-body border-top">
-                                    <form class="pt-0 fv-plugins-bootstrap5 fv-plugins-framework"
-                                        id="eCommerceCategoryListForm" action="/admin/categories/add" method="post"
-                                        novalidate="novalidate">
-                                        <!-- Title -->
-
-                                        <label for="ecommerce-category-title">Title</label>
-                                        <div class="form-floating form-floating-outline mb-5 fv-plugins-icon-container">
-                                            <input type="text" class="form-control" id="ecommerce-category-title"
-                                                name="title" placeholder="Enter title" required>
-
-                                            <div
-                                                class="fv-plugins-message-container fv-plugins-message-container--enabled invalid-feedback">
-                                            </div>
-                                        </div>
-
-                                        <!-- Slug -->
-                                        <label for="ecommerce-category-slug">Description</label>
-                                        <div class="form-floating form-floating-outline mb-5 fv-plugins-icon-container">
-                                            <input type="text" id="ecommerce-category-slug" class="form-control"
-                                                placeholder="Enter description" name="slug" required>
-
-                                            <!-- <div class="fv-plugins-message-container fv-plugins-message-container--enabled invalid-feedback"></div></div> -->
-
-                                            <!-- Status -->
-                                            <div class="col-md-6 mb-5">
-                                                <div class="mb-3">
-                                                    <label for="publishStatus" class="form-label">Status</label>
-                                                    <select class="form-select" id="publishStatus" name="isListed"
-                                                        required>
-                                                        <option value="" disabled selected>Select status</option>
-                                                        <option value="true">Active</option>
-                                                        <option value="false">Inactive</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-
-                                            <!-- Image -->
-                                            <!-- <label for="ecommerce-category-image">Category Image</label>
-                  <div class="form-floating form-floating-outline mb-5">
-                    <input type="file" class="form-control" id="ecommerce-category-image" name="image" accept="image/*">
-                    
-                  </div>
-                   -->
 
 
 
 
 
-                                            <!-- Submit and reset -->
-                                            <div>
-                                                <button type="submit"
-                                                    class="btn btn-primary me-3 data-submit waves-effect waves-light"
-                                                    data-bs-dismiss="offcanvas">Add</button>
-                                                <button type="reset" class="btn btn-outline-danger waves-effect"
-                                                    data-bs-dismiss="offcanvas">Discard</button>
-                                            </div>
-                                            <input type="hidden">
-                                    </form>
-                                </div>
+
+                            <!-- Submit and reset -->
+                            <div>
+                                <button type="submit" class="btn btn-primary me-3 data-submit waves-effect waves-light"
+                                    data-bs-dismiss="offcanvas">Add</button>
+                                <button type="reset" class="btn btn-outline-danger waves-effect"
+                                    data-bs-dismiss="offcanvas">Discard</button>
                             </div>
-
+                            <input type="hidden">
+                            </form>
                         </div>
-                        <!-- / Content -->
-
-
-
-
-
-
-
-
-
-
-
-                        <div class="content-backdrop fade"></div>
                     </div>
-                    <!-- Content wrapper -->
+
                 </div>
-                <!-- / Layout page -->
+                <!-- / Content -->
+
+
+
+
+
+
+
+
+
+
+
+                <div class="content-backdrop fade"></div>
             </div>
-
-
-
-            <!-- Overlay -->
-            <div class="layout-overlay layout-menu-toggle"></div>
-
-
-            <!-- Drag Target Area To SlideIn Menu On Small Screens -->
-            <div class="drag-target"></div>
-
+            <!-- Content wrapper -->
         </div>
-        <!-- / Layout wrapper -->
+        <!-- / Layout page -->
+    </div>
+
+
+
+    <!-- Overlay -->
+    <div class="layout-overlay layout-menu-toggle"></div>
+
+
+    <!-- Drag Target Area To SlideIn Menu On Small Screens -->
+    <div class="drag-target"></div>
+
+    </div>
+    <!-- / Layout wrapper -->
 
 
 
 
-        <!-- Edit Coupon Modal -->
-        <div class="modal fade" id="editCouponModal" tabindex="-1" aria-labelledby="editCouponModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="editCouponModalLabel">Edit Coupon</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="editCouponForm" method="POST">
-                            <!-- Hidden input to store the coupon ID -->
-                            <input type="hidden" id="couponId" name="couponId">
-
-                            <!-- Coupon Code -->
-                            <div class="mb-3">
-                                <label for="editCouponCode" class="form-label">Coupon Code</label>
-                                <input type="text" class="form-control" id="editCouponCode" name="coupon_code" required>
-                            </div>
-
-                            <!-- Description -->
-                            <div class="mb-3">
-                                <label for="editCouponDescription" class="form-label">Description</label>
-                                <textarea class="form-control" id="editCouponDescription" name="description"></textarea>
-                            </div>
-
-                            <!-- Discount and Minimum Amount -->
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="editDiscount" class="form-label">Discount (%):</label>
-                                    <input type="number" class="form-control" id="editDiscount" name="discount"
-                                        required>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="editMinAmount" class="form-label">Minimum Amount:</label>
-                                    <input type="number" class="form-control" id="editMinAmount" name="min_amount"
-                                        required>
-                                </div>
-                            </div>
-
-                            <!-- Redeem Amount and Expiry Date -->
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="editRedeemAmount" class="form-label">Redeem Amount:</label>
-                                    <input type="number" class="form-control" id="editRedeemAmount" name="redeem_amount"
-                                        required>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="editExpiryDate" class="form-label">Expiry Date:</label>
-                                    <input type="date" class="form-control" id="editExpiryDate" name="expiryDate"
-                                        required>
-                                </div>
-                            </div>
-
-                            <!-- Status -->
-                            <div class="mb-3">
-                                <label for="editCouponStatus" class="form-label">Status:</label>
-                                <select class="form-select" id="editCouponStatus" name="isActive" required>
-                                    <option value="" disabled>Select status</option>
-                                    <option value="true">Active</option>
-                                    <option value="false">Inactive</option>
-                                </select>
-                            </div>
-
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-primary">Save Changes</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-
-        <!-- Core JS -->
-        <!-- build:js assets/vendor/js/core.js -->
-        <script src="/dashboard-assets/vendor/libs/jquery/jquery.js"></script>
-        <script src="./dashboard-assets/vendor/libs/popper/popper.js"></script>
-        <script src="/dashboard-assets/vendor/js/bootstrap.js"></script>
-        <script src="/dashboard-assets/vendor/libs/node-waves/node-waves.js"></script>
-        <script src="/dashboard-assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-        <script src="/dashboard-assets/vendor/libs/hammer/hammer.js"></script>
-        <script src="/dashboard-assets/vendor/libs/i18n/i18n.js"></script>
-        <script src="/dashboard-assets/vendor/libs/typeahead-js/typeahead.js"></script>
-        <script src="/dashboard-assets/vendor/js/menu.js"></script>
-
-        <!-- endbuild -->
-
-        <!-- Vendors JS -->
-        <script src="/dashboard-assets/vendor/libs/moment/moment.js"></script>
-        <script src="/dashboard-assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
-        <script src="/dashboard-assets/vendor/libs/select2/select2.js"></script>
-        <script src="/dashboard-assets/vendor/libs/%40form-validation/popular.js"></script>
-        <script src="/dashboard-assets/vendor/libs/%40form-validation/bootstrap5.js"></script>
-        <script src="/dashboard-assets/vendor/libs/%40form-validation/auto-focus.js"></script>
-        <script src="/dashboard-assets/vendor/libs/quill/katex.js"></script>
-        <script src="/dashboard-assets/vendor/libs/quill/quill.js"></script>
-
-        <!-- Main JS -->
-        <script src="/dashboard-assets/js/main.js"></script>
-
-
-        <!-- Page JS -->
-        <!-- <script src="/dashboard-assets/js/app-ecommerce-category-list.js"></script> -->
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
 
 
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                const editButtons = document.querySelectorAll('[data-bs-target="#editCouponModal"]');
-                editButtons.forEach(button => {
-                    button.addEventListener('click', function () {
-                        const couponId = this.getAttribute('data-id');
-                        fetch(`/admin/get-coupon/${couponId}`)
-                            .then(response => response.json())
-                            .then(data => {
-                                document.getElementById('couponId').value = data._id;
-                                document.getElementById('editCouponCode').value = data.couponCode;
-                                document.getElementById('editCouponDescription').value = data.discription;
-                                document.getElementById('editDiscount').value = data.discount;
-                                document.getElementById('editMinAmount').value = data.minAmount;
-                                document.getElementById('editRedeemAmount').value = data.redeemAmount;
-                                document.getElementById('editExpiryDate').value = data.expiryDate.split('T')[0];
-                                document.getElementById('editCouponStatus').value = data.isListed;
 
-                                // Update the form action URL
-                                document.getElementById('editCouponForm').action = "/admin/edit-coupon";
-                            })
-                            .catch(error => console.error('Error fetching coupon data:', error));
-                    });
+    <!-- Core JS -->
+    <!-- build:js assets/vendor/js/core.js -->
+    <script src="/dashboard-assets/vendor/libs/jquery/jquery.js"></script>
+    <script src="./dashboard-assets/vendor/libs/popper/popper.js"></script>
+    <script src="/dashboard-assets/vendor/js/bootstrap.js"></script>
+    <script src="/dashboard-assets/vendor/libs/node-waves/node-waves.js"></script>
+    <script src="/dashboard-assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+    <script src="/dashboard-assets/vendor/libs/hammer/hammer.js"></script>
+    <script src="/dashboard-assets/vendor/libs/i18n/i18n.js"></script>
+    <script src="/dashboard-assets/vendor/libs/typeahead-js/typeahead.js"></script>
+    <script src="/dashboard-assets/vendor/js/menu.js"></script>
+
+    <!-- endbuild -->
+
+    <!-- Vendors JS -->
+    <script src="/dashboard-assets/vendor/libs/moment/moment.js"></script>
+    <script src="/dashboard-assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
+    <script src="/dashboard-assets/vendor/libs/select2/select2.js"></script>
+    <script src="/dashboard-assets/vendor/libs/%40form-validation/popular.js"></script>
+    <script src="/dashboard-assets/vendor/libs/%40form-validation/bootstrap5.js"></script>
+    <script src="/dashboard-assets/vendor/libs/%40form-validation/auto-focus.js"></script>
+    <script src="/dashboard-assets/vendor/libs/quill/katex.js"></script>
+    <script src="/dashboard-assets/vendor/libs/quill/quill.js"></script>
+
+    <!-- Main JS -->
+    <script src="/dashboard-assets/js/main.js"></script>
+
+
+    <!-- Page JS -->
+    <!-- <script src="/dashboard-assets/js/app-ecommerce-category-list.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const editOfferModal = new bootstrap.Modal(document.getElementById('editOfferModal'));
+
+            document.querySelectorAll('.btn[data-bs-target="#editOfferModal"]').forEach(button => {
+                button.addEventListener('click', function () {
+                    const offerId = this.getAttribute('data-id');
+                    const offerName = this.getAttribute('data-offername');
+                    const discount = this.getAttribute('data-discount');
+                    const offerType = this.getAttribute('data-offertype');
+                    const status = this.getAttribute('data-status');
+
+                    // Populate the modal fields
+                    document.getElementById('offerId').value = offerId;
+                    document.getElementById('offerName').value = offerName;
+                    document.getElementById('discount').value = discount;
+                    document.getElementById('offerType').value = offerType;
+                    document.getElementById('status').value = status;
+
+                    // Show the modal
+                    editOfferModal.show();
                 });
             });
-        </script>
+
+            // Handle the form submission
+            document.getElementById('editOfferModal').addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                const offerId = document.getElementById('offerId').value;
+                const offerName = document.getElementById('offerName').value;
+                const discount = document.getElementById('discount').value;
+                const offerType = document.getElementById('offerType').value;
+                const status = document.getElementById('status').value;
+
+                // AJAX request to update offer
+                fetch(`/admin/offer-list`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        offerId,
+                        offerName,
+                        discount,
+                        offerType,
+                        status,
+                    }),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Close the modal and refresh the page or update the UI
+                            editOfferModal.hide();
+                            location.reload(); // Reload the page to reflect the changes
+                        } else {
+                            alert('Failed to update the offer');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            });
+        });
+
+
+        // Handle delete offer
+        document.querySelectorAll('.btn-delete-offer').forEach(button => {
+            button.addEventListener('click', function () {
+                const offerId = this.getAttribute('data-id');
+
+                fetch(`/admin/add-offer/delete/${offerId}`, {
+                    method: 'DELETE'
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert(data.message);
+                            location.reload(); // or remove the offer from the DOM dynamically
+                        } else {
+                            alert(`Error deleting offer: ${data.message}`);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error deleting offer. Check the console for details.');
+                    });
+            });
+        });
+
+    </script>
 
 
 
 
 
-        <%- include('../admin-layout/footer.ejs') %>
 
 
-            <!-- beautify ignore:end -->
+
+    <%- include('../admin-layout/footer.ejs') %>
+
+
+        <!-- beautify ignore:end -->
