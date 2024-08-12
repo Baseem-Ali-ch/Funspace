@@ -560,12 +560,12 @@
 
                     <!-- Discount and Minimum Amount -->
                     <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="discount" class="form-label">Discount (%):</label>
-                                <input type="number" class="form-control" id="discount" name="discount" required>
-                            </div>
+                      <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="redeemAmount" class="form-label">Redeem Amount:</label>
+                            <input type="number" class="form-control" id="redeemAmount" name="redeem_amount" required>
                         </div>
+                    </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="minAmount" class="form-label">Minimum Amount:</label>
@@ -576,32 +576,28 @@
 
                     <!-- Redeem Amount and Expiry Date -->
                     <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="redeemAmount" class="form-label">Redeem Amount:</label>
-                                <input type="number" class="form-control" id="redeemAmount" name="redeem_amount" required>
-                            </div>
-                        </div>
+                        
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="expiryDate" class="form-label">Expiry Date:</label>
                                 <input type="date" class="form-control" id="expiryDate" name="expiryDate" required>
                             </div>
                         </div>
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                              <label for="couponStatus" class="form-label">Status:</label>
+                              <select class="form-select" id="couponStatus" name="isListed" required>
+                                  <option value="" disabled selected>Select status</option>
+                                  <option value="true">Active</option>
+                                  <option value="false">Inactive</option>
+                              </select>
+                          </div>
+                      </div>
                     </div>
 
                     <!-- Status -->
                     <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="couponStatus" class="form-label">Status:</label>
-                                <select class="form-select" id="couponStatus" name="isListed" required>
-                                    <option value="" disabled selected>Select status</option>
-                                    <option value="true">Active</option>
-                                    <option value="false">Inactive</option>
-                                </select>
-                            </div>
-                        </div>
+                        
                     </div>
 
                     <div class="mb-3">

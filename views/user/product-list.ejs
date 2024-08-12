@@ -21,6 +21,51 @@
       background-color: #f44336;
       /* Red for errors */
     }
+
+    .search-results-container {
+      position: absolute;
+      top: 100%;
+      left: -330px;
+      right: 0;
+      background: white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .search-result-item {
+      display: flex;
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .search-result-image {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      margin-right: 10px;
+    }
+
+    .search-result-info {
+      flex: 1;
+    }
+
+    .search-result-info h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .search-result-info p {
+      margin: 5px 0;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .search-result-price {
+      font-weight: bold;
+      color: #e44d26;
+    }
   </style>
 
   <div class="page-wrapper">
@@ -171,14 +216,14 @@
           <div class="header-right">
             <div class="header-search">
               <a href="#" class="search-toggle" role="button" title="Search"><i class="icon-search"></i></a>
-              <form action="#" method="get">
+              <form id="searchForm" action="#" method="get">
                 <div class="header-search-wrapper">
                   <label for="q" class="sr-only">Search</label>
                   <input type="search" class="form-control" name="q" id="searchInput" placeholder="Search in..."
                     required />
                 </div>
-                <!-- End .header-search-wrapper -->
               </form>
+              <div id="searchResults" class="search-results-container"></div>
             </div>
 
 
@@ -301,24 +346,24 @@
                               <div class="product-price mx-3">
                                 ₹<%= (product.price - (product.price * (product.offer.discount / 100))).toFixed(2) %>
                               </div>
-                              
+
                               <!-- Original price with strikethrough -->
                               <div class="product-price mx-3" style="font-size: 13px;">
                                 <del>₹<%= product.price %></del>
                               </div>
-                              
+
                               <!-- Discount percentage -->
-                              <% const discountPercentage = Math.round(product.offer.discount); %>
-                              <div class="product-price" style="font-size: 16px;">
-                                <%= discountPercentage %>% off
+                              <% const discountPercentage=Math.round(product.offer.discount); %>
+                                <div class="product-price" style="font-size: 16px;">
+                                  <%= discountPercentage %>% off
+                                </div>
+                            </div>
+                            <% } else { %>
+                              <!-- If no offer, display the original price -->
+                              <div class="product-price">
+                                ₹<%= product.price %>
                               </div>
-                            </div>
-                          <% } else { %>
-                            <!-- If no offer, display the original price -->
-                            <div class="product-price">
-                              ₹<%= product.price %>
-                            </div>
-                          <% } %>
+                              <% } %>
                                 <div class="ratings-container">
                                   <div class="ratings">
                                     <div class="ratings-val" style="width: 20%"></div>
@@ -945,136 +990,184 @@
 
 
   <script>
-    function filterAndSortProducts() {
-      console.log("filterAndSortProducts function called");
+    document.addEventListener('DOMContentLoaded', function () {
       const categoryCheckboxes = document.querySelectorAll('.category-checkbox');
-      const uncategorizedCheckbox = document.getElementById('cat-uncategorized');
       const sortCheckboxes = document.querySelectorAll('.sort-checkbox');
+      const clearFiltersButton = document.getElementById('clear-filters');
+      const productList = document.getElementById('product-list');
+      const paginationContainer = document.querySelector('.pagination');
 
-      const selectedCategories = [];
-      let sortOption = '';
+      function filterAndSortProducts(page = 1) {
+        const selectedCategories = Array.from(categoryCheckboxes)
+          .filter(cb => cb.checked)
+          .map(cb => cb.value);
 
-      categoryCheckboxes.forEach(checkbox => {
-        if (checkbox.checked) {
-          selectedCategories.push(checkbox.value);
-        }
-      });
+        const selectedSort = Array.from(sortCheckboxes)
+          .find(cb => cb.checked)?.value || '';
 
-      if (uncategorizedCheckbox.checked) {
-        selectedCategories.push('uncategorized');
+        fetch('/filter-and-sort-products', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            categories: selectedCategories,
+            sort: selectedSort,
+            page: page
+          }),
+        })
+          .then(response => response.json())
+          .then(data => {
+            updateProductList(data.products);
+            updatePagination(data.currentPage, data.totalPages);
+          })
+          .catch(error => console.error('Error:', error));
       }
 
-      sortCheckboxes.forEach(checkbox => {
-        if (checkbox.checked) {
-          sortOption = checkbox.value;
-        }
-      });
-
-      console.log("Selected categories:", selectedCategories);
-      console.log("Sort option:", sortOption);
-
-      // Make an AJAX call to the server
-      fetch('/filter-and-sort-products', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ categories: selectedCategories, sort: sortOption }),
-      })
-        .then(response => response.json())
-        .then(data => {
-          updateProductList(data.products);
-        })
-        .catch(error => {
-          console.error('Error:', error);
+      function updateProductList(products) {
+        productList.innerHTML = '';
+        products.forEach(product => {
+          const productElement = createProductElement(product);
+          productList.appendChild(productElement);
         });
-    }
+      }
 
-    function updateProductList(products) {
-      const productList = document.getElementById('product-list');
-      productList.innerHTML = ''; // Clear existing products
+      function createProductElement(product) {
+        const productDiv = document.createElement('div');
+        productDiv.className = 'col-6 col-md-4 col-lg-4 product';
+        productDiv.setAttribute('data-category-id', product.category ? product.category._id : '');
 
-      products.forEach(product => {
-        const productElement = createProductElement(product);
-        productList.appendChild(productElement);
-      });
+        let stockStatus = '';
+        if (product.stock > 10) {
+          stockStatus = '<p style="color: #50C878;">In stock</p>';
+        } else if (product.stock > 0 && product.stock <= 10) {
+          stockStatus = '<p style="color: #dbba00;">Few left</p>';
+        } else {
+          stockStatus = '<p style="color: #DC143C;">Out of stock</p>';
+        }
 
-      console.log("Number of products displayed:", products.length);
-    }
-
-    function createProductElement(product) {
-      // Create and return a DOM element for the product
-      // This function will depend on your HTML structure
-      // Here's a basic example:
-      const div = document.createElement('div');
-      div.className = 'col-6 col-md-4 col-lg-4 product';
-      div.setAttribute('data-category-id', product.category ? product.category._id : '');
-      div.innerHTML = `
-        <div class="product product-7 text-center">
-          <figure class="product-media">
-            <a href="/product/${product._id}">
-              <img src="${product.imageUrl_1}" alt="Product image" class="product-image" />
-            </a>
-            <!-- Add other product details here -->
-          </figure>
-          <div class="product-body">
-            <h3 class="product-title">
-              <a href="/product/${product._id}">${product.name}</a>
-            </h3>
-            <div class="product-price">
-              ₹${product.price}
-            </div>
-            <!-- Add other product details here -->
-          </div>
+        let priceHtml = '';
+        if (product.offer) {
+          const discountedPrice = (product.price - (product.price * (product.offer.discount / 100))).toFixed(2);
+          const discountPercentage = Math.round(product.offer.discount);
+          priceHtml = `
+        <div class="row">
+          <div class="product-price mx-3">₹${discountedPrice}</div>
+          <div class="product-price mx-3" style="font-size: 13px;"><del>₹${product.price}</del></div>
+          <div class="product-price" style="font-size: 16px;">${discountPercentage}% off</div>
         </div>
       `;
-      return div;
-    }
+        } else {
+          priceHtml = `<div class="product-price">₹${product.price}</div>`;
+        }
 
-    // Add event listeners to checkboxes
-    document.querySelectorAll('.category-checkbox, #cat-uncategorized, .sort-checkbox').forEach(checkbox => {
-      checkbox.addEventListener('change', filterAndSortProducts);
-    });
+        productDiv.innerHTML = `
+      <div class="product product-7 text-center">
+        <figure class="product-media">
+          <span class="product-label label-new" style="background-color: rgba(223, 223, 223, 0.925);">
+            ${stockStatus}
+          </span>
+          <a href="/product/${product._id}">
+            <img src="${product.imageUrl_1}" alt="Product image" class="product-image" />
+          </a>
+          <div class="product-action-vertical">
+            <a href="#" class="btn-product-icon btn-wishlist btn-expandable"
+              onclick="addToWishlist('${product._id}',1); return false;">
+              <span>Add to Wishlist</span>
+            </a>
+          </div>
+          <div class="product-action">
+            ${product.status === 'unavailable' || product.stock === 0
+            ? `<a href="#" class="btn-product btn-cart" style="pointer-events: none;"><span>Sold out</span></a>`
+            : `<a href="#" class="btn-product btn-cart" id="btn-cart-${product._id}" onclick="addToCart('${product._id}')"><span>Add to cart</span></a>`
+          }
+          </div>
+        </figure>
+        <div class="product-body">
+          <div class="product-cat">
+            ${product.category ? `<a href="#">${product.category.title}</a>` : '<a href="#">No Category</a>'}
+          </div>
+          <h3 class="product-title">
+            <a href="product.html">${product.name}</a>
+          </h3>
+          ${priceHtml}
+          <div class="ratings-container">
+            <div class="ratings">
+              <div class="ratings-val" style="width: 20%"></div>
+            </div>
+            <span class="ratings-text">( 2 Reviews )</span>
+          </div>
+        </div>
+      </div>
+    `;
 
-    document.getElementById('clear-filters').addEventListener('click', function (event) {
-      event.preventDefault();
-      // Uncheck all checkboxes
-      document.querySelectorAll('.category-checkbox, #cat-uncategorized, .sort-checkbox').forEach(checkbox => {
-        checkbox.checked = false;
+        return productDiv;
+      }
+
+      function updatePagination(currentPage, totalPages) {
+        let paginationHtml = `
+      <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+        <a class="page-link page-link-prev" href="#" data-page="${currentPage - 1}" aria-label="Previous" tabindex="-1" aria-disabled="${currentPage === 1}">
+          <span aria-hidden="true"><i class="icon-long-arrow-left"></i></span> Prev
+        </a>
+      </li>
+    `;
+
+        for (let i = 1; i <= totalPages; i++) {
+          paginationHtml += `
+        <li class="page-item ${currentPage === i ? 'active' : ''}">
+          <a class="page-link" href="#" data-page="${i}">${i}</a>
+        </li>
+      `;
+        }
+
+        paginationHtml += `
+      <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+        <a class="page-link page-link-next" href="#" data-page="${currentPage + 1}" aria-label="Next">
+          Next <span aria-hidden="true"><i class="icon-long-arrow-right"></i></span>
+        </a>
+      </li>
+    `;
+
+        paginationContainer.innerHTML = paginationHtml;
+
+        // Add event listeners to pagination links
+        paginationContainer.querySelectorAll('.page-link').forEach(link => {
+          link.addEventListener('click', function (e) {
+            e.preventDefault();
+            const page = parseInt(this.getAttribute('data-page'));
+            filterAndSortProducts(page);
+          });
+        });
+      }
+
+      categoryCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', () => filterAndSortProducts());
       });
-      filterAndSortProducts(); // Refresh the product list
+
+      sortCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+          sortCheckboxes.forEach(cb => {
+            if (cb !== checkbox) cb.checked = false;
+          });
+          filterAndSortProducts();
+        });
+      });
+
+      clearFiltersButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        categoryCheckboxes.forEach(cb => cb.checked = false);
+        sortCheckboxes.forEach(cb => cb.checked = false);
+        filterAndSortProducts();
+      });
+
+      // Initial load
+      filterAndSortProducts();
     });
   </script>
 
 
-  <!-- <script>
-  function addToWishlist(productId) {
-      console.log('Button clicked! Product ID:', productId); // Debugging line
 
-      fetch('/wishlist', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest',
-          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').getAttribute('content') : ''
-        },
-        body: JSON.stringify({ productId })
-      })
-      .then(response => {
-        console.log('Response received:', response); // Debugging line
-        return response.json();
-      })
-      .then(data => {
-        console.log('Data received:', data); // Debugging line
-        if (data.message) {
-          alert(data.message);
-        } else {
-          window.location.href = '/wishlist';
-        }
-      })
-      .catch(error => console.error('Error adding to wishlist:', error));
-    }
-</script> -->
 
   <script>
     function addToWishlist(productId) {
@@ -1174,43 +1267,66 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
+      const searchForm = document.getElementById('searchForm');
       const searchInput = document.getElementById('searchInput');
-      const productElements = document.querySelectorAll('.product');
-      const productsContainer = document.querySelector('.products .row');
+      const searchResults = document.getElementById('searchResults');
 
-      function searchProducts() {
-        const searchTerm = searchInput.value.toLowerCase();
-        let visibleProductsCount = 0;
+      let debounceTimer;
 
-        productElements.forEach(productElement => {
-          const productName = productElement.querySelector('.product-title a').textContent.toLowerCase();
-          const productCategory = productElement.querySelector('.product-cat a').textContent.toLowerCase();
-
-          if (productName.includes(searchTerm) || productCategory.includes(searchTerm)) {
-            productElement.style.display = '';
-            visibleProductsCount++;
+      searchInput.addEventListener('input', function () {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          const query = this.value.trim();
+          if (query.length > 2) { // Only search if query is more than 2 characters
+            fetchSearchResults(query);
           } else {
-            productElement.style.display = 'none';
+            searchResults.innerHTML = '';
           }
-        });
+        }, 300); // Debounce for 300ms
+      });
 
-        // Handle no results
-        const noResultsElement = document.querySelector('.no-results');
-        if (visibleProductsCount === 0) {
-          if (!noResultsElement) {
-            const noResults = document.createElement('p');
-            noResults.className = 'no-results';
-            noResults.textContent = 'No products found.';
-            productsContainer.before(noResults);
-          }
-        } else if (noResultsElement) {
-          noResultsElement.remove();
+      searchForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const query = searchInput.value.trim();
+        if (query) {
+          fetchSearchResults(query);
         }
+      });
+
+      function fetchSearchResults(query) {
+        fetch(`/search?q=${encodeURIComponent(query)}`)
+          .then(response => response.json())
+          .then(data => {
+            displaySearchResults(data);
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            searchResults.innerHTML = '<p>An error occurred while searching. Please try again.</p>';
+          });
       }
 
-      searchInput.addEventListener('input', searchProducts);
+      function displaySearchResults(results) {
+        if (results.length === 0) {
+          searchResults.innerHTML = '<p>No results found.</p>';
+          return;
+        }
+
+        const resultsHtml = results.map(product => `
+      <div class="search-result-item">
+        <img src="${product.image}" alt="${product.name}" class="search-result-image">
+        <div class="search-result-info">
+          <h3><a href="/product/${product.id}">${product.name}</a></h3>
+          <p>${product.description.substring(0, 50)}...</p>
+          <span class="search-result-price">$${product.price.toFixed(2)}</span>
+        </div>
+      </div>
+    `).join('');
+
+        searchResults.innerHTML = resultsHtml;
+      }
     });
+
   </script>
-  f
+
 
   <%- include('../layout/footer.ejs') %>

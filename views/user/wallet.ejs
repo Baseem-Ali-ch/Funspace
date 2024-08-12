@@ -295,17 +295,26 @@
                         </thead>
                         <tbody>
 
-                            <% transactions.forEach(transaction => { %>
+                            <% transactions.forEach(transaction=> { %>
                                 <tr>
-                                  <td>#<%= transaction.transactionId || 'N/A' %></td>
-                                  <td><%= transaction.date ? new Date(transaction.date).toLocaleDateString() : 'N/A' %></td>
-                                  <td><%= transaction.description || 'No description' %></td>
-                                  <td>₹<%= transaction.amount || 0 %></td>
-                                  <td class="<%= transaction.type || 'unknown' %>">
-                                    <%= (transaction.type || 'Unknown').charAt(0).toUpperCase() + (transaction.type || 'Unknown').slice(1) %>
-                                  </td>
+                                    <td>
+                                        <%= transaction.transactionId || 'N/A' %>
+                                    </td>
+                                    <td>
+                                        <%= transaction.date ? new Date(transaction.date).toLocaleDateString() : 'N/A'
+                                            %>
+                                    </td>
+                                    <td>
+                                        <%= transaction.description || 'No description' %>
+                                    </td>
+                                    <td>₹<%= transaction.amount || 0 %>
+                                    </td>
+                                    <td class="<%= transaction.type || 'unknown' %>">
+                                        <%= (transaction.type || 'Unknown' ).charAt(0).toUpperCase() + (transaction.type
+                                            || 'Unknown' ).slice(1) %>
+                                    </td>
                                 </tr>
-                              <% }); %>
+                                <% }); %>
 
                         </tbody>
                     </table>
@@ -319,8 +328,8 @@
                     <div class="row">
                         <div class="col-sm-6 col-lg-3">
                             <div class="widget widget-about">
-                                <img src="assets/images/logo.png" class="footer-logo" alt="Footer Logo" width="105"
-                                    height="25">
+                                <img src="/assets/images/furnspace logo black.png" class="footer-logo" alt="Footer Logo"
+                                    width="105" height="25">
                                 <p>Praesent dapibus, neque id cursus ucibus, tortor neque egestas augue, eu vulputate
                                     magna eros eu erat. </p>
 

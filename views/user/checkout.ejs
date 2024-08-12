@@ -270,43 +270,34 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <% let total=0 %>
-                                                <% cartItems.forEach(item=> { %>
-                                                    <tr>
-                                                        <td>
-                                                            <a href="/product/<%= item.productId._id %>">
-                                                                <%= item.productId.name %>
-                                                            </a>
-                                                        </td>
-                                                        <td>
-                                                            ₹<%= (item.productId.finalPrice * item.quantity).toFixed(2)
-                                                                %>
-                                                                <% total +=item.productId.finalPrice * item.quantity %>
-                                                        </td>
-                                                    </tr>
-                                                    <% }) %>
-                                                        <tr class="summary-subtotal" id="subtotalAmount">
-                                                            <td>Subtotal</td>
-                                                            <td>₹<%= total.toFixed(2) %>
-                                                            </td>
-                                                        </tr><!-- End .summary-subtotal -->
-                                                        <tr>
-                                                            <td>Shipping:</td>
-                                                            <td>Free shipping</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>Coupon Amount:</td>
-                                                            <td id="couponStatus"></td>
-                                                        </tr>
-                                                        <tr class="summary-total"
-                                                            style="font-weight: 400; font-size: 1.6rem; color: #c96; border-bottom: none;">
-                                                            <td>Total:</td>
-                                                            <td id="totalAmount">₹<%= total.toFixed(2) %>
-                                                            </td>
-                                                        </tr><!-- End .summary-total -->
+                                            <!-- Your product rows -->
+                                            <tr class="summary-subtotal" id="subtotalAmount">
+                                                <td>Subtotal</td>
+                                                <td>₹<span id="subtotalValue">
+                                                        <%= subtotal.toFixed(2) %>
+                                                    </span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Shipping:</td>
+                                                <td>Free shipping</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Coupon Amount:</td>
+                                                <td id="couponStatus">₹<span id="couponAmount">
+                                                        <%= discountAmount.toFixed(2) %>
+                                                    </span></td>
+                                            </tr>
+                                            <tr class="summary-total"
+                                                style="font-weight: 400; font-size: 1.6rem; color: #c96; border-bottom: none;">
+                                                <td>Total:</td>
+                                                <td id="totalAmount">₹<span id="totalValue">
+                                                        <%= totalAmount.toFixed(2) %>
+                                                    </span></td>
+                                            </tr>
                                         </tbody>
+                                    </table>
 
-                                    </table><!-- End .table table-summary -->
+
 
 
                                     <div class="accordion-summary" id="accordion-payment">
@@ -976,9 +967,7 @@
             const couponCode = document.getElementById('checkout-discount-input').value;
 
             try {
-
                 const response = await fetch('/apply-coupon', {
-
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ couponCode })
@@ -987,16 +976,36 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    document.getElementById('totalAmount').innerText = result.newTotal;
+                    // Ensure newTotal is a number
+                    const newTotal = parseFloat(result.newTotal);
+                    const redeemAmount = parseFloat(result.redeemAmount);
 
-                    document.getElementById('couponStatus').innerText = result.redeemAmount;
+                    if (!isNaN(newTotal) && !isNaN(redeemAmount)) {
+                        // Update the HTML elements
+                        const totalAmountElement = document.getElementById('totalAmount');
+                        const couponStatusElement = document.getElementById('couponStatus');
 
-                    Swal.fire({
-                        title: 'Coupon applied',
-                        text: 'Coupon applied successfully!.',
-                        icon: 'success',
-                        confirmButtonText: 'OK'
-                    });
+                        if (totalAmountElement && couponStatusElement) {
+                            totalAmountElement.innerText = '₹' + newTotal.toFixed(2);
+                            couponStatusElement.innerText = '₹' + redeemAmount.toFixed(2);
+
+                            // Optionally update the subtotal as well, if needed
+                            const subtotalValue = parseFloat(document.getElementById('subtotalValue').innerText.replace('₹', ''));
+                            const updatedSubtotal = subtotalValue - redeemAmount;
+                            document.getElementById('subtotalValue').innerText = '₹' + updatedSubtotal.toFixed(2);
+
+                            Swal.fire({
+                                title: 'Coupon applied',
+                                text: 'Coupon applied successfully!.',
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            });
+                        } else {
+                            console.error('Elements for totalAmount or couponStatus are not found in the DOM.');
+                        }
+                    } else {
+                        console.error('Invalid number returned from server:', result.newTotal, result.redeemAmount);
+                    }
                 } else {
                     Swal.fire({
                         title: 'Error',
@@ -1004,7 +1013,6 @@
                         icon: 'error',
                         confirmButtonText: 'OK'
                     });
-
                 }
             } catch (error) {
                 console.error('Error applying coupon:', error);
@@ -1017,6 +1025,9 @@
                 });
             }
         }
+
+
+
 
 
     </script>

@@ -1263,13 +1263,14 @@
                                 onclick="submitReturn('<%= order._id %>')">Confirm Return</button>
                         </div>
 
-                        <% if(order.order_status==="Delivered" ) { %>
+                        <% if(order.order_status==="Deliverd" ) { %>
                             <button id="returnButton_<%= order._id %>" class="btn btn-warning"
                                 onclick="showReturnForm('<%= order._id %>')">Return Order</button>
                             <% } else if(order.order_status !=='Cancelled' && order.order_status !=='Returned' ) { %>
                                 <button id="cancelButton_<%= order._id %>" class="btn btn-danger"
                                     onclick="showCancellationForm('<%= order._id %>')">Cancel Order</button>
                                 <% } %>
+
 
                                     <button type="button" class="btn btn-secondary" data-dismiss="modal"
                                         onclick="closeModal('<%= order._id %>')">Close</button>
@@ -1848,34 +1849,111 @@
 
 
 
-                document.getElementById('cancel-order-button').addEventListener('click', () => {
-                    const orderInfoDiv = document.getElementById('order-info');
-                    const orderId = orderInfoDiv.getAttribute('data-order-id');
+                // Show Cancellation Form
+                function showCancellationForm(orderId) {
+                    document.getElementById(`cancellationForm_${orderId}`).style.display = 'block';
+                    document.getElementById(`cancelButton_${orderId}`).style.display = 'none';
+                }
 
-                    if (!orderId) {
-                        console.error('Order ID not found');
+                // Hide Cancellation Form
+                function hideCancellationForm(orderId) {
+                    document.getElementById(`cancellationForm_${orderId}`).style.display = 'none';
+                    document.getElementById(`cancelButton_${orderId}`).style.display = 'inline-block';
+                }
+
+                // Submit Cancellation
+                function submitCancellation(orderId) {
+                    const reason = document.getElementById(`cancellationReason_${orderId}`).value.trim();
+                    if (!reason) {
+                        alert("Please provide a reason for cancellation.");
                         return;
                     }
 
-                    fetch('/account/update-order-status', {
+                    fetch('/account', {
                         method: 'PATCH',
                         headers: {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
                             orderId: orderId,
-                            status: 'order.order_status',
+                            status: 'Cancel',
+                            cancellationReason: reason,
                         }),
                     })
                         .then(response => response.json())
                         .then(data => {
-                            console.log(data);
-                            if (data.message) {
-                                alert(data.message);
+                            if (data.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Order Cancelled',
+                                    text: data.message,
+                                }).then(() => {
+                                    location.reload(); // Reload the page to reflect the changes
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: data.message,
+                                });
                             }
                         })
                         .catch(error => console.error('Error:', error));
-                });
+                }
+
+                // Show Return Form
+                function showReturnForm(orderId) {
+                    document.getElementById(`returnForm_${orderId}`).style.display = 'block';
+                    document.getElementById(`returnButton_${orderId}`).style.display = 'none';
+                }
+
+                // Hide Return Form
+                function hideReturnForm(orderId) {
+                    document.getElementById(`returnForm_${orderId}`).style.display = 'none';
+                    document.getElementById(`returnButton_${orderId}`).style.display = 'inline-block';
+                }
+
+                // Submit Return
+                function submitReturn(orderId) {
+                    const reason = document.getElementById(`returnReason_${orderId}`).value.trim();
+                    if (!reason) {
+                        alert("Please provide a reason for return.");
+                        return;
+                    }
+
+                    fetch('/account', {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            orderId: orderId,
+                            status: 'Returned',
+                            returnReason: reason,
+                        }),
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Order Returned',
+                                    text: data.message,
+                                }).then(() => {
+                                    location.reload(); // Reload the page to reflect the changes
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: data.message,
+                                });
+                            }
+                        })
+                        .catch(error => console.error('Error:', error));
+                }
+
+
 
             </script>
 

@@ -140,14 +140,16 @@ const loadProductList = async (req, res) => {
 
 const filterAndSortProducts = async (req, res) => {
   try {
-    const { categories, sort } = req.body;
-    let query = {};
-    let sortOption = { createdAt: -1 }; // Default sort
+    const { categories, sort, page = 1 } = req.body;
+    const limit = 9;
+    const skip = (page - 1) * limit;
 
+    let query = { isListed: true };
     if (categories && categories.length > 0) {
       query.category = { $in: categories };
     }
 
+    let sortOption = {};
     switch (sort) {
       case "name_asc":
         sortOption = { name: 1 };
@@ -167,14 +169,48 @@ const filterAndSortProducts = async (req, res) => {
       case "oldest":
         sortOption = { createdAt: 1 };
         break;
+      default:
+        sortOption = { createdAt: -1 };
     }
 
-    const products = await Product.find(query).sort(sortOption).populate("category");
+    const products = await Product.find(query)
+      .sort(sortOption)
+      .skip(skip)
+      .limit(limit)
+      .populate("category");
 
-    res.json({ products });
+    // Add offer information to each product
+    for (let product of products) {
+      // Find an active product-specific offer
+      const productOffer = await Offer.findOne({
+        offerType: "product",
+        status: "active",
+        productId: product._id,
+      }).exec();
+
+      // Find an active category-specific offer, if no product offer is found
+      let categoryOffer = null;
+      if (!productOffer) {
+        categoryOffer = await Offer.findOne({
+          offerType: "category",
+          status: "active",
+          categoryId: product.category._id,
+        }).exec();
+      }
+      product.offer = productOffer || categoryOffer;
+    }
+
+    const totalProducts = await Product.countDocuments(query);
+    const totalPages = Math.ceil(totalProducts / limit);
+
+    res.json({
+      products,
+      currentPage: page,
+      totalPages,
+    });
   } catch (error) {
-    console.error("Error fetching filtered and sorted products:", error);
-    res.status(500).json({ error: "Server Error" });
+    console.error("Error in filter and sort:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -376,7 +412,6 @@ const loadCart = async (req, res) => {
   }
 };
 
-
 //add a product to cart
 const addToCart = async (req, res) => {
   try {
@@ -408,6 +443,11 @@ const addToCart = async (req, res) => {
       return res.status(404).json({ message: "Product not found", success: false });
     }
 
+    // Ensure the quantity does not exceed available stock and the limit of 5
+    if (quantity > 5) {
+      return res.status(400).json({ message: "You can only add up to 5 items of this product", success: false });
+    }
+
     if (product.stock < quantity) {
       return res.status(400).json({ message: "Not enough stock available", success: false });
     }
@@ -420,7 +460,14 @@ const addToCart = async (req, res) => {
     if (cart) {
       const itemIndex = cart.items.findIndex((item) => item.productId.equals(productObjectId));
       if (itemIndex > -1) {
-        cart.items[itemIndex].quantity += quantity;
+        const existingQuantity = cart.items[itemIndex].quantity;
+        const newQuantity = existingQuantity + quantity;
+
+        if (newQuantity > 5) {
+          return res.status(400).json({ message: "Cannot add more than 5 items of this product to the cart", success: false });
+        }
+
+        cart.items[itemIndex].quantity = newQuantity;
       } else {
         cart.items.push({ productId: productObjectId, quantity });
       }
@@ -455,6 +502,11 @@ const updateCartItemQty = async (req, res) => {
       return res.status(400).json({ message: "Product ID and quantity are required", success: false });
     }
 
+    // Limit the maximum quantity that can be added to the cart
+    if (quantity > 5) {
+      return res.status(400).json({ message: "Cannot add more than 5 units of a product to the cart", success: false });
+    }
+
     const productObjectId = new mongoose.Types.ObjectId(productId);
 
     const cart = await Cart.findOne({ userId });
@@ -472,26 +524,26 @@ const updateCartItemQty = async (req, res) => {
       return res.status(404).json({ message: "Product not found", success: false });
     }
 
+    // Calculate total stock
     const totalStock = product.stock + cartItem.quantity;
     if (quantity > totalStock) {
       return res.status(400).json({ message: "Requested quantity exceeds available stock", success: false });
     }
 
-    const quantityDifference = quantity - cartItem.quantity;
-    product.stock -= quantityDifference;
-    await product.save();
-
+    // Update the cart item quantity
     cartItem.quantity = quantity;
 
+    // Remove the item from the cart if quantity is set to zero
     if (quantity === 0) {
       cart.items = cart.items.filter((item) => !item.productId.equals(productObjectId));
     }
 
     await cart.save();
+
     res.status(200).json({
       message: "Cart updated successfully",
       success: true,
-      totalStock: product.stock + quantity,
+      cartItems: cart.items,
     });
   } catch (error) {
     console.error("Error updating cart item quantity:", error);
@@ -555,6 +607,32 @@ const removeFromCart = async (req, res) => {
   }
 };
 
+const searchProduct = async (req, res) => {
+  try {
+    const query = req.query.q.toLowerCase();
+    const products = await Product.find({
+      $or: [
+        { name: { $regex: query, $options: 'i' } },
+        { description: { $regex: query, $options: 'i' } }
+      ],
+      isListed: true
+    }).limit(10); // Limit to 10 results for performance
+
+    const results = products.map(product => ({
+      id: product._id,
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      image: product.imageUrl_1 // Assuming there's an image field
+    }));
+
+    res.json(results);
+  } catch (error) {
+    console.error('Error in product search:', error);
+    res.status(500).json({ error: 'An error occurred while searching for products' });
+  }
+};
+
 module.exports = {
   loadProduct,
   loadProductList,
@@ -566,4 +644,5 @@ module.exports = {
   addToCart,
   updateCartItemQty,
   removeFromCart,
+  searchProduct
 };

@@ -28,6 +28,7 @@ userRoute.get("/product/:id", productController.loadProduct);
 userRoute.get("/product-list", productController.loadProductList);
 userRoute.post("/filter-and-sort-products", productController.filterAndSortProducts);
 
+
 //cart routes
 userRoute.get("/cart", productController.loadCart);
 userRoute.post("/cart", productController.addToCart);
@@ -105,8 +106,9 @@ userRoute.post('/apply-coupon',couponController.applyCoupon)
 
 //wallet
 userRoute.get('/wallet',auth.isUserAuthenticated,accountController.loadWallet )
-userRoute.patch('/update-order-status', accountController.updateOrderStatus);
+userRoute.patch('/account', accountController.updateOrderStatus);
 
+userRoute.get('/search', productController.searchProduct);
 // Authentication Routes
 const authRoute = require("./authRoutes"); // Ensure this path is correct
 userRoute.use("/", authRoute);
