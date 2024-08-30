@@ -20,7 +20,7 @@ mongoose
   });
 
 const app = express();
-const port = process.env.PORT || 4000;
+
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -99,9 +99,15 @@ app.get("/", (req, res) => {
   res.render("index", { user: req.user });
 });
 
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+const port = process.env.PORT || 4000;
+// app.listen(port, () => {
+//   console.log(`Server running at http://localhost:${port}`);
+// });
+
+app.listen(port, '0.0.0.0', () => {
+    console.log(`Server running at http://0.0.0.0:${port}`);
 });
+
 
 app.use((req, res, next) => {
   res.locals.user = req.user;
