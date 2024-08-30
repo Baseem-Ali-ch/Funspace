@@ -220,11 +220,11 @@
                 <div data-i18n="Order List">Order List</div>
               </a>
             </li>
-            <li class="menu-item">
+            <!-- <li class="menu-item">
               <a href="/admin/order-details" class="menu-link">
                 <div data-i18n="Order Details">Order Details</div>
               </a>
-            </li>
+            </li> -->
           </ul>
         </li>
         <li class="menu-item">
@@ -237,7 +237,7 @@
                 <div data-i18n="All Customers">All Customers</div>
               </a>
             </li>
-            <li class="menu-item">
+            <!-- <li class="menu-item">
               <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <div data-i18n="Customer Details">Customer Details</div>
               </a>
@@ -264,12 +264,12 @@
                 </li>
 
               </ul>
-            </li>
+            </li> -->
           </ul>
         </li>
         <li class="menu-item">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
-            <div data-i18n="Coupon">Coupon</div>
+            <div data-i18n="Coupon & Offer">Coupon & Offer</div>
           </a>
           <ul class="menu-sub">
             <li class="menu-item">
@@ -288,7 +288,7 @@
               </a>
             </li>
             <li class="menu-item ">
-              <a href="/admin/list-offer" class="menu-link">
+              <a href="/admin/offer-list" class="menu-link">
                 <div data-i18n="offer List">offer List</div>
               </a>
             </li>
@@ -536,7 +536,7 @@
           <!-- Search Small Screens -->
           <div class="navbar-search-wrapper search-input-wrapper  d-none">
             <input type="text" class="form-control search-input container-xxl border-0" placeholder="Search..."
-              aria-label="Search...">
+              aria-label="Search ...">
             <i class="ri-close-fill search-toggler cursor-pointer"></i>
           </div>
 
@@ -565,207 +565,234 @@
 <!-- Order List Table -->
 <div class="card">
   <div class="card-datatable table-responsive">
-    <div id="DataTables_Table_0_wrapper" class="dataTables_wrapper dt-bootstrap5 no-footer"><div class="card-header d-flex flex-column flex-md-row align-items-start align-items-md-center pb-md-0 pt-0"><div><div id="DataTables_Table_0_filter" class="dataTables_filter"><label><input type="search" class="form-control form-control-sm ms-0" placeholder="Search Order" aria-controls="DataTables_Table_0"></label></div></div><div class="d-flex align-items-md-center justify-content-md-end gap-4"><div class="dataTables_length" id="DataTables_Table_0_length"><label><select name="DataTables_Table_0_length" aria-controls="DataTables_Table_0" class="form-select form-select-sm"><option value="10">10</option><option value="40">40</option><option value="60">60</option><option value="80">80</option><option value="100">100</option></select></label></div><div class="dt-action-buttons pt-0"><div class="dt-buttons btn-group flex-wrap"><div class="btn-group"><button class="btn btn-secondary buttons-collection dropdown-toggle btn-outline-secondary waves-effect waves-light" tabindex="0" aria-controls="DataTables_Table_0" type="button" aria-haspopup="dialog" aria-expanded="false"><span><i class="ri-upload-2-line ri-16px me-2"></i> <span class="d-none d-sm-inline-block">Export</span></span></button></div> </div></div></div></div>
+    <div id="DataTables_Table_0_wrapper" class="dataTables_wrapper dt-bootstrap5 no-footer">
+      <div class="card-header d-flex flex-column flex-md-row align-items-start align-items-md-center pb-md-0 pt-0">
+        <form method="GET" action="/admin/order-list">
+          <div class="input-group mb-3 mt-3">
+            <input type="text" class="form-control" name="search" value="<%= search %>" placeholder="Search order...">
+            <button class="btn btn-outline-light" type="submit">Search</button>
+          </div>
+        </form>
+        
+      </div>
+    </div>
     <table class="datatables-order table dataTable no-footer dtr-column collapsed" id="DataTables_Table_0" aria-describedby="DataTables_Table_0_info" style="width: 1045px;">
       <thead>
         <tr>
-          
-          <th class="sorting" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" style="width: 55px;" aria-label="order: activate to sort column ascending">order</th>
-          <th class="sorting sorting_asc" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" style="width: 143px;" aria-label="date: activate to sort column descending" aria-sort="ascending">date</th>
-          <th class="sorting" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" style="width: 281px;" aria-label="customers: activate to sort column ascending">customers</th>
-          <th class="sorting" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" style="width: 109px;" aria-label="payment: activate to sort column ascending">payment</th>
-          <th class="sorting" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" style="width: 124px;" aria-label="status: activate to sort column ascending">status</th>
-          <th class="sorting dtr-hidden" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" style="width: 0px; display: none;" aria-label="method: activate to sort column ascending">method</th>
+          <th class="sorting" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" style="width: 15%;" aria-label="order: activate to sort column ascending">Order</th>
+          <th class="sorting" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" style="width: 15%;" aria-label="date: activate to sort column ascending">Date</th>
+          <th class="sorting" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" style="width: 20%;" aria-label="customers: activate to sort column ascending">Customers</th>
+          <th class="sorting" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" style="width: 15%;" aria-label="payment: activate to sort column ascending">Payment</th>
+          <th class="sorting" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" style="width: 20%;" aria-label="offer: activate to sort column ascending">Offer</th> <!-- New Offer Column -->
           <th class="sorting_disabled dtr-hidden" rowspan="1" colspan="1" style="width: 0px; display: none;" aria-label="Actions">Actions</th>
           <th></th>
         </tr>
       </thead>
       <tbody>
-        <% orders.forEach(order=> { %>
-          <% order.items.forEach(item=> { %>
-        <tr class="even">
-          <td>
-            <a href="app-ecommerce-order-details.html">
-              <span><%= order.orderId %></span>
-            </a>
-          </td>
-          <td class="sorting_1">
-            <span class="text-nowrap"><%= order.createdAt.toLocaleDateString() %></span>
-          </td>
-          <td>
-            <div class="d-flex justify-content-start align-items-center user-name">
-              
-              <div class="d-flex flex-column">
-                <a href="pages-profile-user.html" class="text-truncate text-heading">
-                  <% if (order.user) { %>
-                    <span class="fw-medium"><%= order.user.name %></span>
-                  <% } else { %>
-                    <span class="fw-medium">Unknown User</span>
-                  <% } %>
+        <% orders.forEach(order => { %>
+          <% order.items.forEach(item => { %>
+            <tr class="even">
+              <td>
+                <a href="app-ecommerce-order-details.html">
+                  <span><%= order.orderId %></span>
                 </a>
-                <!-- <small class="text-truncate">ncornfordn@sogou.</small> -->
-              </div>
-            </div>
-          </td>
-          <td>
-            <h6 class="mb-0 w-px-100 d-flex align-items-center text-secondary">
-              <%= order.payment_status %>
-            </h6>
-          </td>
-          <td>
-            <span class="badge px-2 rounded-pill bg-label-primary text-capitalized"><%= order.order_status %></span>
-          </td>
-          <td class="dtr-hidden" style="display: none;">
-            <div class="d-flex align-items-center text-nowrap">
-              <img src="/dashboard-assets/img/icons/payments/paypal.png" alt="paypal" class="me-2" width="29">
-              <span>
-                <i class="ri-more-line"></i>@gmail.com
-              </span>
-            </div>
-          </td>
-          <td class="dtr-hidden" style="display: none;">
-            <div>
-              <button class="btn btn-sm btn-icon btn-text-secondary waves-effect waves-light rounded-pill dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                <i class="ri-more-2-line ri-20px"></i>
-              </button>
-              <div class="dropdown-menu dropdown-menu-end m-0">
-                <a href="app-ecommerce-order-details.html" class="dropdown-item">View</a>
-                <a href="javascript:0;" class="dropdown-item delete-record">Delete</a>
-              </div>
-            </div>
-          </td>
-          <td>
-            <button class="btn btn-sm btn-primary btn-icon btn-text-secondary waves-effect waves-light rounded-pill edit-btn mx-2" data-bs-toggle="modal" data-bs-target="#viewOrderModal<%= order._id %>">
-              View
-            </button>
-          </td>
-        </tr>
-      <% }) %>
-    <% }) %>
+              </td>
+              <td class="sorting_1">
+                <span class="text-nowrap"><%= order.createdAt.toLocaleDateString() %></span>
+              </td>
+              <td>
+                <div class="d-flex justify-content-start align-items-center user-name">
+                  <div class="d-flex flex-column">
+                    <a href="pages-profile-user.html" class="text-truncate text-heading">
+                      <% if (order.user) { %>
+                        <span class="fw-medium"><%= order.user.name %></span>
+                      <% } else { %>
+                        <span class="fw-medium">Unknown User</span>
+                      <% } %>
+                    </a>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <h6 class="mb-0 w-px-100 d-flex align-items-center text-secondary">
+                  <% if(order.paymentMethod === 'Razorpay' && order.order_status === 'Cancelled'){ %>
+                    Refund
+                  <% } else { %>
+                    <%= order.payment_status %>
+                  <% } %>
+                </h6>
+              </td>
+              <td>
+                <% if (item?.product?.offerDetails) { %>
+                  <div>
+                    <strong><%= item.product.offerDetails.offerName %></strong>
+                    <p>Discount: <%= item.product.offerDetails.discount %>%</p>
+                  </div>
+                <% } else { %>
+                  <p>No offer</p>
+                <% } %>
+              </td>
+              <td class="dtr-hidden" style="display: none;">
+                <div>
+                  <button class="btn btn-sm btn-icon btn-text-secondary waves-effect waves-light rounded-pill dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                    <i class="ri-more-2-line ri-20px"></i>
+                  </button>
+                  <div class="dropdown-menu dropdown-menu-end m-0">
+                    <a href="app-ecommerce-order-details.html" class="dropdown-item">View</a>
+                    <a href="javascript:0;" class="dropdown-item delete-record">Delete</a>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <button class="btn btn-sm btn-primary btn-icon btn-text-secondary waves-effect waves-light rounded-pill edit-btn mx-2" data-bs-toggle="modal" data-bs-target="#viewOrderModal<%= order._id %>">
+                  View
+                </button>
+              </td>
+            </tr>
+          <% }) %>
+        <% }) %>
       </tbody>
     </table>
+    
 
     <!-- Pagination Controls -->
     <nav aria-label="Page navigation">
       <ul class="pagination justify-content-center">
-        <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
-          <a class="page-link page-link-prev" href="?page=<%= currentPage - 1 %>" aria-label="Previous"
-            tabindex="-1" aria-disabled="<%= currentPage === 1 %>">
-            <span aria-hidden="true"><i class="icon-long-arrow-left"></i></span> Prev
-          </a>
-        </li>
-        <% for (let i=1; i <=totalPages; i++) { %>
-          <li class="page-item <%= currentPage === i ? 'active' : '' %>">
-            <a class="page-link" href="?page=<%= i %>">
-              <%= i %>
-            </a>
-          </li>
-          <% } %>
-            <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
-              <a class="page-link page-link-next" href="?page=<%= currentPage + 1 %>" aria-label="Next">
-                Next <span aria-hidden="true"><i class="icon-long-arrow-right"></i></span>
+          <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+              <a class="page-link page-link-prev"
+                  href="?page=<%= currentPage - 1 %>&search=<%= search %>"
+                  aria-label="Previous" tabindex="-1"
+                  aria-disabled="<%= currentPage === 1 %>">
+                  <span aria-hidden="true"><i class="icon-long-arrow-left"></i></span> Prev
               </a>
-            </li>
+          </li>
+          <% for (let i = 1; i <= totalPages; i++) { %>
+              <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                  <a class="page-link" href="?page=<%= i %>&search=<%= search %>">
+                      <%= i %>
+                  </a>
+              </li>
+          <% } %>
+          <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+              <a class="page-link page-link-next"
+                  href="?page=<%= currentPage + 1 %>&search=<%= search %>"
+                  aria-label="Next">
+                  Next <span aria-hidden="true"><i class="icon-long-arrow-right"></i></span>
+              </a>
+          </li>
       </ul>
-    </nav>
+  </nav>
+  
 
 
     <!-- order details modal -->
-    <% orders.forEach(order => { %>
-      <div class="modal fade" id="viewOrderModal<%= order._id %>" tabindex="-1" aria-labelledby="viewOrderModalLabel<%= order._id %>" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="viewOrderModalLabel<%= order._id %>">Order Details</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <!-- order details modal -->
+<% orders.forEach(order => { %>
+  <div class="modal fade" id="viewOrderModal<%= order._id %>" tabindex="-1" aria-labelledby="viewOrderModalLabel<%= order._id %>" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content" style="width: 70em; margin-left: -8em;">
+        <div class="modal-header">
+          <h5 class="modal-title" id="viewOrderModalLabel<%= order._id %>">Order Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row mb-3">
+            <div class="col">
+              <h6>Order Information</h6>
+              <p><strong>Order ID:</strong> <%= order.orderId %></p>
+              <p><strong>Order Date:</strong> <%= order.createdAt.toLocaleDateString() %></p>
+              <p><strong>Total Amount:</strong> ₹<%= order.totalPrice %></p>
+              <p><strong>Payment Type:</strong> <%= order.paymentMethod %></p>
+              <p><strong>Payment Status:</strong> <%= order.payment_status %></p>
             </div>
-            <div class="modal-body">
-              <div class="row mb-3">
-                <div class="col">
-                  <h6>Order Information</h6>
-                  <p><strong>Order ID:</strong> <%= order.orderId %></p>
-                  <p><strong>Order Date:</strong> <%= order.createdAt.toLocaleDateString() %></p>
-                  <p><strong>Total Amount:</strong> ₹<%= order.totalPrice %></p>
-                  <p><strong>Order Status:</strong> <%= order.order_status %></p>
-                  <p><strong>Payment Type:</strong> <%= order.paymentMethod %></p>
-                  <p><strong>Payment Status:</strong> <%= order.payment_status %></p>
-                </div>
-                <div class="col">
-                  <h6>Shipping Address</h6>
-                  <p><strong>Name:</strong><%= order.address.fullName %></p>
-                  <p><strong>Street:</strong><%= order.address.streetAddress %></p>
-                  <p><strong>City:</strong><%= order.address.city %> <%= order.address.postcode %></p>
-                  <p><strong>State:</strong><%= order.address.state %></p>
-                  <p><strong>Phone:</strong><%= order.address.phone %></p>
-                </div>
-              </div>
-              <h6>Order Items</h6>
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>Product</th>
-                    <th>Quantity</th>
-                    <th>Price</th>
-                    <th>Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% order.items.forEach(item => { %>
-                  <tr>
-                    <td><%= item.product.name %></td>
-                    <td><%= item.quantity %></td>
-                    <td>₹<%= item.product.price %></td>
-                    <td>₹<%= item.quantity * item.product.price %></td>
-                  </tr>
-                  <% }) %>
-                </tbody>
-              </table>
-            </div>
-            <div class="modal-footer">
-              <form action="/admin/order-list/update-status" method="post" class="me-auto">
-                <input type="hidden" name="orderId" value="<%= order._id %>">
-                <select name="order_status" class="form-select" style="width: auto; display: inline-block;">
-                  <option value="" disabled selected>Update Status</option>
-                  
-                  <% if (order.order_status === 'Pending') { %>
-                    <option value="Pending" selected>Pending</option>
-                    <option value="Processing">Processing</option>
-                    <option value="Shipped">Shipped</option>
-                    <option value="Deliverd">Deliverd</option>
-                    <option value="Cancel">Cancel</option>
-                  <% } else if (order.order_status === 'Processing') { %>
-                    <option value="Processing" selected>Processing</option>
-                    <option value="Shipped">Shipped</option>
-                    <option value="Deliverd">Deliverd</option>
-                    <option value="Cancel">Cancel</option>
-                  <% } else if (order.order_status === 'Shipped') { %>
-                    <option value="Shipped" selected>Shipped</option>
-                    <option value="Deliverd">Deliverd</option>
-                    <option value="Cancel">Cancel</option>
-                  <% } else if (order.order_status === 'Deliverd') { %>
-                    <option value="Deliverd" selected>Deliverd</option>
-                  <% } else if (order.order_status === 'Cancel') { %>
-                    <option value="Cancel" selected>Cancel</option>
-                  <% } else if (order.order_status === 'Returned') { %>
-                    <option value="Returned" selected>Returned</option>
-                  <% } else { %>
-                    <option value="Pending">Pending</option>
-                    <option value="Processing">Processing</option>
-                    <option value="Shipped">Shipped</option>
-                    <option value="Deliverd">Deliverd</option>
-                    <option value="Cancel">Cancel</option>
-                  <% } %>
-                </select>
-                <button type="submit" class="btn btn-primary ms-2">Update</button>
-              </form>
-              
-              
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <div class="col">
+              <h6>Shipping Address</h6>
+              <p><strong>Name:</strong><%= order.address.fullName %></p>
+              <p><strong>Street:</strong><%= order.address.streetAddress %></p>
+              <p><strong>City:</strong><%= order.address.city %> <%= order.address.postcode %></p>
+              <p><strong>State:</strong><%= order.address.state %></p>
+              <p><strong>Phone:</strong><%= order.address.phone %></p>
             </div>
           </div>
+          <h6>Order Items</h6>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Offer</th> <!-- New Offer Column -->
+                <th>Final Price</th> <!-- New Final Price Column -->
+                <th>Total</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            
+            <tbody>
+              <% order.items.forEach(item => { %>
+                <tr>
+                  <td><%= item?.product?.name %></td>
+                  <td><%= item.quantity %></td>
+                  <td>₹<%= item?.product?.price?.toFixed(2) %></td> <!-- Display the original price -->
+                  <td>
+                    <% if (item?.product?.offerDetails) { %>
+                      <div>
+                        <strong><%= item?.product?.offerDetails?.offerName %></strong>
+                        <p>Discount: <%= item?.product?.offerDetails?.discount %>%</p>
+                      </div>
+                    <% } else { %>
+                      <p>No offer</p>
+                    <% } %>
+                  </td>
+                  <td>₹<%= item?.product?.finalPrice %></td> <!-- Display the final price after discount -->
+                  <td>₹<%= (item.quantity * item?.product?.finalPrice)?.toFixed(2) %></td> <!-- Display the total price per item -->
+                  <td><%= item.order_status %></td>
+                  <td>
+                    <!-- Existing action buttons and status select menu -->
+                    <!-- <% if (item.order_status === "Delivered" && !item.returnRequested) { %>
+                      <button class="btn btn-warning" onclick="openReturnModal('<%= order._id %>', '<%= item._id %>')">Request Return</button>
+                    <% } %> -->
+          
+                    <select name="orderStatus" data-order-id="<%= order._id %>" data-product-id="<%= item._id %>" class="form-select" style="width: auto; display: inline-block;">
+                      <!-- Add options based on current order status -->
+                      <% if (item.order_status === "Pending") { %>
+                        <option value="" disabled selected>Select Status</option>
+                        <option value="Processing">Processing</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                      <% } else if (item.order_status === "Processing") { %>
+                        <option value="" disabled selected>Select Status</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                      <% } else if (item.order_status === "Shipped") { %>
+                        <option value="" disabled selected>Select Status</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                      <% } else if (item.returnRequested && item.order_status === "Return Requested") { %>
+                        <!-- <option value="" disabled selected>Select Status</option>
+                        <option value="Returned">Mark as Returned</option>
+                        <option value="Delivered">Reject Return</option> -->
+                      <% } %>
+                    </select>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+          
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         </div>
       </div>
-    <% }) %>
+    </div>
+  </div>
+<% }); %>
+
+    
     
     
     <div style="width: 1%;"></div><div style="width: 1%;"></div></div>
@@ -850,54 +877,91 @@
 
   <!-- Main JS -->
   <script src="/dashboard-assets/js/main.js"></script>
-  
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 
   <!-- Page JS -->
   <!-- <script src="/dashboard-assets/js/app-ecommerce-order-list.js"></script> -->
   <script type="text/javascript" id="">console.log("PI:GTM Worked!");</script>
 
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const orderId = '<%= orders._id %>';
-      const statusSelect = document.getElementById(`orderStatusSelect_${orderId}`);
-      const currentStatus = statusSelect.value;
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-      function updateOptions() {
-        const options = statusSelect.options;
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const statusSelects = document.querySelectorAll('select[name="orderStatus"]');
 
-        for (let i = 0; i < options.length; i++) {
-          options[i].style.display = 'block'; // Reset all options to visible
-        }
+    statusSelects.forEach(statusSelect => {
+      statusSelect.addEventListener('change', function (event) {
+        event.preventDefault();
+        const orderId = this.dataset.orderId;
+        const productId = this.dataset.productId;
+        const newStatus = this.value;
 
-        if (currentStatus === 'Deliverd') {
-          for (let i = 0; i < options.length; i++) {
-            if (options[i].value !== 'Deliverd' && options[i].value !== '') {
-              options[i].style.display = 'none';
-            }
-          }
-        } else if (currentStatus === 'Shipped') {
-          for (let i = 0; i < options.length; i++) {
-            if (options[i].value === 'Pending' || options[i].value === 'Processing') {
-              options[i].style.display = 'none';
-            }
-          }
-        } else if (currentStatus === 'Processing') {
-          for (let i = 0; i < options.length; i++) {
-            if (options[i].value === 'Pending') {
-              options[i].style.display = 'none';
-            }
-          }
-        }
-      }
-
-      updateOptions();
-
-      statusSelect.addEventListener('change', function () {
-        updateOptions();
+        updateOrderStatus(orderId, productId, newStatus);
       });
     });
-  </script>
+
+    function updateOrderStatus(orderId, productId, newStatus) {
+      console.log('Updating status for:', { orderId, productId, newStatus });
+
+      // Show loading indicator
+      Swal.fire({
+        title: 'Updating...',
+        text: 'Please wait while we update the order status.',
+        icon: 'info',
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        willOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      fetch('/admin/order-list/update-order-status', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ orderId, productId, product_status: newStatus }),
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            showStatusUpdateAlert('Success', data.message || 'Order status updated successfully', 'success');
+          } else {
+            showStatusUpdateAlert('Error', data.message || 'Failed to update order status', 'error');
+          }
+        })
+        .catch(error => {
+          console.error('Fetch error:', error);
+          showStatusUpdateAlert('Error', 'An error occurred while updating the order status. Please try again.', 'error');
+        });
+    }
+
+    function showStatusUpdateAlert(title, message, icon) {
+      Swal.fire({
+        title: title,
+        text: message,
+        icon: icon,
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.addEventListener('mouseenter', Swal.stopTimer)
+          toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+      }).then(() => {
+        location.reload();
+      });
+    }
+  });
+
+</script>
+
+  
+  
 
   </body>
 

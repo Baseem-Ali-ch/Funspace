@@ -126,6 +126,9 @@
         height: 70px;
         display: none;
       }
+      span{
+        font-size: 12px;
+      }
     </style>
     
 </head>
@@ -221,11 +224,11 @@
                 <div data-i18n="Order List">Order List</div>
               </a>
             </li>
-            <li class="menu-item">
+            <!-- <li class="menu-item">
               <a href="/admin/order-details" class="menu-link">
                 <div data-i18n="Order Details">Order Details</div>
               </a>
-            </li>
+            </li> -->
           </ul>
         </li>
         <li class="menu-item">
@@ -238,7 +241,7 @@
                 <div data-i18n="All Customers">All Customers</div>
               </a>
             </li>
-            <li class="menu-item">
+            <!-- <li class="menu-item">
               <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <div data-i18n="Customer Details">Customer Details</div>
               </a>
@@ -265,12 +268,12 @@
                 </li>
 
               </ul>
-            </li>
+            </li> -->
           </ul>
         </li>
         <li class="menu-item  ">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
-            <div data-i18n="Coupon">Coupon</div>
+            <div data-i18n="Coupon & Offer">Coupon & Offer</div>
           </a>
           <ul class="menu-sub">
             <li class="menu-item">
@@ -289,7 +292,7 @@
               </a>
             </li>
             <li class="menu-item ">
-              <a href="/admin/list-offer" class="menu-link">
+              <a href="/admin/offer-list" class="menu-link">
                 <div data-i18n="offer List">offer List</div>
               </a>
             </li>
@@ -573,7 +576,7 @@
 
 
   <div class="container py-4">
-    <form action="/admin/add-product" method="POST" enctype="multipart/form-data">
+    <form id="addProductForm" action="/admin/add-product" method="POST" enctype="multipart/form-data">
       <!-- Product Information -->
       <div class="card shadow mb-4">
           <div class="card-header py-3">
@@ -585,11 +588,13 @@
                   <div class="mb-3 col-md-6">
                       <label for="productTitle">Product Title</label>
                       <input type="text" class="form-control" id="productTitle" name="productTitle" placeholder="Product Title" required>
+                      <span id="productTitleError" class="text-danger"></span>
                   </div>
                   <!-- Description -->
                   <div class="mb-3 col-md-6">
                       <label for="productDescription">Description</label>
                       <textarea class="form-control" id="productDescription" name="productDescription" placeholder="Product Description"></textarea>
+                      <span id="productDescriptionError" class="text-danger"></span>
                   </div>
               </div>
   
@@ -603,9 +608,11 @@
                               <label for="productImage1" class="image-placeholder">Click to upload</label>
                               <img id="imagePreview1" src="#" alt="Preview" class="img-thumbnail mt-2" style="display: none; height: 270px;">
                           </div>
+                          <span id="productImage1Error" class="text-danger"></span>
                           <div class="image-actions" id="actions1" style="display: none;">
                               <a href="#" class="btn btn-warning btn-sm" onclick="triggerInputClick('productImage1'); return false;">Replace</a>
                               <a href="#" class="btn btn-danger btn-sm" onclick="deleteImage('productImage1', 'imagePreview1'); return false;">Remove</a>
+                              <a href="#" class="btn btn-primary btn-sm" onclick="cropImage('imagePreview1', 'productImage1'); return false;">Crop</a>
                           </div>
                       </div>
                       <div class="col-md-4 mb-3">
@@ -614,9 +621,11 @@
                               <label for="productImage2" class="image-placeholder">Click to upload</label>
                               <img id="imagePreview2" src="#" alt="Preview" class="img-thumbnail mt-2" style="display: none; height: 270px;">
                           </div>
+                          <span id="productImage2Error" class="text-danger"></span>
                           <div class="image-actions" id="actions2" style="display: none;">
                               <a href="#" class="btn btn-warning btn-sm" onclick="triggerInputClick('productImage2'); return false;">Replace</a>
                               <a href="#" class="btn btn-danger btn-sm" onclick="deleteImage('productImage2', 'imagePreview2'); return false;">Remove</a>
+                              <a href="#" class="btn btn-primary btn-sm" onclick="cropImage('imagePreview2', 'productImage2'); return false;">Crop</a>
                           </div>
                       </div>
                       <div class="col-md-4 mb-3">
@@ -625,9 +634,11 @@
                               <label for="productImage3" class="image-placeholder">Click to upload</label>
                               <img id="imagePreview3" src="#" alt="Preview" class="img-thumbnail mt-2" style="display: none; height: 270px;">
                           </div>
+                          <span id="productImage3Error" class="text-danger"></span>
                           <div class="image-actions" id="actions3" style="display: none;">
                               <a href="#" class="btn btn-warning btn-sm" onclick="triggerInputClick('productImage3'); return false;">Replace</a>
                               <a href="#" class="btn btn-danger btn-sm" onclick="deleteImage('productImage3', 'imagePreview3'); return false;">Remove</a>
+                              <a href="#" class="btn btn-primary btn-sm" onclick="cropImage('imagePreview3', 'productImage3'); return false;">Crop</a>
                           </div>
                       </div>
                   </div>
@@ -639,41 +650,31 @@
                       <div class="mb-3">
                           <label for="productPrice" class="form-label">Price:</label>
                           <input type="number" class="form-control" id="productPrice" name="productPrice" required>
+                          <span id="productPriceError" class="text-danger"></span>
                       </div>
                   </div>
                   <div class="col-md-6">
                       <div class="mb-3">
-                          <label for="discountPrice" class="form-label">Discount Price:</label>
-                          <input type="number" class="form-control" id="discountPrice" name="productDiscountedPrice">
-                          <div class="invalid-feedback" id="discountPrice-error" style="display: none;">Discount price must be a valid number.</div>
+                          <label for="stock" class="form-label">Stock:</label>
+                          <input type="number" class="form-control" id="stock" name="stock" required>
+                          <span id="stockError" class="text-danger"></span>
                       </div>
                   </div>
-                </div>
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="mb-3">
-                        <label for="stock" class="form-label">Stock:</label>
-                        <input type="number" class="form-control" id="stock" name="stock" required>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                     <div class="mb-3">
-                        <label for="category" class="form-label">Category:</label>
-                        <select class="form-select" id="category" name="category" required>
-                            <option value="" disabled selected>Select category</option>
-                            <% categories.forEach(category => { %>
-                                <option value="<%= category._id %>"><%= category.title %></option>
-                            <% }) %>
-                        </select>
-                      </div>
-                  </div>
-                </div>
-                  
-              
+              </div>
   
               <!-- Category and Status -->
               <div class="row">
-                  
+                  <div class="col-md-6">
+                      <div class="mb-3">
+                          <label for="category" class="form-label">Category:</label>
+                          <select class="form-select" id="category" name="category" required>
+                              <option value="" disabled selected>Select category</option>
+                              <% categories.forEach(category => { %>
+                                <option value="<%= category._id %>"><%= category.title %></option>
+                            <% }) %>
+                          </select>
+                      </div>
+                  </div>
                   <div class="col-md-6">
                       <div class="mb-3">
                           <label for="publishStatus" class="form-label">Status:</label>
@@ -775,6 +776,8 @@
   <script src="https://unpkg.com/cropperjs/dist/cropper.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="/image-cropper/cropperjs/cropper.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropper/4.1.0/cropper.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropper/4.1.0/cropper.min.js"></script>
 
 <script>
   // Check for success query parameter in the URL
@@ -803,55 +806,114 @@
 
 
 <script>
-  function previewImage(input, imgId, replaceLinkId) {
-    var imgElement = document.getElementById(imgId);
-    var replaceLink = document.getElementById(replaceLinkId);
-    if (input.files && input.files[0]) {
-      var reader = new FileReader();
-      reader.onload = function (e) {
-        imgElement.src = e.target.result;
-        imgElement.style.display = 'block';
-        replaceLink.style.display = 'block'; // Show the replace link
-      };
-      reader.readAsDataURL(input.files[0]);
-    } else {
-      imgElement.src = "#";
-      imgElement.style.display = 'none';
-      replaceLink.style.display = 'none'; // Hide the replace link
-    }
+
+
+  function validateLettersOnly(input) {
+    return /^[a-zA-Z\s]+$/.test(input);
   }
 
-  function triggerInputClick(inputId) {
-    document.getElementById(inputId).click();
+  function validatePositiveNumber(input) {
+    return /^\d*\.?\d+$/.test(input) && parseFloat(input) > 0;
   }
 
-  function deleteImage(inputId, previewId, replaceLinkId) {
-    const input = document.getElementById(inputId);
-    input.value = '';
-    const preview = document.getElementById(previewId);
-    preview.src = '#';
-    preview.style.display = 'none';
-    document.getElementById(replaceLinkId).style.display = 'none';
+  function validateImageFile(file) {
+    const validExtensions = ['jpg', 'jpeg', 'png'];
+    const extension = file.name.split('.').pop().toLowerCase();
+    return validExtensions.includes(extension);
   }
 
+  // Event listeners for real-time validation
+  document.addEventListener('DOMContentLoaded', function () {
+    const productTitle = document.getElementById('productTitle');
+    const productDescription = document.getElementById('productDescription');
+    const productPrice = document.getElementById('productPrice');
+    const stock = document.getElementById('stock');
+    const imageInputs = document.querySelectorAll('.image-input');
 
+    productTitle.addEventListener('input', function () {
+      const errorSpan = document.getElementById('productTitleError');
+      if (!validateLettersOnly(this.value)) {
+        errorSpan.textContent = 'Product title should contain only letters and spaces';
+      } else {
+        errorSpan.textContent = '';
+      }
+    });
 
+    productDescription.addEventListener('input', function () {
+      const errorSpan = document.getElementById('productDescriptionError');
+      if (!validateLettersOnly(this.value)) {
+        errorSpan.textContent = 'Description should contain only letters and spaces';
+      } else {
+        errorSpan.textContent = '';
+      }
+    });
 
-  function triggerInputClick(id) {
-    document.getElementById(id).click();
-  }
+    productPrice.addEventListener('input', function () {
+      const errorSpan = document.getElementById('productPriceError');
+      if (!validatePositiveNumber(this.value)) {
+        errorSpan.textContent = 'Price should be a positive number';
+      } else {
+        errorSpan.textContent = '';
+      }
+    });
+
+    stock.addEventListener('input', function () {
+      const errorSpan = document.getElementById('stockError');
+      if (!validatePositiveNumber(this.value)) {
+        errorSpan.textContent = 'Stock should be a positive number';
+      } else {
+        errorSpan.textContent = '';
+      }
+    });
+
+    imageInputs.forEach(input => {
+      input.addEventListener('change', function () {
+        const errorSpan = document.getElementById(`${this.id}Error`);
+        if (this.files.length > 0 && !validateImageFile(this.files[0])) {
+          errorSpan.textContent = 'Please select a valid image file (jpg, jpeg, or png)';
+        } else {
+          errorSpan.textContent = '';
+        }
+      });
+    });
+  });
+
+  // Image preview and cropping functions
+  let croppers = {};
 
   function previewImage(input, previewId) {
     if (input.files && input.files[0]) {
+      const errorSpan = document.getElementById(`${input.id}Error`);
+      if (!validateImageFile(input.files[0])) {
+        errorSpan.textContent = 'Please select a valid image file (jpg, jpeg, or png)';
+        return;
+      }
+      errorSpan.textContent = '';
+
       const reader = new FileReader();
       reader.onload = function (e) {
         const preview = document.getElementById(previewId);
         preview.src = e.target.result;
         preview.style.display = 'block';
         document.getElementById('actions' + previewId.charAt(previewId.length - 1)).style.display = 'block';
+
+        // Initialize Cropper
+        if (croppers[previewId]) {
+          croppers[previewId].destroy();
+        }
+        croppers[previewId] = new Cropper(preview, {
+          aspectRatio: 1,
+          viewMode: 1,
+          minCropBoxWidth: 300,
+          minCropBoxHeight: 300,
+        });
       };
       reader.readAsDataURL(input.files[0]);
     }
+  }
+
+  function triggerInputClick(id) {
+    document.getElementById(id).click();
   }
 
   function deleteImage(inputId, previewId) {
@@ -861,10 +923,115 @@
     preview.src = '#';
     preview.style.display = 'none';
     document.getElementById('actions' + previewId.charAt(previewId.length - 1)).style.display = 'none';
+    if (croppers[previewId]) {
+      croppers[previewId].destroy();
+      delete croppers[previewId];
+    }
   }
 
-</script>
+  function cropImage(previewId, inputId) {
+    if (croppers[previewId]) {
+      croppers[previewId].getCroppedCanvas({ width: 300, height: 300 }).toBlob((blob) => {
+        const file = new File([blob], `${inputId}.jpg`, { type: 'image/jpeg' });
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        document.getElementById(inputId).files = dataTransfer.files;
+      }, 'image/jpeg');
+    }
+  }
 
+  // Form submission
+  document.getElementById('addProductForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    // Check all validations
+    const inputs = this.querySelectorAll('input, textarea, select');
+    let isValid = true;
+    inputs.forEach(input => {
+      const errorSpan = document.getElementById(`${input.id}Error`);
+      if (errorSpan) {
+        if (input.type === 'file') {
+          if (input.files.length > 0 && !validateImageFile(input.files[0])) {
+            errorSpan.textContent = 'Please select a valid image file (jpg, jpeg, or png)';
+            isValid = false;
+          }
+        } else if (input.type === 'text' || input.tagName.toLowerCase() === 'textarea') {
+          if (!validateLettersOnly(input.value)) {
+            errorSpan.textContent = `${input.name} should contain only letters and spaces`;
+            isValid = false;
+          }
+        } else if (input.type === 'number') {
+          if (!validatePositiveNumber(input.value)) {
+            errorSpan.textContent = `${input.name} should be a positive number`;
+            isValid = false;
+          }
+        }
+      }
+    });
+
+    if (!isValid) {
+      return;
+    }
+
+    const formData = new FormData(this);
+
+    // Crop all images before submission
+    for (let i = 1; i <= 3; i++) {
+      const previewId = `imagePreview${i}`;
+      const inputId = `productImage${i}`;
+      if (croppers[previewId]) {
+        await new Promise(resolve => {
+          croppers[previewId].getCroppedCanvas({ width: 700, height: 700 }).toBlob((blob) => {
+            formData.set(inputId, blob, `${inputId}.jpg`);
+            resolve();
+          }, 'image/jpeg');
+        });
+      }
+    }
+
+    // Submit the form with cropped images
+    fetch('/admin/add-product', {
+      method: 'POST',
+      body: formData
+    })
+      .then(response => {
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+          return response.json().then(data => ({ status: response.status, body: data }));
+        } else {
+          return response.text().then(text => ({ status: response.status, body: text }));
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          window.location.href = '/admin/add-product?success=true';
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to add product. Please try again.',
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+          icon: 'success',
+          title: 'success',
+          text: 'Product added.',
+        }).then((result) => {
+          // Redirect to remove the success query parameter
+          if (result.isConfirmed) {
+            window.location.href = '/admin/add-product';
+          }
+        });;
+      });
+  });
+
+
+</script>
+  
 
 
 

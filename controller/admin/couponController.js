@@ -3,12 +3,35 @@ const Cart = require("../../model/cartModel");
 const Category = require("../../model/categoryModel");
 const Product = require("../../model/productModel");
 const Offer = require("../../model/offerModel");
+const mongoose = require('mongoose');
+const { ObjectId } = mongoose.Types;
 
 // Get all coupons
 const getCoupons = async (req, res) => {
   try {
-    const coupons = await Coupon.find();
-    res.render("coupon-list", { coupons }); // Adjust the view path as necessary
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page
+    const search = req.query.search || ""; // Search query
+
+    const skip = (page - 1) * limit;
+
+    // Search for coupons based on query
+    const query = search
+      ? {
+          $or: [{ couponCode: new RegExp(search, "i") }, { description: new RegExp(search, "i") }],
+        }
+      : {};
+
+    const coupons = await Coupon.find(query).skip(skip).limit(limit).exec();
+
+    const totalCoupons = await Coupon.countDocuments(query);
+
+    res.render("coupon-list", {
+      coupons,
+      currentPage: page,
+      totalPages: Math.ceil(totalCoupons / limit), // Total pages
+      search, // Pass search term to the view
+    });
   } catch (error) {
     console.error("Error fetching coupons:", error);
     res.status(500).send("Server Error");
@@ -50,7 +73,7 @@ const createCoupon = async (req, res) => {
       isListed: isListed === "true",
     });
     await newCoupon.save();
-    res.redirect("/admin/add-coupon");
+    res.redirect("/admin/add-coupon?success=true");
   } catch (error) {
     console.error("Error saving coupon:", error);
     res.status(500).send("Server Error");
@@ -69,21 +92,27 @@ const editCouponForm = async (req, res) => {
 
 // Update a coupon
 const updateCoupon = async (req, res) => {
-  const { couponId, coupon_code, description, discount, min_amount, redeem_amount, isActive, expiryDate } = req.body;
+  const couponId = req.params.id;
+  const { coupon_code, description, discount, min_amount, redeem_amount, isListed, expiryDate } = req.body;
+
   try {
+    // Convert isListed to a boolean
+    const isListedBoolean = isListed === "true";
+
     await Coupon.findByIdAndUpdate(couponId, {
       couponCode: coupon_code,
-      discription: description,
+      description,
       discount,
       minAmount: min_amount,
       redeemAmount: redeem_amount,
-      isActive,
+      isListed: isListedBoolean,
       expiryDate,
     });
-    res.redirect("/admin/list-coupon");
+
+    res.json({ success: true, message: "Coupon updated successfully!" });
   } catch (error) {
     console.error("Error updating coupon:", error);
-    res.status(500).send("Server Error");
+    res.status(500).json({ success: false, message: "Server Error" });
   }
 };
 
@@ -104,6 +133,7 @@ const applyCoupon = async (req, res) => {
   try {
     const user = req.session.user || req.user;
     const userId = user ? user._id : null;
+    
     // Find the coupon
     const coupon = await Coupon.findOne({ couponCode: couponCode });
     if (!coupon) {
@@ -134,8 +164,13 @@ const applyCoupon = async (req, res) => {
     }
 
     // Calculate discount
-    let discount = 0;
-    discount = coupon.redeemAmount;
+    let discount;
+    if (coupon.redeemAmount > cartTotal) {
+      // If redeem amount is greater than cart total, apply 50% discount
+      discount = cartTotal * 0.5;
+    } else {
+      discount = coupon.redeemAmount;
+    }
 
     // Apply discount to cart total
     const newTotal = cartTotal - discount;
@@ -151,7 +186,7 @@ const applyCoupon = async (req, res) => {
       success: true,
       message: "Coupon applied successfully!",
       newTotal: newTotal.toFixed(2),
-      redeemAmount: coupon.redeemAmount.toFixed(2),
+      redeemAmount: discount.toFixed(2),
       subtotal: cartTotal.toFixed(2),
     });
   } catch (error) {
@@ -176,13 +211,35 @@ const renderAddOfferPage = async (req, res) => {
 };
 
 const offerList = async (req, res) => {
-  try {
-    const isAdmin = req.session.admin;
-    const offers = await Offer.find().populate("productId categoryId").lean();
-    const products = await Product.find();
-    const categories = await Category.find();
+  const { search = "", page = 1 } = req.query;
+  const limit = 10;
+  const skip = (page - 1) * limit;
 
-    res.render("list-offer", { offers, isAdmin, products, categories }); // Adjust the view path as needed
+  try {
+    // Build search query
+    const searchQuery = search
+      ? {
+          $or: [{ offerName: new RegExp(search, "i") }, { referralCode: new RegExp(search, "i") }],
+        }
+      : {};
+
+    const totalOffers = await Offer.countDocuments(searchQuery);
+
+    const offers = await Offer.find(searchQuery).populate("productIds").populate("categoryIds").skip(skip).limit(limit).lean();
+
+    // Calculate total pages
+    const totalPages = Math.ceil(totalOffers / limit);
+
+    // Render the offer list with pagination and search term
+    res.render("list-offer", {
+      offers,
+      search,
+      currentPage: parseInt(page),
+      totalPages,
+      isAdmin: req.session.admin,
+      products: await Product.find(),
+      categories: await Category.find(),
+    });
   } catch (error) {
     console.error("Error fetching offers:", error);
     res.status(500).send("Server error");
@@ -191,15 +248,17 @@ const offerList = async (req, res) => {
 
 const addOffer = async (req, res) => {
   try {
-    const { offerType, offerName, discount, productId, categoryId, referralCode, startDate, endDate } = req.body;
+    const { offerType, offerName, discount, productIds, categoryIds, referralCode, startDate, endDate } = req.body;
 
     const newOffer = new Offer({
       offerType,
       offerName,
       discount,
-      productId: offerType === "product" ? productId : null,
-      categoryId: offerType === "category" ? categoryId : null,
-      referralCode: offerType === "referral" ? referralCode : null,
+      productIds: offerType === "product" ? productIds : undefined, // Handle array of product IDs
+      categoryIds: offerType === "category" ? categoryIds : undefined, // Handle array of category IDs
+      referralCode: offerType === "referral" ? referralCode : undefined,
+      startDate,
+      endDate,
     });
 
     await newOffer.save();
@@ -211,17 +270,19 @@ const addOffer = async (req, res) => {
 };
 
 const editOffer = async (req, res) => {
-  const { offerId } = req.body;
-  const { offerName, discount, offerType, status } = req.body;
+  console.log("Received data:", req.body);
+  const { offerId, offerName, discount, offerType, status, products = [], categories = [] } = req.body;
 
   try {
     const offer = await Offer.findByIdAndUpdate(
-      offerId,
+      offerId, // MongoDB will automatically convert this string to ObjectId
       {
         offerName,
         discount,
         offerType,
         status,
+        productIds: products.map(id => new ObjectId(id)),
+        categoryIds: categories.map(id => new ObjectId(id)),
       },
       { new: true },
     );
@@ -229,14 +290,13 @@ const editOffer = async (req, res) => {
     if (offer) {
       res.json({ success: true, offer });
     } else {
-      res.json({ success: false, message: "Offer not found" });
+      res.status(404).json({ success: false, message: "Offer not found" });
     }
   } catch (error) {
     console.error("Error updating offer:", error);
-    res.json({ success: false, message: "Error updating offer" });
+    res.status(500).json({ success: false, message: "Error updating offer", error: error.message });
   }
 };
-
 const deleteOffer = async (req, res) => {
   try {
     const { offerId } = req.params;

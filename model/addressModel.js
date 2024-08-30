@@ -36,7 +36,11 @@ const addressSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "userModel" },
+  userId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "User", // Ensure this matches your User model name
+    required: true 
+  },
 });
 
 module.exports = mongoose.model("Address", addressSchema);

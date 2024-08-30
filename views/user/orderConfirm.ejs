@@ -344,7 +344,7 @@
                         </p>
                         <p><strong>Total Amount:</strong> ₹ <%= order.totalPrice %>
                         </p>
-                        <p><strong>Ordered Date:</strong>
+                        <p><strong>Delivery Date:</strong>
                             <%= order.deliveryDate ? formatDate(new Date(order.deliveryDate)) : 'N/A' %>
                         </p>
                     </div>
@@ -374,33 +374,48 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <% let subtotal = 0; %>
-                        <% order.items.forEach(item => { %>
-                            <% const product = item.product; %>
-                            <% const itemTotal = product.discountedPrice * item.quantity; %>
-                            <% subtotal += itemTotal; %>
-                            <tr>
-                                <td>
-                                    <a href="/product/<%= product._id %>">
-                                        <img style="width: 7em;" src="<%= product.imageUrl_1 %>" alt="<%= product.name %>">
-                                    </a>
-                                </td>
-                                <td><%= product.name %></td>
-                                <td><%= item.quantity %></td>
-                                <td>
-                                    ₹ <%= product.price.toFixed(2) %>
-                                    <% if (product.offer) { %>
-                                        <br>
-                                        <small class="text-muted">(Discounted: ₹ <%= product.discountedPrice %>)</small>
-                                    <% } %>
-                                </td>
-                                <td><%= product.offer ? product.offer.discount + '%' : 'No Offer' %></td>
-                                <td>₹ <%= itemTotal.toFixed(2) %></td>
-                            </tr>
-                        <% }); %>
+                        <% let subtotal=0; %>
+                            <% order.items.forEach(item=> { %>
+                                <% const product=item.product; %>
+                                    <% const itemTotal=parseFloat(product.discountedPrice) * item.quantity; %>
+                                        <% subtotal +=itemTotal; %>
+                                            <tr>
+                                                <td>
+                                                    <a href="/product/<%= product._id %>">
+                                                        <img style="width: 7em;" src="<%= product.imageUrl_1 %>"
+                                                            alt="<%= product.name %>">
+                                                    </a>
+                                                </td>
+                                                <td>
+                                                    <%= product.name %>
+                                                </td>
+                                                <td>
+                                                    <%= item.quantity %>
+                                                </td>
+                                                <td>
+                                                    ₹ <%= product.price.toFixed(2) %>
+                                                        <% if (product.offer) { %>
+                                                            <br>
+                                                            <small class="text-muted">
+                                                                (Discounted: ₹ <%=
+                                                                    parseFloat(product.discountedPrice).toFixed(2) %>)
+                                                            </small>
+                                                            <% } %>
+                                                </td>
+                                                <td>
+                                                    <% if (product.offer) { %>
+                                                        <%= product.offer.discount %>%
+                                                            <% } else { %>
+                                                                No Offer
+                                                                <% } %>
+                                                </td>
+                                                <td>₹ <%= itemTotal.toFixed(2) %>
+                                                </td>
+                                            </tr>
+                                            <% }); %>
                     </tbody>
                 </table>
-                
+
                 <div class="order-summary-footer">
                     <div class="row">
                         <div class="col-md-12 text-right">
@@ -409,9 +424,13 @@
                         </div>
                     </div>
                 </div>
+
+
                 <div class="text-center mt-4">
                     <a href="/product-list" class="btn btn-md mr-2">Continue Shopping</a>
-                    <a href="/download-invoice/<%= order.orderId %>" class="btn btn-md">Download Invoice</a>
+
+
+
                 </div>
             </div>
 

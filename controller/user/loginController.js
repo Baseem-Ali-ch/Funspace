@@ -186,7 +186,7 @@ const verifyLogin = async (req, res) => {
           req.session.user = userData; // Set user data in session
           const redirectUrl = req.session.redirectUrl || "/home";
           delete req.session.redirectUrl;
-          return res.redirect(redirectUrl);
+          return res.redirect(redirectUrl); 
         } else {
           return res.redirect("/register");
         }
@@ -221,6 +221,7 @@ const userLogout = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
+
 
 module.exports = {
   setRedirectUrl,

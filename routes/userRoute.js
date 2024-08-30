@@ -4,11 +4,11 @@ const userController = require("../controller/user/userController");
 const accountController = require("../controller/user/accountController");
 const productController = require("../controller/user/productController");
 const orderController = require("../controller/user/orderController");
-const couponController = require('../controller/admin/couponController')
+const couponController = require("../controller/admin/couponController");
 const breadcrumbs = require("../middleware/breadcrumbs");
 const auth = require("../middleware/userAuth");
 
-const Order = require('../model/orderModel')
+const Order = require("../model/orderModel");
 
 const express = require("express");
 const userRoute = express();
@@ -28,7 +28,6 @@ userRoute.get("/product/:id", productController.loadProduct);
 userRoute.get("/product-list", productController.loadProductList);
 userRoute.post("/filter-and-sort-products", productController.filterAndSortProducts);
 
-
 //cart routes
 userRoute.get("/cart", productController.loadCart);
 userRoute.post("/cart", productController.addToCart);
@@ -45,27 +44,36 @@ userRoute.get("/checkout", auth.isUserAuthenticated, orderController.loadCheckou
 userRoute.post("/checkout", auth.isUserAuthenticated, orderController.placeOrder);
 userRoute.get("/checkout/ordered/:orderId", auth.isUserAuthenticated, orderController.orderConfirm);
 userRoute.post("/account/order-status", auth.isUserAuthenticated, orderController.updateStatus);
-userRoute.post("/checkout/verify-payment", auth.isUserAuthenticated, orderController.verifyPayment);
+userRoute.post("/verify-payment", auth.isUserAuthenticated, orderController.verifyPayment);
+userRoute.post("/order-list/cancel/:orderId", auth.isUserAuthenticated, orderController.cancelOrder);
+userRoute.post("/order-list/return/:orderId/:itemId", auth.isUserAuthenticated, orderController.returnOrder);
+userRoute.post("/order-list/return/:orderId/:itemId", auth.isUserAuthenticated, orderController.returnRequest);
+userRoute.post('/checkout/razorpay-failure', orderController.razorpayFailure);
+userRoute.post("/checkout/retry-payment", orderController.retryPayment);
 
-userRoute.get('/order-success', (req, res) => {
-    const { orderId } = req.query;
-    if (!orderId) {
-      return res.status(400).send("Order ID is required");
+
+
+
+
+
+
+userRoute.get("/order-success", (req, res) => {
+  const { orderId } = req.query;
+  if (!orderId) {
+    return res.status(400).send("Order ID is required");
+  }
+
+  Order.findById(orderId, (err, order) => {
+    if (err || !order) {
+      return res.status(404).send("Order not found");
     }
-  
-    Order.findById(orderId, (err, order) => {
-      if (err || !order) {
-        return res.status(404).send("Order not found");
-      }
-  
-      res.render('order-success', { order });
-    });
+
+    res.render("order-success", { order });
   });
-  
+});
 
 //account route
 userRoute.get("/address", auth.isUserAuthenticated, userController.loadAddress);
-
 
 //contact routes
 userRoute.get("/contact-us", auth.isUserAuthenticated, userController.loadContact);
@@ -89,26 +97,34 @@ userRoute.get("/forget-password", accountController.forgetPassword);
 userRoute.post("/forget-password", accountController.verifyForgetPassword);
 userRoute.get("/reset-password", accountController.resetPasswordPage);
 userRoute.post("/reset-password", accountController.resetPassword);
-userRoute.get('/change-password', auth.isUserAuthenticated, accountController.changePassword);
-userRoute.post('/change-password', auth.isUserAuthenticated, accountController.changedPassword);
+userRoute.get("/change-password", auth.isUserAuthenticated, accountController.changePassword);
+userRoute.post("/change-password", auth.isUserAuthenticated, accountController.changedPassword);
+
+//order list
+userRoute.get("/order-list", auth.isUserAuthenticated, accountController.loadOrderList);
+userRoute.get('/download-invoice/:orderId/:productId', (req, res, next) => {
+  req.params.orderId = decodeURIComponent(req.params.orderId);
+  accountController.downloadInvoice(req, res, next);
+});
+
 
 
 //manage checkout address, order, dashboard
-userRoute.post("/account/address", accountController.addAddress);
-userRoute.get("/account/address", accountController.loadAddress);
-userRoute.get("/account/addresses", accountController.getAddress);
-userRoute.patch("/account/address/update/:id", accountController.updateAddress);
-userRoute.delete("/account/address/:id", accountController.deleteAddress);
+userRoute.post("/address", accountController.addAddress);
+userRoute.get("/address", accountController.loadAddress);
+userRoute.get("/addresses", accountController.getAddress);
+userRoute.patch("/address/update/:id", accountController.updateAddress);
+userRoute.delete("/address/:id", accountController.deleteAddress);
+
 
 //coupon
-userRoute.post('/apply-coupon',couponController.applyCoupon)
-
+userRoute.post("/apply-coupon", couponController.applyCoupon);
 
 //wallet
-userRoute.get('/wallet',auth.isUserAuthenticated,accountController.loadWallet )
-userRoute.patch('/account', accountController.updateOrderStatus);
+userRoute.get("/wallet", auth.isUserAuthenticated, accountController.loadWallet);
+userRoute.patch("/account", accountController.updateOrderStatus);
 
-userRoute.get('/search', productController.searchProduct);
+userRoute.get("/search", productController.searchProduct);
 // Authentication Routes
 const authRoute = require("./authRoutes"); // Ensure this path is correct
 userRoute.use("/", authRoute);

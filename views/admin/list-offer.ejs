@@ -24,8 +24,45 @@
         .image-actions {
             margin-top: 10px;
         }
+
+        .select2-container--default .select2-selection--multiple {
+            min-height: 100px;
+            overflow-y: auto;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+            display: block;
+            padding: 5px;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            margin-top: 5px;
+        }
+
+        .select2-container {
+            width: 100% !important;
+        }
     </style>
 
+    <style>
+        .select2-container--default .select2-selection--multiple {
+            min-height: 100px;
+            overflow-y: auto;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+            display: block;
+            padding: 5px;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            margin-top: 5px;
+        }
+
+        .select2-container {
+            width: 100% !important;
+        }
+    </style>
 
     <!-- ?PROD Only: Google Tag Manager (noscript) (Default ThemeSelection: GTM-5DDHKGP, PixInvent: GTM-5J3LMKC) -->
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5DDHKGP" height="0" width="0"
@@ -280,11 +317,11 @@
                                             <div data-i18n="Order List">Order List</div>
                                         </a>
                                     </li>
-                                    <li class="menu-item">
+                                    <!-- <li class="menu-item">
                                         <a href="/admin/order-details" class="menu-link">
                                             <div data-i18n="Order Details">Order Details</div>
                                         </a>
-                                    </li>
+                                    </li> -->
                                 </ul>
                             </li>
                             <li class="menu-item">
@@ -297,7 +334,7 @@
                                             <div data-i18n="All Customers">All Customers</div>
                                         </a>
                                     </li>
-                                    <li class="menu-item">
+                                    <!-- <li class="menu-item">
                                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                                             <div data-i18n="Customer Details">Customer Details</div>
                                         </a>
@@ -327,12 +364,12 @@
                                             </li>
 
                                         </ul>
-                                    </li>
+                                    </li> -->
                                 </ul>
                             </li>
                             <li class="menu-item  active open">
                                 <a href="javascript:void(0);" class="menu-link menu-toggle">
-                                    <div data-i18n="Coupon">Coupon</div>
+                                    <div data-i18n="Coupon & Offer">Coupon & Offer</div>
                                 </a>
                                 <ul class="menu-sub">
                                     <li class="menu-item">
@@ -669,13 +706,14 @@
                                 <div id="DataTables_Table_0_wrapper" class="dataTables_wrapper dt-bootstrap5 no-footer">
                                     <div class="card-header d-flex rounded-0 flex-wrap pb-md-0 pt-0">
                                         <div class="me-5 ms-n2">
-                                            <div id="DataTables_Table_0_filter" class="dataTables_filter">
-                                                <label>
-                                                    <input type="text" class="form-control form-control-sm"
-                                                        placeholder="Search Category" aria-controls="DataTables_Table_0"
-                                                        id="searchInput" onkeyup="searchTable()">
-                                                </label>
-                                            </div>
+                                            <form method="GET" action="/admin/offer-list">
+                                                <div class="input-group mb-3 mt-3">
+                                                    <input type="text" class="form-control" name="search"
+                                                        value="<%= search %>" placeholder="Search offer...">
+                                                    <button class="btn btn-outline-light" type="submit">Search</button>
+                                                </div>
+                                            </form>
+
                                         </div>
                                         <div
                                             class="d-flex justify-content-start justify-content-md-end align-items-baseline">
@@ -686,13 +724,13 @@
                                                 </div>
                                                 <div class="dt-buttons btn-group flex-wrap">
 
-                                                    <a href="/admin/add-coupon"
+                                                    <a href="/admin/add-offer"
                                                         class="btn btn-secondary add-new btn-primary waves-effect waves-light"
                                                         tabindex="0" aria-controls="DataTables_Table_0">
                                                         <span>
                                                             <i
                                                                 class="ri-add-line ri-16px me-0 me-sm-1 align-baseline"></i>
-                                                            <span class="d-none d-sm-inline-block">Add Coupon</span>
+                                                            <span class="d-none d-sm-inline-block">Add offer</span>
                                                         </span>
                                                     </a>
 
@@ -712,30 +750,68 @@
                                                             aria-label="Close"></button>
                                                     </div>
                                                     <div class="modal-body">
-
                                                         <input type="hidden" name="offerId" id="offerId">
-                                                        <div class="mb-3">
-                                                            <label for="offerName" class="form-label">Offer Name</label>
-                                                            <input type="text" class="form-control" id="offerName"
-                                                                name="offerName">
+                                                        <div class="row">
+                                                            <div class="mb-3 col-md-6">
+                                                                <label for="editOfferType">Offer Type</label>
+                                                                <select class="form-select" id="editOfferType"
+                                                                    name="offerType" required
+                                                                    onchange="handleEditOfferTypeChange()">
+                                                                    <option value="" disabled>Select Offer Type</option>
+                                                                    <option value="product">Product Offer</option>
+                                                                    <option value="category">Category Offer</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="mb-3 col-md-6">
+                                                                <label for="editOfferName">Offer Name</label>
+                                                                <input type="text" class="form-control"
+                                                                    id="editOfferName" name="offerName" required>
+                                                            </div>
                                                         </div>
-                                                        <div class="mb-3">
-                                                            <label for="discount" class="form-label">Discount
-                                                                (%)</label>
-                                                            <input type="number" class="form-control" id="discount"
-                                                                name="discount">
+                                                        <div class="row">
+                                                            <div class="mb-3 col-md-6">
+                                                                <label for="editDiscount">Discount (%)</label>
+                                                                <input type="number" class="form-control"
+                                                                    id="editDiscount" name="discount" required>
+                                                            </div>
+                                                            <div id="editCategoryFields" style="display: none;"
+                                                                class="col-md-6">
+                                                                <div class="mb-3">
+                                                                    <label for="editCategoryId"
+                                                                        class="form-label">Category:</label>
+                                                                    <select class="form-select select2-multiple"
+                                                                        id="editCategoryId" name="categoryIds[]"
+                                                                        multiple data-select2-id="editCategoryId"
+                                                                        tabindex="-1" aria-hidden="true">
+                                                                        <% categories.forEach(category=> { %>
+                                                                            <option value="<%= category._id %>">
+                                                                                <%= category.title %>
+                                                                            </option>
+                                                                            <% }) %>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div id="editProductFields" style="display: none;"
+                                                                class="col-md-6">
+                                                                <div class="mb-3">
+                                                                    <label for="editProductId"
+                                                                        class="form-label">Product:</label>
+                                                                    <select class="form-select select2-multiple"
+                                                                        id="editProductId" name="productIds[]" multiple
+                                                                        required>
+                                                                        <% products.forEach(product=> { %>
+                                                                            <option value="<%= product._id %>">
+                                                                                <%= product.name %>
+                                                                            </option>
+                                                                            <% }) %>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                        <div class="mb-3">
-                                                            <label for="offerType" class="form-label">Offer Type</label>
-                                                            <select class="form-select" id="offerType" name="offerType">
-                                                                <option value="product">Product</option>
-                                                                <option value="category">Category</option>
-                                                                <option value="referral">Referral</option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label for="status" class="form-label">Status</label>
-                                                            <select class="form-select" id="status" name="status">
+                                                        <div class="mb-3 col-md-6">
+                                                            <label for="editStatus">Status</label>
+                                                            <select class="form-select" id="editStatus" name="status"
+                                                                required>
                                                                 <option value="active">Active</option>
                                                                 <option value="inactive">Inactive</option>
                                                             </select>
@@ -755,59 +831,144 @@
 
 
                                     <!-- Offer Cards -->
-                                    <div class="row">
-                                        <% if (Array.isArray(offers) && offers.length> 0) { %>
-                                            <% offers.forEach(offer=> { %>
-                                                <div class="col-md-4 mb-4">
-                                                    <div class="card">
-                                                        <div class="card-body">
-                                                            <h5 class="card-title">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">Offer Name</th>
+                                                    <th scope="col">Offer Type</th>
+                                                    <th scope="col">Discount (%)</th>
+                                                    <th scope="col">Details</th>
+                                                    <th scope="col">Status</th>
+                                                    <th scope="col">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <% if (Array.isArray(offers) && offers.length> 0) { %>
+                                                    <% offers.forEach(offer=> { %>
+                                                        <tr>
+                                                            <td>
                                                                 <%= offer.offerName %>
-                                                            </h5>
-                                                            <p class="card-text">Offer Type: <%= offer.offerType %>
-                                                            </p>
-                                                            <p class="card-text">Discount: <%= offer.discount %>%</p>
-                                                            <% if (offer.offerType==='product' ) { %>
-                                                                <p class="card-text">Product: <%= offer.productId ?
-                                                                        offer.productId.name : 'N/A' %>
-                                                                </p>
-                                                                <% } else if (offer.offerType==='category' ) { %>
-                                                                    <p class="card-text">Category: <%= offer.categoryId
-                                                                            ? offer.categoryId.name : 'N/A' %>
-                                                                    </p>
-                                                                    <% } else if (offer.offerType==='referral' ) { %>
-                                                                        <p class="card-text">Referral Code: <%=
-                                                                                offer.referralCode %>
-                                                                        </p>
-                                                                        <% } %>
-                                                                            <p class="card-text">Status: <%=
-                                                                                    offer.status %>
-                                                                            </p>
-                                                                            <button
-                                                                                class="btn btn-primary btn-sm btn-icon btn-text-secondary waves-effect waves-light rounded-pill mx-2"
-                                                                                data-bs-toggle="modal"
-                                                                                data-bs-target="#editOfferModal"
-                                                                                data-id="<%= offer._id %>"
-                                                                                data-offername="<%= offer.offerName %>"
-                                                                                data-discount="<%= offer.discount %>"
-                                                                                data-offertype="<%= offer.offerType %>"
-                                                                                data-status="<%= offer.status %>">
-                                                                                <i class="ri-edit-box-line ri-22px"></i>
-                                                                            </button>
-                                                                            <button
-                                                                                class="btn btn-danger btn-sm btn-icon waves-effect waves-light rounded-pill mx-2 btn-delete-offer"
-                                                                                data-id="<%= offer._id %>">
-                                                                                <i
-                                                                                    class="ri-delete-bin-line ri-22px"></i>
-                                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <% }) %>
-                                                    <% } else { %>
-                                                        <p>No offers available.</p>
-                                                        <% } %>
+                                                            </td>
+                                                            <td>
+                                                                <%= offer.offerType %>
+                                                            </td>
+                                                            <td>
+                                                                <%= offer.discount %>
+                                                            </td>
+                                                            <td>
+                                                                <% if (offer.offerType==='product' ) { %>
+                                                                    Products:
+                                                                    <% if (offer.productIds && offer.productIds.length>
+                                                                        0) { %>
+                                                                        <% offer.productIds.forEach(product=> { %>
+                                                                            <%= product ? product.name : 'N/A' %>,<br>
+                                                                                <% }) %>
+                                                                                    <% } else { %>
+                                                                                        No products available.
+                                                                                        <% } %>
+                                                                                            <% } else if
+                                                                                                (offer.offerType==='category'
+                                                                                                ) { %>
+                                                                                                Categories:
+                                                                                                <% if (offer.categoryIds
+                                                                                                    &&
+                                                                                                    offer.categoryIds.length>
+                                                                                                    0) { %>
+                                                                                                    <%
+                                                                                                        offer.categoryIds.forEach(category=>
+                                                                                                        { %>
+                                                                                                        <%= category ?
+                                                                                                            category.title
+                                                                                                            : 'N/A' %>,
+                                                                                                            <br>
+                                                                                                            <% }) %>
+                                                                                                                <% } else
+                                                                                                                    { %>
+                                                                                                                    No
+                                                                                                                    categories
+                                                                                                                    available.
+                                                                                                                    <% }
+                                                                                                                        %>
+                                                                                                                        <% } else
+                                                                                                                            if
+                                                                                                                            (offer.offerType==='referral'
+                                                                                                                            )
+                                                                                                                            {
+                                                                                                                            %>
+                                                                                                                            Referral
+                                                                                                                            Code:
+                                                                                                                            <%= offer.referralCode
+                                                                                                                                %>
+                                                                                                                                <% }
+                                                                                                                                    %>
+                                                            </td>
+
+
+                                                            <td>
+                                                                <%= offer.status %>
+                                                            </td>
+                                                            <td>
+                                                                <button class="btn btn-primary" data-bs-toggle="modal"
+                                                                    data-bs-target="#editOfferModal"
+                                                                    data-id="<%= offer._id %>"
+                                                                    data-offername="<%= offer.offerName %>"
+                                                                    data-discount="<%= offer.discount %>"
+                                                                    data-offertype="<%= offer.offerType %>"
+                                                                    data-status="<%= offer.status %>"
+                                                                    data-productids="<%= JSON.stringify(offer.products) %>"
+                                                                    data-categoryids="<%= JSON.stringify(offer.categories) %>">
+                                                                    <i class="ri-edit-box-line ri-22px"></i>
+                                                                </button>
+                                                                <button
+                                                                    class="btn btn-danger btn-sm btn-icon waves-effect waves-light rounded-pill mx-2 btn-delete-offer"
+                                                                    data-id="<%= offer._id %>">
+                                                                    <i class="ri-delete-bin-line ri-22px"></i>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                        <% }) %>
+                                                            <% } else { %>
+                                                                <tr>
+                                                                    <td colspan="6" class="text-center">No offers
+                                                                        available.</td>
+                                                                </tr>
+                                                                <% } %>
+                                            </tbody>
+                                        </table>
+                                        <!-- Pagination controls -->
+                                        <nav aria-label="Page navigation">
+                                            <ul class="pagination justify-content-center">
+                                                <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                                                    <a class="page-link page-link-prev"
+                                                        href="?page=<%= currentPage - 1 %>&search=<%= search %>"
+                                                        aria-label="Previous" tabindex="-1"
+                                                        aria-disabled="<%= currentPage === 1 %>">
+                                                        <span aria-hidden="true"><i
+                                                                class="icon-long-arrow-left"></i></span> Prev
+                                                    </a>
+                                                </li>
+                                                <% for (let i=1; i <=totalPages; i++) { %>
+                                                    <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                                                        <a class="page-link" href="?page=<%= i %>&search=<%= search %>">
+                                                            <%= i %>
+                                                        </a>
+                                                    </li>
+                                                    <% } %>
+                                                        <li
+                                                            class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                                                            <a class="page-link page-link-next"
+                                                                href="?page=<%= currentPage + 1 %>&search=<%= search %>"
+                                                                aria-label="Next">
+                                                                Next <span aria-hidden="true"><i
+                                                                        class="icon-long-arrow-right"></i></span>
+                                                            </a>
+                                                        </li>
+                                            </ul>
+                                        </nav>
+
                                     </div>
+
 
 
 
@@ -825,12 +986,7 @@
 
 
                             <!-- Submit and reset -->
-                            <div>
-                                <button type="submit" class="btn btn-primary me-3 data-submit waves-effect waves-light"
-                                    data-bs-dismiss="offcanvas">Add</button>
-                                <button type="reset" class="btn btn-outline-danger waves-effect"
-                                    data-bs-dismiss="offcanvas">Discard</button>
-                            </div>
+
                             <input type="hidden">
                             </form>
                         </div>
@@ -903,12 +1059,15 @@
     <!-- Main JS -->
     <script src="/dashboard-assets/js/main.js"></script>
 
-
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <!-- Page JS -->
     <!-- <script src="/dashboard-assets/js/app-ecommerce-category-list.js"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 
     <script>
@@ -936,14 +1095,36 @@
             });
 
             // Handle the form submission
-            document.getElementById('editOfferModal').addEventListener('submit', function (event) {
+            document.getElementById('editOfferForm').addEventListener('submit', function (event) {
                 event.preventDefault();
 
+                const offerType = document.getElementById('editOfferType').value;
+                const categoryIds = $('#editCategoryId').val();
+                const productIds = $('#editProductId').val();
+
+                // Get the selected products or categories
+                if (offerType === 'category' && (!categoryIds || categoryIds.length === 0)) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Validation Error',
+                        text: 'Please select at least one category for a category offer.',
+                    });
+                    return;
+                }
+                if (offerType === 'product' && (!productIds || productIds.length === 0)) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Validation Error',
+                        text: 'Please select at least one product for a product offer.',
+                    });
+                    return;
+                }
+
+                // Rest of your existing code for form submission
                 const offerId = document.getElementById('offerId').value;
-                const offerName = document.getElementById('offerName').value;
-                const discount = document.getElementById('discount').value;
-                const offerType = document.getElementById('offerType').value;
-                const status = document.getElementById('status').value;
+                const offerName = document.getElementById('editOfferName').value;
+                const discount = document.getElementById('editDiscount').value;
+                const status = document.getElementById('editStatus').value;
 
                 // AJAX request to update offer
                 fetch(`/admin/offer-list`, {
@@ -957,19 +1138,43 @@
                         discount,
                         offerType,
                         status,
+                        productIds,
+                        categoryIds
                     }),
                 })
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            // Close the modal and refresh the page or update the UI
+                            // Close the modal and show SweetAlert
+                            const editOfferModal = bootstrap.Modal.getInstance(document.getElementById('editOfferModal'));
                             editOfferModal.hide();
-                            location.reload(); // Reload the page to reflect the changes
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Offer Updated',
+                                text: 'The offer has been updated successfully!',
+                                showConfirmButton: true,
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                location.reload(); // Reload the page to reflect the changes after alert is closed
+                            });
+
                         } else {
-                            alert('Failed to update the offer');
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Update Failed',
+                                text: 'Failed to update the offer. Please try again.',
+                            });
                         }
                     })
-                    .catch(error => console.error('Error:', error));
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'An error occurred. Please try again later.',
+                        });
+                    });
             });
         });
 
@@ -985,10 +1190,20 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            alert(data.message);
-                            location.reload(); // or remove the offer from the DOM dynamically
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'success',
+                                text: data.message,
+                            }).then(() => {
+                                location.reload(); 
+                            })
+
                         } else {
-                            alert(`Error deleting offer: ${data.message}`);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: data.message,
+                            });
                         }
                     })
                     .catch(error => {
@@ -997,6 +1212,58 @@
                     });
             });
         });
+
+
+        $(document).ready(function () {
+            // Initialize Select2 for multiple selections
+            $('#editProductId, #editCategoryId').select2({
+                placeholder: "Select options",
+                allowClear: true,
+                dropdownParent: $('#editOfferModal')
+            });
+
+            $('#editOfferModal').on('show.bs.modal', function (event) {
+                const button = $(event.relatedTarget);
+                const offerId = button.data('id');
+                const offerName = button.data('offername');
+                const discount = button.data('discount');
+                const offerType = button.data('offertype');
+                const status = button.data('status');
+                const productIds = button.data('productids') || [];
+                const categoryIds = button.data('categoryids') || [];
+
+                const modal = $(this);
+                modal.find('#offerId').val(offerId);
+                modal.find('#editOfferName').val(offerName);
+                modal.find('#editDiscount').val(discount);
+                modal.find('#editOfferType').val(offerType);
+                modal.find('#editStatus').val(status);
+
+                // Handle offer type fields
+                handleEditOfferTypeChange();
+
+                // Pre-select products or categories based on offer type
+                if (offerType === 'product') {
+                    modal.find('#editProductId').val(productIds).trigger('change');
+                } else if (offerType === 'category') {
+                    modal.find('#editCategoryId').val(categoryIds).trigger('change');
+                }
+            });
+        });
+
+        function handleEditOfferTypeChange() {
+            const offerType = $('#editOfferType').val();
+            if (offerType === 'product') {
+                $('#editProductFields').show();
+                $('#editCategoryFields').hide();
+            } else if (offerType === 'category') {
+                $('#editProductFields').hide();
+                $('#editCategoryFields').show();
+            } else {
+                $('#editProductFields').hide();
+                $('#editCategoryFields').hide();
+            }
+        }
 
     </script>
 

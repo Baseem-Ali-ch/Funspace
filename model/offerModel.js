@@ -12,23 +12,23 @@ const offerSchema = new mongoose.Schema(
       required: true,
     },
     discount: {
-      type: Number, // Discount percentage or flat amount
+      type: Number,
       required: true,
     },
-    productId: {
+    productIds: [{ 
       type: mongoose.Schema.Types.ObjectId,
       ref: "Product",
       required: function () {
         return this.offerType === "product";
       },
-    },
-    categoryId: {
+    }],
+    categoryIds: [{ 
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
       required: function () {
         return this.offerType === "category";
       },
-    },
+    }],
     referralCode: {
       type: String,
       required: function () {

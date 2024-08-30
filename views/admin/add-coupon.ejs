@@ -186,11 +186,11 @@
                 <div data-i18n="Order List">Order List</div>
               </a>
             </li>
-            <li class="menu-item">
+            <!-- <li class="menu-item">
               <a href="/admin/order-details" class="menu-link">
                 <div data-i18n="Order Details">Order Details</div>
               </a>
-            </li>
+            </li> -->
           </ul>
         </li>
         <li class="menu-item">
@@ -203,7 +203,7 @@
                 <div data-i18n="All Customers">All Customers</div>
               </a>
             </li>
-            <li class="menu-item">
+            <!-- <li class="menu-item">
               <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <div data-i18n="Customer Details">Customer Details</div>
               </a>
@@ -230,12 +230,12 @@
                 </li>
 
               </ul>
-            </li>
+            </li> -->
           </ul>
         </li>
         <li class="menu-item active open ">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
-              <div data-i18n="Coupon">Coupon</div>
+              <div data-i18n="Coupon & Offer">Coupon & Offer</div>
             </a>
             <ul class="menu-sub">
               <li class="menu-item active">
@@ -254,7 +254,7 @@
                 </a>
               </li>
               <li class="menu-item ">
-                <a href="/admin/list-offer" class="menu-link">
+                <a href="/admin/offer-list" class="menu-link">
                   <div data-i18n="offer List">offer List</div>
                 </a>
               </li>
@@ -544,66 +544,65 @@
                 <h5 class="card-title mb-0 text-primary">Coupon Information</h5>
             </div>
             <div class="card-body">
-                <form action="/admin/add-coupon" method="POST">
-                    <div class="row">
-                        <!-- Coupon Code -->
-                        <div class="mb-3 col-md-6">
-                            <label for="couponCode">Coupon Code</label>
-                            <input type="text" class="form-control" id="couponCode" name="coupon_code" placeholder="Coupon Code" required>
-                        </div>
-                        <!-- Description -->
-                        <div class="mb-3 col-md-6">
-                            <label for="couponDescription">Description</label>
-                            <textarea class="form-control" id="couponDescription" name="description" placeholder="Description"></textarea>
-                        </div>
+              <form action="/admin/add-coupon" method="POST" id="couponForm">
+                <div class="row">
+                    <!-- Coupon Code -->
+                    <div class="mb-3 col-md-6">
+                        <label for="couponCode">Coupon Code</label>
+                        <input type="text" class="form-control" id="couponCode" name="coupon_code" placeholder="Coupon Code" required>
+                        <span id="couponCodeError" class="text-danger" ></span>
                     </div>
-
-                    <!-- Discount and Minimum Amount -->
-                    <div class="row">
-                      <div class="col-md-6">
+                    <!-- Description -->
+                    <div class="mb-3 col-md-6">
+                        <label for="couponDescription">Description</label>
+                        <textarea class="form-control" id="couponDescription" name="description" placeholder="Description"></textarea>
+                        <span id="couponDescriptionError" class="text-danger"></span>
+                    </div>
+                </div>
+            
+                <!-- Discount and Minimum Amount -->
+                <div class="row">
+                    <div class="col-md-6">
                         <div class="mb-3">
                             <label for="redeemAmount" class="form-label">Redeem Amount:</label>
                             <input type="number" class="form-control" id="redeemAmount" name="redeem_amount" required>
+                            <span id="redeemAmountError" class="text-danger" style=""></span>
                         </div>
                     </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="minAmount" class="form-label">Minimum Amount:</label>
-                                <input type="number" class="form-control" id="minAmount" name="min_amount" required>
-                            </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="minAmount" class="form-label">Minimum Amount:</label>
+                            <input type="number" class="form-control" id="minAmount" name="min_amount" required>
+                            <span id="minAmountError" class="text-danger"></span>
                         </div>
                     </div>
-
-                    <!-- Redeem Amount and Expiry Date -->
-                    <div class="row">
-                        
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="expiryDate" class="form-label">Expiry Date:</label>
-                                <input type="date" class="form-control" id="expiryDate" name="expiryDate" required>
-                            </div>
+                </div>
+            
+                <!-- Expiry Date and Status -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="expiryDate" class="form-label">Expiry Date:</label>
+                            <input type="date" class="form-control" id="expiryDate" name="expiryDate" required>
+                            <span id="expiryDateError" class="text-danger"></span>
                         </div>
-                        <div class="col-md-6">
-                          <div class="mb-3">
-                              <label for="couponStatus" class="form-label">Status:</label>
-                              <select class="form-select" id="couponStatus" name="isListed" required>
-                                  <option value="" disabled selected>Select status</option>
-                                  <option value="true">Active</option>
-                                  <option value="false">Inactive</option>
-                              </select>
-                          </div>
-                      </div>
                     </div>
-
-                    <!-- Status -->
-                    <div class="row">
-                        
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="couponStatus" class="form-label">Status:</label>
+                            <select class="form-select" id="couponStatus" name="isListed" required>
+                                <option value="" disabled selected>Select status</option>
+                                <option value="true">Active</option>
+                                <option value="false">Inactive</option>
+                            </select>
+                        </div>
                     </div>
-
-                    <div class="mb-3">
-                        <button type="submit" class="btn btn-primary">Add Coupon</button>
-                    </div>
-                </form>
+                </div>
+            
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-primary">Add Coupon</button>
+                </div>
+            </form>
             </div>
         </div>
     </div>
@@ -691,10 +690,52 @@
   <script src="https://unpkg.com/cropperjs/dist/cropper.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="/image-cropper/cropperjs/cropper.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
+  <script>
+    document.getElementById('couponForm').addEventListener('input', function (e) {
+      const redeemAmount = document.getElementById('redeemAmount');
+      const minAmount = document.getElementById('minAmount');
+      const expiryDate = document.getElementById('expiryDate');
 
+      const redeemAmountError = document.getElementById('redeemAmountError');
+      const minAmountError = document.getElementById('minAmountError');
+      const expiryDateError = document.getElementById('expiryDateError');
 
+      let isValid = true;
+
+      // Validate Redeem Amount
+      if (redeemAmount.value <= 0) {
+        redeemAmountError.textContent = 'Redeem amount must be a positive number.';
+        isValid = false;
+      } else {
+        redeemAmountError.textContent = '';
+      }
+
+      // Validate Minimum Amount
+      if (minAmount.value <= 0) {
+        minAmountError.textContent = 'Minimum amount must be a positive number.';
+        isValid = false;
+      } else {
+        minAmountError.textContent = '';
+      }
+
+      // Validate Expiry Date
+      const today = new Date().toISOString().split('T')[0];
+      if (expiryDate.value && expiryDate.value <= today) {
+        expiryDateError.textContent = 'Expiry date must be a future date.';
+        isValid = false;
+      } else {
+        expiryDateError.textContent = '';
+      }
+
+      // Prevent form submission if any validation fails
+      if (!isValid) {
+        e.preventDefault();
+      }
+    });
+  </script>
 
 
 </body>

@@ -37,7 +37,7 @@ const orderSchema = new Schema({
     },
     apartment: {
       type: String,
-      required: true,
+     
     },
     state: {
       type: String,
@@ -63,6 +63,22 @@ const orderSchema = new Schema({
         type: Number,
         required: true,
       },
+      order_status: {
+        type: String,
+        enum: ["Pending", "Processing", "Shipped", "Delivered", "Cancelled", "Returned", "Return Requested"],
+        default: "Pending",
+      },
+      discountedPrice: { type: Number},
+      cancelReason: {
+        type: String,
+      },
+      returnReason: {
+        type: String,
+      },
+      returnRequested: {
+        type: Boolean,
+        default: false,
+      },
     },
   ],
   createdAt: {
@@ -81,11 +97,7 @@ const orderSchema = new Schema({
     enum: ["Pending", "Completed", "Failed"],
     default: "Pending",
   },
-  order_status: {
-    type: String,
-    enum: ["Pending", "Processing", "Shipped", "Deliverd", "Cancel", "Returned"],
-    default: "Pending",
-  },
+
   coupon: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Coupon",
@@ -98,6 +110,12 @@ const orderSchema = new Schema({
     type: String,
     unique: true,
     required: true,
+  },
+
+  returnRequestStatus: {
+    type: String,
+    enum: ["Pending", "Accepted", "Rejected"],
+    default: "Pending",
   },
 });
 

@@ -156,7 +156,7 @@ const loadAddress = async (req, res) => {
         }
       : null;
     console.log("user details", userDetails);
-    res.render("account", {
+    res.render("address", {
       user: userDetails,
       categories,
       wishlistItems,

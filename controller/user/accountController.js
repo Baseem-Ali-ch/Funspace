@@ -7,11 +7,17 @@ const Cart = require("../../model/cartModel");
 const Address = require("../../model/addressModel");
 const Order = require("../../model/orderModel");
 const Wallet = require("../../model/walletModel");
-const Offer = require('../../model/offerModel')
+const Offer = require("../../model/offerModel");
+const mongoose = require("mongoose");
+const ObjectId = mongoose.Types.ObjectId;
 
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const bcrypt = require("bcrypt");
+const path = require('path')
+const PDFDocument = require('pdfkit');
+const fs = require('fs');
+
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -21,16 +27,6 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-//load user profile
-// const loadProfile = async (req, res) => {
-//   try {
-//     const user = req.session.user || req.user;
-//     const categories = await Category.find({ isListed: "true" });
-//     res.render("profile", { user, categories });
-//   } catch (error) {
-//     console.log(error);
-//   }
-// };
 const loadProfile = async (req, res) => {
   try {
     const user = req.session.user || req.user;
@@ -112,7 +108,6 @@ const loadProfile = async (req, res) => {
   }
 };
 
-
 //user can edit their own
 const updateProfile = async (req, res) => {
   try {
@@ -180,7 +175,7 @@ const verifyForgetPassword = async (req, res) => {
 
     await Token.create({ userId: user._id, token, createdAt: Date.now() });
 
-    const resetUrl = `http://localhost:5058/reset-password?token=${token}&id=${user._id}`;
+    const resetUrl = `http://localhost:5068/reset-password?token=${token}&id=${user._id}`;
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
@@ -244,84 +239,94 @@ const resetPassword = async (req, res) => {
 // add new address
 const addAddress = async (req, res) => {
   try {
-    const { fullName, streetAddress, apartment, town, city, state, postcode, phone, email } = req.body;
-    const user = req.session.user || req.user;
-    const userId = user ? user._id : null;
-    const newAddress = new Address({
-      fullName,
-      streetAddress,
-      apartment,
-      town,
-      city,
-      state,
-      postcode,
-      phone,
-      email,
-      userId,
-    });
-
-    await newAddress.save();
-    res.status(200).json({ message: "Address saved successfully", success: true });
-  } catch (error) {
-    console.log("Error saving address", error);
-    res.status(500).json({ message: "Error saving address", success: false });
-  }
-};
-
-const loadAddress = async (req, res) => {
-  try {
-    const user = req.session.user || req.user;
+    const user = req.session.user || req.user; // Get user from session or request
     const userId = user ? user._id : null;
 
     if (!userId) {
-      return res.status(400).json({ success: false, message: "User ID not found." });
+      return res.status(401).json({ success: false, message: "User not authenticated" });
     }
 
-    console.log("Fetching addresses for userId:", userId);
+    const addressData = { ...req.body, userId }; // Set userId
+    const address = new Address(addressData);
+    await address.save();
 
-    const addresses = await Address.find({ userId: userId });
-
-    res.status(200).json({ success: true, addresses });
+    res.status(201).json({ success: true, message: "Address added successfully", address });
   } catch (error) {
-    console.error("Error fetching addresses:", error);
-    res.status(500).json({ success: false, message: "Error fetching addresses." });
+    console.error("Error adding address:", error);
+    res.status(500).json({ success: false, message: "Error adding address" });
   }
 };
 
-// Assuming you have an endpoint to fetch all addresses
 const getAddress = async (req, res) => {
   try {
     const user = req.session.user || req.user;
     const userId = user ? user._id : null;
 
     if (!userId) {
-      return res.status(400).json({ success: false, message: "User ID not found." });
+      return res.status(401).json({ success: false, message: "User not authenticated" });
     }
-    const addresses = await Address.find({ userId }); // Fetch all addresses
-    res.status(200).json({ success: true, addresses }); // Return addresses as an array
+
+    const addresses = await Address.find({ userId }); // Fetch addresses for the user
+    res.json({ success: true, addresses });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Error fetching addresses." });
+    console.error("Error fetching addresses:", error);
+    res.status(500).json({ success: false, message: "Error fetching addresses" });
   }
 };
 
 const updateAddress = async (req, res) => {
   try {
+    const user = req.session.user || req.user;
+    const userId = user ? user._id : null;
+
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "User not authenticated" });
+    }
+
     const addressId = req.params.id;
-    const { fullName, streetAddress, apartment, town, city, state, postcode, phone, email } = req.body;
-    await Address.findByIdAndUpdate(addressId, { fullName, streetAddress, apartment, town, city, state, postcode, phone, email });
-    res.status(200).json({ success: true, message: "Address updated successfully." });
+    const updatedData = req.body;
+
+    // Ensure address belongs to the user
+    const address = await Address.findOne({ _id: addressId, userId });
+    if (!address) {
+      return res.status(404).json({ success: false, message: "Address not found or unauthorized" });
+    }
+
+    // Update the address
+    const updatedAddress = await Address.findByIdAndUpdate(addressId, updatedData, { new: true });
+
+    res.json({ success: true, message: "Address updated successfully", address: updatedAddress });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Error updating address." });
+    console.error("Error updating address:", error);
+    res.status(500).json({ success: false, message: "Error updating address" });
   }
 };
 
 const deleteAddress = async (req, res) => {
+  console.log("Delete address request received:", req.params);
   try {
+    const user = req.session.user || req.user;
+    const userId = user ? user._id : null;
+
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "User not authenticated" });
+    }
+
     const addressId = req.params.id;
+    if (!mongoose.Types.ObjectId.isValid(addressId)) {
+      return res.status(400).json({ success: false, message: "Invalid address ID" });
+    }
+
+    const address = await Address.findOne({ _id: addressId, userId });
+    if (!address) {
+      return res.status(404).json({ success: false, message: "Address not found or unauthorized" });
+    }
+
     await Address.findByIdAndDelete(addressId);
-    res.status(200).json({ success: true, message: "Address deleted successfully." });
+    res.json({ success: true, message: "Address deleted successfully" });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Error deleting address." });
+    console.error("Error deleting address:", error);
+    res.status(500).json({ success: false, message: "Error deleting address" });
   }
 };
 
@@ -400,6 +405,7 @@ const loadWallet = async (req, res) => {
     }
 
     // Fetch the wallet
+    
     const wallet = await Wallet.findOne({ user: userId });
 
     res.render("wallet", {
@@ -407,7 +413,7 @@ const loadWallet = async (req, res) => {
       wishlistItems: wishlistItems ? wishlistItems.products : [], // Handle null wishlistItems
       categories,
       cartItems,
-      transactions: wallet.transactions,
+      transactions: wallet?.transactions,
       wallet,
     });
   } catch (error) {
@@ -474,6 +480,313 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
+const loadOrderList = async (req, res) => {
+  const { search = "", page = 1 } = req.query;
+  const limit = 10;
+  const skip = (page - 1) * limit;
+
+  try {
+    const user = req.session.user || req.user;
+    const userId = user ? user._id : null;
+
+    let wishlistItems = [];
+    if (userId) {
+      const wishlist = await Wishlist.findOne({ userId }).populate("products.productId");
+      wishlistItems = wishlist ? wishlist.products : [];
+    }
+
+    let cartItems = [];
+    if (userId) {
+      const cart = await Cart.findOne({ userId }).populate("items.productId");
+      cartItems = cart ? cart.items : [];
+    }
+
+    const searchQuery = search
+      ? {
+          $or: [
+            { orderId: new RegExp(search, "i") },
+            { "address.fullName": new RegExp(search, "i") },
+            ...(mongoose.Types.ObjectId.isValid(search) ? [{ _id: mongoose.Types.ObjectId(search) }] : []),
+          ],
+          user: userId,
+        }
+      : { user: userId };
+
+    const totalOrders = await Order.countDocuments(searchQuery);
+
+    const orders = await Order.find(searchQuery)
+      .populate("items.product")
+      .populate("address")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    for (let order of orders) {
+      let totalPrice = 0;
+
+      for (let item of order.items) {
+        let finalPrice = item.product.price;
+        let offerDetails = null;
+
+        if (item.product) {
+          // Check for product-specific offers
+          const productOffers = await Offer.find({
+            offerType: "product",
+            status: "active",
+            _id: { $in: item.product.offerIds || [] }
+          }).exec();
+
+          // Check for category-specific offers
+          const categoryOffers = await Offer.find({
+            offerType: "category",
+            status: "active",
+            categoryIds: item.product.category
+          }).exec();
+
+          let bestOffer = null;
+          if (productOffers.length > 0) {
+            bestOffer = productOffers.reduce((max, offer) => offer.discount > max.discount ? offer : max, productOffers[0]);
+          }
+
+          if (categoryOffers.length > 0) {
+            const categoryBestOffer = categoryOffers.reduce((max, offer) => offer.discount > max.discount ? offer : max, categoryOffers[0]);
+            if (!bestOffer || categoryBestOffer.discount > bestOffer.discount) {
+              bestOffer = categoryBestOffer;
+            }
+          }
+
+          if (bestOffer) {
+            finalPrice = item.product.price * (1 - bestOffer.discount / 100);
+            offerDetails = {
+              offerType: bestOffer.offerType,
+              discount: bestOffer.discount,
+              offerName: bestOffer.offerName,
+              description: bestOffer.description || "No additional details available",
+            };
+            item.product.finalPrice = finalPrice.toFixed(2);
+            item.product.offerDetails = offerDetails;
+          } else {
+            item.product.finalPrice = item.product.price.toFixed(2);
+            item.product.offerDetails = null;
+          }
+          
+
+          totalPrice += finalPrice * item.quantity;
+          item.product.finalPrice = finalPrice.toFixed(2);
+          item.product.offerDetails = offerDetails;
+        }
+      }
+
+      order.totalPrice = totalPrice.toFixed(2);
+    }
+
+    const totalPages = Math.ceil(totalOrders / limit);
+    const categories = await Category.find({ isListed: "true" });
+
+    res.render("order-list", {
+      wishlistItems,
+      cartItems,
+      orders,
+      categories,
+      search,
+      currentPage: parseInt(page),
+      totalPages,
+      userId,
+      user,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ success: false, message: "Server error", error: error.message });
+  }
+};
+
+
+
+
+
+
+// Route to handle return requests
+
+
+
+
+
+
+
+const loadAddress = async (req, res) => {
+  try {
+    const user = req.session.user || req.user;
+    const userId = user ? user._id : null;
+    console.log("user session:", user);
+
+    let wishlistItems = [];
+    if (userId) {
+      const wishlist = await Wishlist.findOne({ userId }).populate("products.productId");
+      wishlistItems = wishlist ? wishlist.products : [];
+    }
+
+    let cartItems = [];
+    if (userId) {
+      const cart = await Cart.findOne({ userId }).populate("items.productId");
+      cartItems = cart ? cart.items : [];
+    }
+
+    const categories = await Category.find({ isListed: "true" });
+    res.render("order-list", {
+      wishlistItems,
+      cartItems,
+      categories,
+      userId,
+      user,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ success: false, message: "Server error", error: error.message });
+  }
+};
+
+
+
+
+
+
+
+const downloadInvoice = async (req, res) => {
+  try {
+    const { orderId, productId } = req.params;
+    
+    const order = await Order.findOne({ orderId: orderId })
+      .populate('items.product')
+      .populate('user');
+
+    if (!order) {
+      return res.status(404).send('Order not found');
+    }
+
+    const orderItem = order.items.find(item => item.product._id.toString() === productId);
+
+    if (!orderItem) {
+      return res.status(404).send('Product not found in the order');
+    }
+
+    const doc = new PDFDocument({ margin: 50 });
+    
+    // Set response headers for PDF download
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=invoice-${order.orderId}-${productId}.pdf`);
+
+    // Pipe the PDF document to the response
+    doc.pipe(res);
+
+    // Add content to the PDF
+    doc.fontSize(18).text('Invoice', { align: 'center' });
+    doc.moveDown();
+
+    // Define table structure
+    const table = {
+      headers: ['Field', 'Value'],
+      rows: [
+        ['Order ID', order.orderId],
+        ['Date', order.createdAt.toLocaleDateString()],
+        ['Customer', order.address.fullName],
+        ['Address', `${order.address.streetAddress}, ${order.address.city}, ${order.address.state}, ${order.address.postcode}`]
+      ]
+    };
+
+    // Draw table with padding and styling
+    const startX = 50;
+    let startY = 100;
+    const rowHeight = 30;
+    const colWidth = (doc.page.width - 100) / 2;
+    const cellPadding = 5;
+
+    // Draw headers with bold font and background color
+    doc.font('Helvetica-Bold');
+    table.headers.forEach((header, i) => {
+      doc.rect(startX + i * colWidth, startY, colWidth, rowHeight)
+        .fillAndStroke('#f0f0f0', '#000')
+        .fill('#000')
+        .text(header, startX + i * colWidth + cellPadding, startY + cellPadding, {
+          width: colWidth - 2 * cellPadding,
+          align: 'left',
+          height: rowHeight - 2 * cellPadding
+        });
+    });
+
+    // Draw rows with padding
+    doc.font('Helvetica');
+    table.rows.forEach((row, rowIndex) => {
+      row.forEach((cell, colIndex) => {
+        doc.rect(startX + colIndex * colWidth, startY + (rowIndex + 1) * rowHeight, colWidth, rowHeight)
+          .stroke()
+          .text(cell, startX + colIndex * colWidth + cellPadding, startY + (rowIndex + 1) * rowHeight + cellPadding, {
+            width: colWidth - 2 * cellPadding,
+            align: 'left',
+            height: rowHeight - 2 * cellPadding
+          });
+      });
+    });
+
+    // Move to next section
+    startY += (table.rows.length + 1) * rowHeight + 10;
+
+    // Product details table
+    doc.fontSize(14).text('Product Details', startX, startY);
+    startY += 30;
+
+    const productTable = {
+      headers: ['Product', 'Quantity', 'Price', 'Total'],
+      rows: [[
+        orderItem.product.name,
+        orderItem.quantity.toString(),
+        `₹${orderItem.product.price.toFixed(2)}`,
+        `₹${(orderItem.quantity * orderItem.product.price).toFixed(2)}`
+      ]]
+    };
+
+    // Draw product table with padding and styling
+    doc.font('Helvetica-Bold');
+    productTable.headers.forEach((header, i) => {
+      doc.rect(startX + i * colWidth / 2, startY, colWidth / 2, rowHeight)
+        .fillAndStroke('#f0f0f0', '#000')
+        .fill('#000')
+        .text(header, startX + i * colWidth / 2 + cellPadding, startY + cellPadding, {
+          width: colWidth / 2 - 2 * cellPadding,
+          align: 'center',
+          height: rowHeight - 2 * cellPadding
+        });
+    });
+
+    doc.font('Helvetica');
+    productTable.rows[0].forEach((cell, i) => {
+      doc.rect(startX + i * colWidth / 2, startY + rowHeight, colWidth / 2, rowHeight)
+        .stroke()
+        .text(cell, startX + i * colWidth / 2 + cellPadding, startY + rowHeight + cellPadding, {
+          width: colWidth / 2 - 2 * cellPadding,
+          align: 'center',
+          height: rowHeight - 2 * cellPadding
+        });
+    });
+
+    // Move to next section
+    startY += 2 * rowHeight + 10;
+
+    // Add total and order status with padding and font size
+    doc.fontSize(14).text(`Total: ₹${(orderItem.quantity * orderItem.product.price).toFixed(2)}`, startX, startY, { align: 'right' });
+    startY += rowHeight;
+    doc.fontSize(12).text(`Order Status: ${orderItem.order_status}`, startX, startY);
+
+    // Finalize the PDF and end the stream
+    doc.end();
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error generating invoice');
+  }
+};
+
+
 module.exports = {
   loadProfile,
   updateProfile,
@@ -482,7 +795,6 @@ module.exports = {
   resetPasswordPage,
   resetPassword,
   addAddress,
-  loadAddress,
   updateAddress,
   deleteAddress,
   getAddress,
@@ -490,4 +802,7 @@ module.exports = {
   changedPassword,
   loadWallet,
   updateOrderStatus,
+  loadOrderList,
+  loadAddress,
+  downloadInvoice
 };

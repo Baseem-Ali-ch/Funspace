@@ -37,13 +37,13 @@
     
     <!-- ? PROD Only: Google Tag Manager (Default ThemeSelection: GTM-5DDHKGP, PixInvent: GTM-5J3LMKC) -->
     <script>(function (w, d, s, l, i) {
-            w[l] = w[l] || []; w[l].push({
-                'gtm.start':
-                    new Date().getTime(), event: 'gtm.js'
-            }); var f = d.getElementsByTagName(s)[0],
-                j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
-                    '../../../../www.googletagmanager.com/gtm5445.html?id=' + i + dl; f.parentNode.insertBefore(j, f);
-        })(window, document, 'script', 'dataLayer', 'GTM-5DDHKGP');</script>
+        w[l] = w[l] || []; w[l].push({
+          'gtm.start':
+            new Date().getTime(), event: 'gtm.js'
+        }); var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+            '../../../../www.googletagmanager.com/gtm5445.html?id=' + i + dl; f.parentNode.insertBefore(j, f);
+      })(window, document, 'script', 'dataLayer', 'GTM-5DDHKGP');</script>
     <!-- End Google Tag Manager -->
     
     <!-- Favicon -->
@@ -90,7 +90,22 @@
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="/dashboard-assets/js/config.js"></script>
 
-
+    <style>
+      .select2-container--default .select2-selection--multiple {
+          min-height: 100px;
+          overflow-y: auto;
+      }
+      .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+          display: block;
+          padding: 5px;
+      }
+      .select2-container--default .select2-selection--multiple .select2-selection__choice {
+          margin-top: 5px;
+      }
+      .select2-container {
+          width: 100% !important;
+      }
+  </style>
     
     
 </head>
@@ -186,11 +201,11 @@
                 <div data-i18n="Order List">Order List</div>
               </a>
             </li>
-            <li class="menu-item">
+            <!-- <li class="menu-item">
               <a href="/admin/order-details" class="menu-link">
                 <div data-i18n="Order Details">Order Details</div>
               </a>
-            </li>
+            </li> -->
           </ul>
         </li>
         <li class="menu-item">
@@ -203,7 +218,7 @@
                 <div data-i18n="All Customers">All Customers</div>
               </a>
             </li>
-            <li class="menu-item">
+            <!-- <li class="menu-item">
               <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <div data-i18n="Customer Details">Customer Details</div>
               </a>
@@ -230,12 +245,12 @@
                 </li>
 
               </ul>
-            </li>
+            </li> -->
           </ul>
         </li>
         <li class="menu-item active open ">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
-              <div data-i18n="Coupon & offer">Coupon & offer</div>
+              <div data-i18n="Coupon & Offer & offer">Coupon & offer</div>
             </a>
             <ul class="menu-sub">
               <li class="menu-item ">
@@ -540,12 +555,12 @@
   
   <script>
     function handleOfferTypeChange() {
-        const offerType = document.getElementById("offerType").value;
-        document.getElementById("productFields").style.display = offerType === "product" ? "block" : "none";
-        document.getElementById("categoryFields").style.display = offerType === "category" ? "block" : "none";
-        document.getElementById("referralFields").style.display = offerType === "referral" ? "block" : "none";
+      const offerType = document.getElementById("offerType").value;
+      document.getElementById("productFields").style.display = offerType === "product" ? "block" : "none";
+      document.getElementById("categoryFields").style.display = offerType === "category" ? "block" : "none";
+      document.getElementById("referralFields").style.display = offerType === "referral" ? "block" : "none";
     }
-</script>
+  </script>
 </head>
 <body>
 <div class="container py-4">
@@ -564,7 +579,6 @@
                                 <option value="" disabled selected>Select Offer Type</option>
                                 <option value="product">Product Offer</option>
                                 <option value="category">Category Offer</option>
-                                <option value="referral">Referral Offer</option>
                             </select>
                         </div>
     
@@ -579,42 +593,41 @@
                         <!-- Discount -->
                     <div class="mb-3 col-md-6">
                         <label for="discount">Discount (%)</label>
-                        <input type="number" class="form-control" id="discount" name="discount" placeholder="Discount" required>
+                        <input type="number" class="form-control" id="discount" name="discount" max="50" placeholder="Discount" required>
                     </div>
 
                     <!-- Product Fields -->
-                    <div id="productFields" style="display: none;" class="col-md-6">
-                        <div class="mb-3 >
-                            <label for="productId">Product</label>
-                            <select class="form-select" id="productId" name="productId">
-                                <option value="" disabled selected>Select Product</option>
-                                <% products.forEach(product => { %> <!-- Corrected the loop syntax -->
-                                    <option value="<%= product._id %>"><%= product.name %></option> <!-- Populate each product as an option -->
-                                <% }) %>
-                            </select>
-                            
-                        </div>
-                    </div>
-                    <div id="categoryFields" style="display: none;" class="col-md-6">
-                        <div class="mb-3 ">
-                            <label for="categoryId">Category</label>
-                            <select class="form-select" id="categoryId" name="categoryId">
-                                <option value="" disabled selected>Select Category</option>
-                                <% categories.forEach(category => { %>
-                                    <option value="<%= category._id %>"><%= category.title %></option>
-                                 <% }) %>
-                                <!-- Dynamically populate category options -->
-                            </select>
-                        </div>
-                    </div>
+                    <!-- Product Fields -->
+                    
+                      <div id="categoryFields" style="display: none;" class="col-md-6">
+                          <div class="mb-3">
+                              <label for="categoryId" class="form-label">Category:</label>
+                              <select class="form-select select2-multiple" id="categoryId" name="categoryIds[]" multiple required>
+                                  <option value="" disabled>Select Category</option>
+                                  <% categories.forEach(category => { %>
+                                      <option value="<%= category._id %>"><%= category.title %></option>
+                                  <% }) %>
+                              </select>
+                          </div>
+                      </div>
+                  
+                      <div id="productFields" style="display: none;" class="col-md-6">
+                          <div class="mb-3">
+                              <label for="productId" class="form-label">Product:</label>
+                              <select class="form-select select2-multiple" id="productId" name="productIds[]" multiple required>
+                                  <option value="" disabled>Select Product</option>
+                                  <% products.forEach(product => { %>
+                                      <option value="<%= product._id %>"><%= product.name %></option>
+                                  <% }) %>
+                              </select>
+                          </div>
+                      </div>
+                  
+                  
 
-                    <!-- Referral Fields -->
-                    <div id="referralFields" style="display: none;" class="col-md-6">
-                        <div class="mb-3 ">
-                            <label for="referralCode">Referral Code</label>
-                            <input type="text" class="form-control" id="referralCode" name="referralCode" placeholder="Referral Code">
-                        </div>
-                    </div>
+
+                    
+                    
                      </div>
                     
 
@@ -642,7 +655,7 @@
             </div>
         </div>
     </div>
-</div
+  </div>
   
   
 
@@ -724,38 +737,86 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="/image-cropper/cropperjs/cropper.js"></script>
   <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+ <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 
 
 
   <script>
     $(document).ready(function () {
-        $('#addOfferForm').on('submit', function (e) {
-            e.preventDefault(); // Prevent the default form submission
+      // Initialize select2
+      $('.select2-multiple').select2({
+        placeholder: "Select options",
+        allowClear: true,
+        tags: true,
+        tokenSeparators: [',', ' '],
+        maximumSelectionLength: 10  // Optional: limit the number of selections
+      });
 
-            $.ajax({
-                type: 'POST',
-                url: '/admin/add-offer',
-                data: $(this).serialize(),
-                success: function (response) {
-                    Swal.fire({
-                        title: 'Success',
-                        text: response.message,
-                        icon: 'success',
-                        confirmButtonText: 'OK'
-                    });
-                },
-                error: function (xhr) {
-                    Swal.fire({
-                        title: 'Error',
-                        text: xhr.responseJSON.message,
-                        icon: 'error',
-                        confirmButtonText: 'OK'
-                    });
-                }
-            });
+      // Listen for changes in the offerType select field
+      $('#offerType').on('change', function () {
+        var offerType = $(this).val();
+
+        // Hide all fields initially
+        $('#categoryFields').hide();
+        $('#productFields').hide();
+        $('#categoryId').prop('required', false);
+        $('#productId').prop('required', false);
+
+        // Show and require relevant fields based on offerType
+        if (offerType === 'category') {
+          $('#categoryFields').show();
+          $('#categoryId').prop('required', true);
+        } else if (offerType === 'product') {
+          $('#productFields').show();
+          $('#productId').prop('required', true);
+        }
+      });
+
+      // Trigger change event to set initial visibility and required state
+      $('#offerType').trigger('change');
+
+      // Handle form submission via AJAX
+      $(document).ready(function () {
+        $('#addOfferForm').on('submit', function (e) {
+          e.preventDefault(); // Prevent the default form submission
+
+          $.ajax({
+            type: 'POST',
+            url: '/admin/add-offer',
+            data: $(this).serialize(),
+            success: function (response) {
+              if (response.success) {
+                Swal.fire({
+                  title: 'Success',
+                  text: response.message,  // Display success message from the server
+                  icon: 'success',
+                  confirmButtonText: 'OK'
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    // Optional: Redirect or reset the form after successful submission
+                    window.location.reload(); // Reload the page or navigate to another page
+                  }
+                });
+              }
+            },
+            error: function (xhr) {
+              Swal.fire({
+                title: 'Error',
+                text: xhr.responseJSON.message,  // Display error message from the server
+                icon: 'error',
+                confirmButtonText: 'OK'
+              });
+            }
+          });
         });
+      });
+
     });
-</script>
+
+
+  </script>
 
 
 

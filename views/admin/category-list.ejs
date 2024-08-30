@@ -280,11 +280,11 @@
                       <div data-i18n="Order List">Order List</div>
                     </a>
                   </li>
-                  <li class="menu-item">
+                  <!-- <li class="menu-item">
                     <a href="/admin/order-details" class="menu-link">
                       <div data-i18n="Order Details">Order Details</div>
                     </a>
-                  </li>
+                  </li> -->
                 </ul>
               </li>
               <li class="menu-item">
@@ -297,7 +297,7 @@
                       <div data-i18n="All Customers">All Customers</div>
                     </a>
                   </li>
-                  <li class="menu-item">
+                  <!-- <li class="menu-item">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                       <div data-i18n="Customer Details">Customer Details</div>
                     </a>
@@ -324,12 +324,12 @@
                       </li>
 
                     </ul>
-                  </li>
+                  </li> -->
                 </ul>
               </li>
               <li class="menu-item  ">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
-                  <div data-i18n="Coupon">Coupon</div>
+                  <div data-i18n="Coupon & Offer">Coupon & Offer</div>
                 </a>
                 <ul class="menu-sub">
                   <li class="menu-item">
@@ -348,7 +348,7 @@
                     </a>
                   </li>
                   <li class="menu-item ">
-                    <a href="/admin/list-offer" class="menu-link">
+                    <a href="/admin/offer-list" class="menu-link">
                       <div data-i18n="offer List">offer List</div>
                     </a>
                   </li>
@@ -664,12 +664,14 @@
                 <div id="DataTables_Table_0_wrapper" class="dataTables_wrapper dt-bootstrap5 no-footer">
                   <div class="card-header d-flex rounded-0 flex-wrap pb-md-0 pt-0">
                     <div class="me-5 ms-n2">
-                      <div id="DataTables_Table_0_filter" class="dataTables_filter">
-                        <label>
-                          <input type="text" class="form-control form-control-sm" placeholder="Search Category"
-                            aria-controls="DataTables_Table_0" id="searchInput" onkeyup="searchTable()">
-                        </label>
-                      </div>
+                      <form method="GET" action="/admin/category-list">
+                        <div class="input-group mb-3 mt-3">
+                          <input type="text" class="form-control" name="search" value="<%= search %>"
+                            placeholder="Search category...">
+                          <button class="btn btn-outline-light " type="submit">Search</button>
+                        </div>
+                      </form>
+
                     </div>
                     <div class="d-flex justify-content-start justify-content-md-end align-items-baseline">
                       <div
@@ -695,7 +697,7 @@
                     aria-describedby="DataTables_Table_0_info" style="width: 1043px;">
                     <thead>
                       <tr>
-                        <th>s/n</th>
+                        <th></th>
                         <th>Categories</th>
                         <th>Description</th>
                         <th></th>
@@ -708,7 +710,7 @@
                       <% categories.forEach(function(category, index) { %>
                         <tr class="odd" id="row-<%= category._id %>">
                           <td>
-                            <%= index + 1 %>
+
                           </td>
                           <td>
                             <div class="d-flex flex-column justify-content-center" style="width: 230px;">
@@ -754,25 +756,27 @@
                   <nav aria-label="Page navigation">
                     <ul class="pagination justify-content-center">
                       <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
-                        <a class="page-link page-link-prev" href="?page=<%= currentPage - 1 %>" aria-label="Previous"
-                          tabindex="-1" aria-disabled="<%= currentPage === 1 %>">
+                        <a class="page-link page-link-prev" href="?page=<%= currentPage - 1 %>&search=<%= search %>"
+                          aria-label="Previous" tabindex="-1" aria-disabled="<%= currentPage === 1 %>">
                           <span aria-hidden="true"><i class="icon-long-arrow-left"></i></span> Prev
                         </a>
                       </li>
                       <% for (let i=1; i <=totalPages; i++) { %>
                         <li class="page-item <%= currentPage === i ? 'active' : '' %>">
-                          <a class="page-link" href="?page=<%= i %>">
+                          <a class="page-link" href="?page=<%= i %>&search=<%= search %>">
                             <%= i %>
                           </a>
                         </li>
                         <% } %>
                           <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
-                            <a class="page-link page-link-next" href="?page=<%= currentPage + 1 %>" aria-label="Next">
+                            <a class="page-link page-link-next" href="?page=<%= currentPage + 1 %>&search=<%= search %>"
+                              aria-label="Next">
                               Next <span aria-hidden="true"><i class="icon-long-arrow-right"></i></span>
                             </a>
                           </li>
                     </ul>
                   </nav>
+
 
 
 

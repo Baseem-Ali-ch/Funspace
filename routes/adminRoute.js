@@ -3,7 +3,7 @@ const adminController = require("../controller/admin/adminController");
 const upload = require("../middleware/multer");
 const { isAdminAuthenticated } = require("../middleware/adminAuth");
 const adminBreadcrumbs = require("../middleware/adminBreadcrumbs");
-const couponController = require('../controller/admin/couponController')
+const couponController = require("../controller/admin/couponController");
 const nocache = require("nocache");
 const express = require("express");
 const adminRoute = express();
@@ -53,8 +53,10 @@ adminRoute.patch("/category-list/:id", isAdminAuthenticated, upload.single("cate
 
 //order management
 adminRoute.get("/order-list", isAdminAuthenticated, adminController.loadOrderList);
-adminRoute.post("/order-list/update-status", isAdminAuthenticated, adminController.updateOrderStatus);
+adminRoute.post("/order-list/update-order-status", isAdminAuthenticated, adminController.updateOrderStatus);
 adminRoute.get("/order-details", isAdminAuthenticated, adminController.loadOrderDeatails);
+adminRoute.post("/order-list/handle-return", isAdminAuthenticated, adminController.acceptReturn);
+adminRoute.get("/order-list/reject-return/:orderId", isAdminAuthenticated, adminController.rejectReturn);
 
 //user management
 adminRoute.get("/allCustomer", isAdminAuthenticated, adminController.loadAllUser);
@@ -64,31 +66,27 @@ adminRoute.patch("/allCustomer/:id", isAdminAuthenticated, adminController.updat
 adminRoute.get("/admin-profile", isAdminAuthenticated, adminController.loadAdmProfile);
 adminRoute.post("/logout", isAdminAuthenticated, adminController.adminLogout);
 
-
 //coupon management. add, edit, delete a coupon
-adminRoute.get('/list-coupon', couponController.getCoupons);
-adminRoute.get('/add-coupon', couponController.newCouponForm);
-adminRoute.post('/add-coupon', couponController.createCoupon);
-adminRoute.get('/get-coupon/:id', couponController.getCoupon);
-adminRoute.post('/edit-coupon', couponController.updateCoupon);
-adminRoute.post('/coupons/:id/delete', couponController.deleteCoupon);
+adminRoute.get("/list-coupon", couponController.getCoupons);
+adminRoute.get("/add-coupon", couponController.newCouponForm);
+adminRoute.post("/add-coupon", couponController.createCoupon);
+adminRoute.get("/get-coupon/:id", couponController.getCoupon);
+adminRoute.put("/edit-coupon/:id", couponController.updateCoupon);
+adminRoute.post("/coupons/:id/delete", couponController.deleteCoupon);
 
-
-//sales report 
-adminRoute.get('/sales-report', productController.salesReport);
+//sales report
+// adminRoute.get("/sales-report", productController.salesReport);
 
 //download reports
-adminRoute.get('/sales-report/:type',isAdminAuthenticated, adminController.salesReportPdf);
-adminRoute.get('/sales-report/:type',isAdminAuthenticated, adminController.salesReportExcel);
+adminRoute.get("/sales-report/:type", isAdminAuthenticated, adminController.salesReportPdf);
+adminRoute.get("/sales-report/:type", isAdminAuthenticated, adminController.salesReportExcel);
 
-
-//offer 
-adminRoute.get('/add-offer', couponController.renderAddOfferPage);
-adminRoute.get('/offer-list', couponController.offerList);
-adminRoute.post('/add-offer', couponController.addOffer);
-adminRoute.put('/offer-list', couponController.editOffer);
-adminRoute.delete('/add-offer/delete/:offerId', couponController.deleteOffer);
-
+//offer
+adminRoute.get("/add-offer", couponController.renderAddOfferPage);
+adminRoute.get("/offer-list", couponController.offerList);
+adminRoute.post("/add-offer", couponController.addOffer);
+adminRoute.put("/offer-list", couponController.editOffer);
+adminRoute.delete("/add-offer/delete/:offerId", couponController.deleteOffer);
 
 // Catch-all route for undefined paths
 adminRoute.get("*", (req, res) => {

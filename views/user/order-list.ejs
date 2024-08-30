@@ -1,0 +1,1129 @@
+<%- include('../layout/header.ejs') %>
+
+    <style>
+        .d-none {
+            display: none;
+        }
+
+        .success-message {
+            display: flex;
+            align-items: center;
+            background-color: #333;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            width: 21em;
+        }
+
+        .success-message span {
+            margin-left: 10px;
+            font-size: 12px;
+        }
+
+
+
+        .error-message {
+            display: flex;
+            align-items: center;
+            background-color: #333;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            width: 21em;
+        }
+
+        .error-message span {
+            margin-left: 10px;
+            font-size: 12px;
+        }
+
+        /* Custom button styles */
+        .btn-xm {
+            padding: 4px 8px;
+            /* Adjust the padding to make the button smaller */
+            font-size: 12px;
+            /* Adjust the font size */
+            border-radius: 0px;
+            /* Optional: adjust border radius for rounded corners */
+        }
+
+        .btn-xm.btn-primary {
+            background-color: #fff;
+            /* Primary button color */
+            border: 1px solid #c96;
+            /* Remove border */
+            color: #c96;
+            /* Text color */
+        }
+
+        .btn-xm.btn-danger {
+            background-color: #fff;
+            /* Danger button color */
+            border: 1px solid #c96;
+            ;
+            /* Remove border */
+            color: #c96;
+            /* Text color */
+        }
+
+        /* Optional: hover effects */
+        .btn-xm.btn-primary:hover {
+            background-color: #c96;
+            color: #fff;
+            /* Darker shade of primary color on hover */
+        }
+
+        .btn-xm.btn-danger:hover {
+            background-color: #c96;
+            color: #fff;
+            /* Darker shade of danger color on hover */
+        }
+
+        .address-item {
+            padding: 10px;
+            margin-bottom: 0px;
+            /* Space below each address item */
+            border-bottom: 1px solid #ddd;
+            /* Bottom border line */
+        }
+
+        .address-item:last-child {
+            border-bottom: none;
+            /* Remove border from the last item */
+        }
+
+        #successAddressMessage,
+        #errorAddressMessage {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            width: 90%;
+            max-width: 300px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            text-align: center;
+            padding: 12px;
+            background-color: black;
+            color: white;
+        }
+
+        .btn-edit-address,
+        .btn-delete-address {
+            background-color: #fff;
+            color: #000000;
+            padding: 10px;
+            margin-left: -9px;
+            font-weight: bolder;
+        }
+
+        .btn-edit-address:hover {
+            color: #c96;
+
+        }
+
+        .btn-delete-address:hover {
+            color: #c96;
+
+        }
+
+        #addAddressBtn {
+            color: #c96;
+            background-color: #fff;
+            border: 1px solid #c96;
+        }
+
+        #addAddressBtn:hover {
+            color: white;
+            background-color: #c96;
+        }
+
+        .table-cart {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table-cart th,
+        .table-cart td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .table-cart th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .table-cart a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .table-cart a:hover {
+            text-decoration: underline;
+        }
+
+        .table-cart .btn-info {
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+            color: #fff;
+        }
+
+        .table-cart .btn-info:hover {
+            background-color: #138496;
+            border-color: #117a8b;
+        }
+
+        .modal-content {
+            border-radius: 10px;
+            border: none;
+        }
+
+        .modal-header {
+            background-color: #343a40;
+            color: #fff;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        .modal-title {
+            font-weight: bold;
+        }
+
+        .modal-header .close {
+            color: #fff;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .table {
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+
+        .table th,
+        .table td {
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .table th {
+            background-color: #343a40;
+            color: #fff;
+        }
+
+        .modal-footer {
+            background-color: #f1f1f1;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        .modal-footer .btn {
+            font-weight: bold;
+        }
+
+        #viewOrder {
+            border: 1px solid #c96;
+            color: #c96;
+            background-color: white;
+        }
+
+        #viewOrder:hover {
+            color: #fff;
+            background-color: #c96;
+        }
+    </style>
+
+
+    <div class="page-wrapper">
+        <header class="header">
+            <div class="header-top">
+                <div class="container">
+                    <div class="header-left">
+
+                        <div class=" breadcrumbs">
+                            <ol class="breadcrumb">
+                                <% breadcrumbs.forEach((crumb, index)=> { %>
+                                    <% if (index < breadcrumbs.length - 1) { %>
+                                        <!-- Breadcrumbs with links -->
+                                        <li class="breadcrumb-item">
+                                            <a href="<%= crumb.url %>">
+                                                <%= crumb.name %>
+                                            </a>
+                                        </li>
+                                        <% } else { %>
+                                            <!-- Current page breadcrumb without link -->
+                                            <li class="breadcrumb-item active" aria-current="page">
+                                                <%= crumb.name %>
+                                            </li>
+                                            <% } %>
+                                                <% }); %>
+                            </ol>
+                        </div>
+                        <!-- End .container -->
+
+                        <!-- End .breadcrumb-nav -->
+                    </div>
+                    <div class="header-right ">
+                        <ul class="top-menu">
+                            <li>
+                                <a href="#">Links</a>
+                                <ul>
+                                    <li>
+
+                                        <a href="/wishlist"><i class="icon-heart-o"></i>Wishlist
+                                            <% if(wishlistItems){ %>
+                                                <span>
+                                                    (<%= wishlistItems.length %>)
+                                                </span>
+                                                <% }else{ %>
+                                                    <span>
+                                                        (0)
+                                                    </span>
+                                                    <% } %>
+
+                                        </a>
+                                    </li>
+                                    <li><a href="about.html">About Us</a></li>
+                                    <li><a href="/contact-us">Contact Us</a></li>
+                                    <% if (user) { %>
+                                        <li>
+                                            <a href="/account"><i class="icon-user"></i>
+                                                <%= user.name || user.displayName %>
+                                            </a>
+                                        </li>
+                                        <% } else { %>
+                                            <li>
+                                                <a href="/login"><i class="icon-user"></i>Login</a>
+                                            </li>
+                                            <% } %>
+                                </ul>
+                            </li>
+                        </ul>
+                        <!-- End .top-menu -->
+                    </div>
+                    <!-- End .header-right -->
+                </div>
+                <!-- End .container -->
+            </div>
+            <!-- End .header-top -->
+
+            <div class="header-middle sticky-header">
+                <div class="container">
+                    <div class="header-left">
+                        <button class="mobile-menu-toggler">
+                            <span class="sr-only">Toggle mobile menu</span>
+                            <i class="icon-bars"></i>
+                        </button>
+
+                        <a href="/" class="logo">
+                            <img src="/assets/images/furnspace logo black.png" alt="Molla Logo" width="105"
+                                height="25" />
+                        </a>
+
+                        <nav class="main-nav">
+                            <ul class="menu sf-arrows">
+                                <li class="megamenu-container active">
+                                    <a href="/home" class="">Home</a>
+                                </li>
+                                <li>
+                                    <a href="/product-list" ">Product</a>
+                    </li>
+      
+                    <li>
+                      <a href=" #" class="sf-with-ul">Category</a>
+                                    <ul>
+                                        <% categories.forEach(function(category) { %>
+
+                                            <li><a href="/category/<%= category._id %>">
+                                                    <%= category.title %>
+                                                </a></li>
+
+                                            <% }) %>
+                                    </ul>
+                                </li>
+
+
+
+                                <li>
+                                    <a href=" #" class="sf-with-ul">Brand</a>
+                                    <ul>
+                                        <li><a href="#">IKEA</a></li>
+                                        <li><a href="#">DURIAN</a></li>
+                                        <li><a href="#">URBAN LADDER</a></li>
+                                        <li><a href="#">FURNITURE PARK</a></li>
+                                        <li><a href="#">HOME TOWN</a></li>
+                                        <li><a href="#">WOODEN STREET</a></li>
+                                    </ul>
+                                </li>
+                                <!-- End .megamenu megamenu-sm -->
+
+
+                                <li>
+                                    <a href="#" class="sf-with-ul">Pages</a>
+
+                                    <ul>
+                                        <!-- <li><a href="about.html">About</a></li> -->
+                                        <li><a href="/contact-us">Contact</a></li>
+                                        <li><a href="/login">Login</a></li>
+
+                                        <!-- <li><a href="coming-soon.html">Coming Soon</a></li> -->
+                                    </ul>
+                                </li>
+                            </ul>
+                            <!-- End .menu -->
+                        </nav>
+                        <!-- End .main-nav -->
+                    </div>
+                    <!-- End .header-left -->
+
+                    <div class="header-right">
+                        <div class="header-search">
+                            <a href="#" class="search-toggle" role="button" title="Search"><i
+                                    class="icon-search"></i></a>
+                            <form action="#" method="get">
+                                <div class="header-search-wrapper">
+                                    <label for="q" class="sr-only">Search</label>
+                                    <input type="search" class="form-control" name="q" id="q" placeholder="Search in..."
+                                        required />
+                                </div>
+                                <!-- End .header-search-wrapper -->
+                            </form>
+                        </div>
+                        <!-- End .header-search -->
+
+                        <div class=" cart-dropdown">
+                            <a href="/wallet" class="dropdown-toggle" style="font-size: 23px;">
+                                <i class="fa-solid fa-wallet"></i>
+                            </a>
+                        </div>
+
+                        <div class="dropdown cart-dropdown">
+                            <a href="/cart" class="dropdown-toggle">
+                                <i class="icon-shopping-cart"></i>
+                                <% if(cartItems){ %>
+                                    <span class="cart-count">
+                                        <%= cartItems.length %>
+                                    </span>
+                                    <% }else{ %>
+                                        <span class="cart-count">0</span>
+                                        <% } %>
+
+                            </a>
+                        </div>
+                        <!-- End .cart-dropdown -->
+                    </div>
+                    <!-- End .header-right -->
+                </div>
+                <!-- End .container -->
+            </div>
+            <!-- End .header-middle -->
+        </header>
+        <!-- End .header -->
+
+        <main class="main">
+            <div class="page-header text-center" style="background-image: url('assets/images/page-header-bg.jpg')">
+                <div class="container">
+                    <h1 class="page-title">My Account<span>Shop</span></h1>
+                </div><!-- End .container -->
+            </div><!-- End .page-header -->
+
+
+            <div class="page-content mt-2">
+                <div class="dashboard">
+                    <div class="container">
+                        <div class="row">
+                            <aside class="col-md-4 col-lg-3" style="margin-left: -2em;">
+                                <ul class="nav nav-dashboard flex-column mb-3 mb-md-0" role="tablist"
+                                    style="margin-left: 30px;">
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="/account">Account
+                                            Details</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link active" id="tab-orders-link" data-toggle="tab"
+                                            href="#tab-orders" role="tab" aria-controls="tab-orders"
+                                            aria-selected="false">Orders</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="/address">Addresses</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="#" onclick="confirmLogout(event)">Sign Out</a>
+                                    </li>
+                                </ul>
+                            </aside><!-- End .col-lg-3 -->
+
+
+
+                            <div class="col-md-8 col-lg-9">
+                                <div class="tab-content col-md-8 col-lg-9">
+                                    <div class="tab-pane fade show active" id="tab-orders" role="tabpanel"
+                                        aria-labelledby="tab-orders-link">
+                                        <div class="" style="width: 60em;">
+                                            <div class="me-5 ms-n2 " style="width: 30em;">
+                                                <form method="GET" action="/order-list">
+                                                    <div class="input-group mb-3">
+                                                        <input type="text" class="form-control" name="search"
+                                                            placeholder="Search orders..." value="<%= search %>">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-md btn-outline-secondary"
+                                                                style="height: 40px;" type="submit">Search</button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                            <table class="table table-cart table-mobile">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 4%;">Order ID</th>
+                                                        <th style="width: 15%;">Address Name</th>
+                                                        <th style="width: 10%;">Price</th>
+                                                        <th style="width: 10%;">Offer</th> <!-- New column for Offer -->
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <% orders.forEach(order=> { %>
+                                                        <tr>
+                                                            <td>
+                                                                <a href="#" style="color: #c96;" data-toggle="modal"
+                                                                    data-target="#orderDetailsModal<%= order._id %>">
+                                                                    <%= order.orderId %>
+                                                                </a>
+                                                            </td>
+                                                            <td>
+                                                                <%= order.address.fullName %>
+                                                            </td>
+                                                            <td>
+                                                                ₹ <%= order.totalPrice %>
+                                                            </td>
+                                                            <td>
+                                                                <% let offerDescription='No offer' ;
+                                                                    order.items.forEach(item=> {
+                                                                    if (item.product.offerDetails) {
+                                                                    offerDescription =
+                                                                    item.product.offerDetails.offerName;
+                                                                    }
+                                                                    });
+                                                                    %>
+                                                                    <%= offerDescription %>
+                                                            </td>
+                                                        </tr>
+                                                        <% }); %>
+                                                </tbody>
+                                            </table>
+
+
+
+                                            <nav aria-label="Page navigation">
+                                                <ul class="pagination justify-content-center">
+                                                    <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                                                        <a class="page-link page-link-prev"
+                                                            href="?page=<%= currentPage - 1 %>&search=<%= search %>"
+                                                            aria-label="Previous" tabindex="-1"
+                                                            aria-disabled="<%= currentPage === 1 %>">
+                                                            <span aria-hidden="true"><i
+                                                                    class="icon-long-arrow-left"></i></span> Prev
+                                                        </a>
+                                                    </li>
+                                                    <% for (let i=1; i <=totalPages; i++) { %>
+                                                        <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                                                            <a class="page-link"
+                                                                href="?page=<%= i %>&search=<%= search %>">
+                                                                <%= i %>
+                                                            </a>
+                                                        </li>
+                                                        <% } %>
+                                                            <li
+                                                                class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                                                                <a class="page-link page-link-next"
+                                                                    href="?page=<%= currentPage + 1 %>&search=<%= search %>"
+                                                                    aria-label="Next">
+                                                                    Next <span aria-hidden="true"><i
+                                                                            class="icon-long-arrow-right"></i></span>
+                                                                </a>
+                                                            </li>
+                                                </ul>
+                                            </nav>
+                                        </div>
+                                        <a href="/product-list" class="btn btn-outline-primary-2"><span>GO SHOP</span><i
+                                                class="icon-long-arrow-right"></i></a>
+                                    </div><!-- .End .tab-pane -->
+
+                                </div><!-- End .col-lg-9 -->
+                            </div><!-- End .row -->
+                        </div><!-- End .col-lg-9 -->
+                    </div><!-- End .row -->
+                </div><!-- End .container -->
+            </div><!-- End .dashboard -->
+    </div><!-- End .page-content -->
+    </main><!-- End .main -->
+
+
+
+
+
+    <!-- Order Details Modal -->
+    <% orders.forEach(order=> { %>
+        <div class="modal fade" id="orderDetailsModal<%= order._id %>" tabindex="-1" role="dialog"
+            aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content" style="width: 80em; margin-left: -18em;">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="orderDetailsModalLabel" style="color: #fff;">Order Details</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body" style="padding: 20px;">
+
+                        <!-- Order Information -->
+                        <div class="row mb-4">
+                            <div class="col-md-6" id="order-info" data-order-id="<%= order._id %>"
+                                style="padding: 15px; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+                                <h6>Order Information</h6>
+                                <p><strong>Order ID:</strong>
+                                    <%= order.orderId %>
+
+                                </p>
+                                <p><strong>Order Date:</strong>
+                                    <%= order.createdAt.toLocaleDateString() %>
+                                </p>
+                                <p><strong>Total Amount:</strong> ₹<%= order.totalPrice %>
+                                </p>
+                                <p><strong>Payment Type:</strong>
+                                    <%= order.paymentMethod %>
+                                </p>
+                                <p><strong>Payment Status:</strong>
+
+                                    <%= order.payment_status %>
+                                </p>
+                            </div>
+                            <div class="col-md-6"
+                                style="padding: 15px; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+                                <h6>Shipping Address</h6>
+                                <p><strong>Name:</strong>
+                                    <%= order.address.fullName %>
+                                </p>
+                                <p><strong>Street:</strong>
+                                    <%= order.address.streetAddress %>
+                                </p>
+                                <p><strong>City:</strong>
+                                    <%= order.address.city %>,
+                                        <%= order.address.postcode %>
+                                </p>
+                                <p><strong>State:</strong>
+                                    <%= order.address.state %>
+                                </p>
+                                <p><strong>Phone:</strong>
+                                    <%= order.address.phone %>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Order Items -->
+                        <!-- Order Items -->
+                        <!-- Order Items -->
+                        <h6>Order Items</h6>
+                        <table class="table table-bordered table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th style="width: 25%;">Product</th>
+                                    <th>Quantity</th>
+                                    <th style="width: 10%;">Price</th>
+                                    <th style="width: 10%;">Total</th>
+                                    <th style="width: 10%;">Offer</th> <!-- New column for Offer -->
+                                    <th style="width: 10%;">Status</th>
+                                    <th>Actions</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% order.items.forEach(item=> { %>
+                                    <tr>
+                                        <td>
+                                            <%= item.product.name %>
+                                        </td>
+                                        <td>
+                                            <%= item.quantity %>
+                                        </td>
+                                        <td>
+                                            ₹<%= item.product.finalPrice %>
+                                        </td>
+                                        <td>
+                                            ₹<%= (item.quantity * item.product.finalPrice).toFixed(2) %>
+                                        </td>
+                                        <td>
+                                            <% if (item.product.offerDetails) { %>
+                                                <div>
+                                                    <strong>
+                                                        <%= item.product.offerDetails.offerName %>
+                                                    </strong>
+                                                    <p>Discount: <%= item.product.offerDetails.discount %>%</p>
+
+                                                </div>
+                                                <% } else { %>
+                                                    <p>No offer</p>
+                                                    <% } %>
+                                        </td>
+                                        <td>
+                                            <%= item.order_status %>
+                                        </td>
+                                        <td>
+                                            <% if (item.order_status==="Delivered" ) { %>
+                                                <button id="returnButton_<%= item._id %>" class="btn btn-sm"
+                                                    style="color: #c96;"
+                                                    onclick="openReturnModal('<%= order._id %>', '<%= item._id %>')">Return</button>
+                                                <% } else if (item.order_status !=="Cancelled" && item.order_status
+                                                    !=="Returned" && item.order_status !=="Return Requested" ) { %>
+                                                    <button id="cancelButton_<%= item._id %>" class="btn btn-sm"
+                                                        style="color: #c96;"
+                                                        onclick="openCancelModal('<%= order._id %>', '<%= item._id %>')">Cancel</button>
+                                                    <% } %>
+                                        </td>
+                                        <td>
+                                            <% if (item.order_status==='Delivered' ) { %>
+                                                <a href="/download-invoice/<%= encodeURIComponent(order.orderId) %>/<%= item.product._id %>"
+                                                    class="btn btn-sm" style="color: #c96;">Invoice</a>
+                                                <% }else if(order.payment_status==='Failed' ){ %>
+                                                    <button class="btn btn-sm btn-danger"
+                                                        onclick="retryPayment('<%= order._id %>')">Retry
+                                                        Payment</button>
+                                                    <% } %>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                            </tbody>
+                        </table>
+
+
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <% }) %>
+
+            <!-- Cancel Order Modal -->
+            <div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-labelledby="cancelOrderModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form id="cancelOrderForm" method="POST">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="cancelOrderModalLabel">Cancel Order</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="cancelReason" class="form-label">Reason for Cancellation</label>
+                                    <textarea class="form-control" id="cancelReason" name="cancelReason"
+                                        required></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="returnOrderModal" tabindex="-1" aria-labelledby="returnOrderModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form id="returnOrderForm" method="POST">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="returnOrderModalLabel">Return Order</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="returnReason" class="form-label">Reason for Return</label>
+                                    <textarea class="form-control" id="returnReason" name="returnReason"
+                                        required></textarea>
+                                </div>
+                                <!-- Hidden fields for orderId and itemId -->
+                                <input type="hidden" id="returnOrderId" name="orderId">
+                                <input type="hidden" id="returnItemId" name="itemId">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+            <footer class="footer">
+                <div class="footer-middle">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-sm-6 col-lg-3">
+                                <div class="widget widget-about">
+                                    <img src="/assets/images/furnspace logo black.png" class="footer-logo"
+                                        alt="Footer Logo" width="105" height="25">
+                                    <p>Praesent dapibus, neque id cursus ucibus, tortor neque egestas augue, eu
+                                        vulputate
+                                        magna eros eu erat. </p>
+
+                                    <div class="social-icons">
+                                        <a href="#" class="social-icon" target="_blank" title="Facebook"><i
+                                                class="icon-facebook-f"></i></a>
+                                        <a href="#" class="social-icon" target="_blank" title="Twitter"><i
+                                                class="icon-twitter"></i></a>
+                                        <a href="#" class="social-icon" target="_blank" title="Instagram"><i
+                                                class="icon-instagram"></i></a>
+                                        <a href="#" class="social-icon" target="_blank" title="Youtube"><i
+                                                class="icon-youtube"></i></a>
+                                        <a href="#" class="social-icon" target="_blank" title="Pinterest"><i
+                                                class="icon-pinterest"></i></a>
+                                    </div><!-- End .soial-icons -->
+                                </div><!-- End .widget about-widget -->
+                            </div><!-- End .col-sm-6 col-lg-3 -->
+
+                            <div class="col-sm-6 col-lg-3">
+                                <div class="widget">
+                                    <h4 class="widget-title">Useful Links</h4><!-- End .widget-title -->
+
+                                    <ul class="widget-list">
+                                        <li><a href="about.html">About Molla</a></li>
+                                        <li><a href="#">How to shop on Molla</a></li>
+                                        <li><a href="#">FAQ</a></li>
+                                        <li><a href="contact.html">Contact us</a></li>
+                                        <li><a href="login.html">Log in</a></li>
+                                    </ul><!-- End .widget-list -->
+                                </div><!-- End .widget -->
+                            </div><!-- End .col-sm-6 col-lg-3 -->
+
+                            <div class="col-sm-6 col-lg-3">
+                                <div class="widget">
+                                    <h4 class="widget-title">Customer Service</h4><!-- End .widget-title -->
+
+                                    <ul class="widget-list">
+                                        <li><a href="#">Payment Methods</a></li>
+                                        <li><a href="#">Money-back guarantee!</a></li>
+                                        <li><a href="#">Returns</a></li>
+                                        <li><a href="#">Shipping</a></li>
+                                        <li><a href="#">Terms and conditions</a></li>
+                                        <li><a href="#">Privacy Policy</a></li>
+                                    </ul><!-- End .widget-list -->
+                                </div><!-- End .widget -->
+                            </div><!-- End .col-sm-6 col-lg-3 -->
+
+                            <div class="col-sm-6 col-lg-3">
+                                <div class="widget">
+                                    <h4 class="widget-title">My Account</h4><!-- End .widget-title -->
+
+                                    <ul class="widget-list">
+                                        <li><a href="#">Sign In</a></li>
+                                        <li><a href="cart.html">View Cart</a></li>
+                                        <li><a href="#">My Wishlist</a></li>
+                                        <li><a href="#">Track My Order</a></li>
+                                        <li><a href="#">Help</a></li>
+                                    </ul><!-- End .widget-list -->
+                                </div><!-- End .widget -->
+                            </div><!-- End .col-sm-6 col-lg-3 -->
+                        </div><!-- End .row -->
+                    </div><!-- End .container -->
+                </div><!-- End .footer-middle -->
+
+                <div class="footer-bottom">
+                    <div class="container">
+                        <p class="footer-copyright">Copyright © 2019 Molla Store. All Rights Reserved.</p>
+                        <!-- End .footer-copyright -->
+                        <figure class="footer-payments">
+                            <img src="assets/images/payments.png" alt="Payment methods" width="272" height="20">
+                        </figure><!-- End .footer-payments -->
+                    </div><!-- End .container -->
+                </div><!-- End .footer-bottom -->
+            </footer><!-- End .footer -->
+            </div><!-- End .page-wrapper -->
+            <button id="scroll-top" title="Back to Top"><i class="icon-arrow-up"></i></button>
+
+            <!-- Mobile Menu -->
+            <div class="mobile-menu-overlay"></div><!-- End .mobil-menu-overlay -->
+
+            <div class="mobile-menu-container">
+                <div class="mobile-menu-wrapper">
+                    <span class="mobile-menu-close"><i class="icon-close"></i></span>
+
+                    <form action="#" method="get" class="mobile-search">
+                        <label for="mobile-search" class="sr-only">Search</label>
+                        <input type="search" class="form-control" name="mobile-search" id="mobile-search"
+                            placeholder="Search in..." required>
+                        <button class="btn btn-primary" type="submit"><i class="icon-search"></i></button>
+                    </form>
+
+                    <nav class="mobile-nav">
+                        <ul class="mobile-menu">
+                            <li class="active">
+                                <a href="/home">Home</a>
+                            </li>
+                            <li>
+                                <a href="/product-list" class="">Product</a>
+                            </li>
+                            <li>
+                                <a href=" #" class="sf-with-ul">Category</a>
+                                <ul>
+                                    <% categories.forEach(function(category) { %>
+
+                                        <li><a href="/category/<%= category._id %>">
+                                                <%= category.title %>
+                                            </a></li>
+
+                                        <% }) %>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href=" #" class="sf-with-ul">Brand</a>
+                                <ul>
+                                    <li><a href="#">IKEA</a></li>
+                                    <li><a href="#">DURIAN</a></li>
+                                    <li><a href="#">URBAN LADDER</a></li>
+                                    <li><a href="#">FURNITURE PARK</a></li>
+                                    <li><a href="#">HOME TOWN</a></li>
+                                    <li><a href="#">WOODEN STREET</a></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#">Pages</a>
+                                <ul>
+                                    <li>
+                                        <a href="/login">Login</a>
+                                    </li>
+                                    <li>
+                                        <a href="/contact-us">Contact</a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </nav><!-- End .mobile-nav -->
+
+                    <div class="social-icons">
+                        <a href="#" class="social-icon" target="_blank" title="Facebook"><i
+                                class="icon-facebook-f"></i></a>
+                        <a href="#" class="social-icon" target="_blank" title="Twitter"><i class="icon-twitter"></i></a>
+                        <a href="#" class="social-icon" target="_blank" title="Instagram"><i
+                                class="icon-instagram"></i></a>
+                        <a href="#" class="social-icon" target="_blank" title="Youtube"><i class="icon-youtube"></i></a>
+                    </div><!-- End .social-icons -->
+                </div><!-- End .mobile-menu-wrapper -->
+            </div><!-- End .mobile-menu-container -->
+
+
+
+
+            <!-- Plugins JS File -->
+            <script src="assets/js/jquery.min.js"></script>
+            <script src="assets/js/bootstrap.bundle.min.js"></script>
+            <script src="assets/js/jquery.hoverIntent.min.js"></script>
+            <script src="assets/js/jquery.waypoints.min.js"></script>
+            <script src="assets/js/superfish.min.js"></script>
+            <script src="assets/js/owl.carousel.min.js"></script>
+            <!-- Main JS File -->
+            <script src="assets/js/main.js"></script>
+            <!-- Include SweetAlert CSS and JS files -->
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
+
+            <!-- trigger the modal -->
+            <script>
+                function openCancelModal(orderId) {
+                    document.getElementById('cancelOrderForm').action = `/order-list/cancel/${orderId}`;
+                    $('#cancelOrderModal').modal('show');
+                }
+
+                function openReturnModal(orderId, itemId) {
+                    document.getElementById('returnOrderId').value = orderId;
+                    document.getElementById('returnItemId').value = itemId;
+                    var returnOrderModal = new bootstrap.Modal(document.getElementById('returnOrderModal'));
+                    returnOrderModal.show();
+                }
+            </script>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const status = urlParams.get('status');
+
+                    if (status === 'cancelled') {
+                        Swal.fire({
+                            title: 'Cancelled!',
+                            text: 'The order has been cancelled successfully.',
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        });
+                    } else if (status === 'returned') {
+                        Swal.fire({
+                            title: 'Returned!',
+                            text: 'The order has been returned successfully.',
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        });
+                    } else if (status === 'returnRequested') {
+                        Swal.fire({
+                            title: 'Return Requested!',
+                            text: 'Your return request has been submitted.',
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                });
+
+
+                document.addEventListener('DOMContentLoaded', function () {
+                    const returnOrderForm = document.getElementById('returnOrderForm');
+
+                    returnOrderForm.addEventListener('submit', function (e) {
+                        e.preventDefault();
+
+                        const orderId = document.getElementById('returnOrderId').value;
+                        const itemId = document.getElementById('returnItemId').value;
+                        const returnReason = document.getElementById('returnReason').value;
+
+                        fetch(`/order-list/return/${orderId}/${itemId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ returnReason }),
+                        })
+                            .then(response => {
+                                if (response.ok) {
+                                    window.location.href = '/order-list?status=returned';
+                                } else {
+                                    throw new Error('Return failed');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert('Failed to return the order. Please try again.');
+                            });
+                    });
+                });
+
+            </script>
+
+
+
+
+            <!-- confirm message for logout -->
+            <script>
+                function confirmLogout(event) {
+                    event.preventDefault(); // Prevent the default link behavior
+
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "You will be logged out of your session.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, log me out',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // User confirmed, proceed with logout
+                            window.location.href = "/logout"; // This should match your logout route
+                        }
+                    });
+                }
+
+
+
+                //retry payment
+                function retryPayment(orderId) {
+                    fetch('/checkout/retry-payment', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ orderId }),
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Initiate the Razorpay payment flow with the new order details
+                                var options = {
+                                    "key": data.key,
+                                    "amount": data.amount,
+                                    "currency": data.currency,
+                                    "name": "FurnSpace",
+                                    "description": "Retry Payment",
+                                    "image": "/assets/images/furnspace logo black.png",
+                                    "order_id": data.razorpayOrderId,
+                                    "handler": function (response) {
+                                        // Handle successful payment
+                                        updatePaymentStatus(orderId, 'Completed');
+                                    },
+                                    "prefill": {
+                                        "name": "User Name",
+                                        "email": "user@example.com",
+                                        "contact": "9999999999"
+                                    },
+                                    "theme": {
+                                        "color": "#F37254"
+                                    },
+                                    "modal": {
+                                        "ondismiss": function () {
+                                            // Handle payment failure or dismissal
+                                            updatePaymentStatus(orderId, 'Failed');
+                                        }
+                                    }
+                                };
+                                var rzp1 = new Razorpay(options);
+                                rzp1.open();
+                            } else {
+                                console.error('Error retrying payment:', data.message);
+                                // Display the error message to the user
+                                alert(`Error retrying payment: ${data.message}`);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error retrying payment:', error);
+                            // Display a generic error message to the user
+                            alert('An error occurred while retrying the payment. Please try again later.');
+                        });
+                }
+
+                function updatePaymentStatus(orderId, status) {
+                    // Make a request to update the payment status in the server
+                    fetch(`/checkout/payment-status`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ orderId, status }),
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                console.log('Payment status updated successfully');
+                            } else {
+                                console.error('Error updating payment status:', data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error updating payment status:', error);
+                        });
+                }
+            </script>
+            <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+            <%- include('../layout/footer.ejs') %>
