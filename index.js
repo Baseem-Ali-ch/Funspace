@@ -100,14 +100,9 @@ app.get("/", (req, res) => {
 });
 
 const port = process.env.PORT || 4000;
-// app.listen(port, () => {
-//   console.log(`Server running at http://localhost:${port}`);
-// });
-
-app.listen(port, '0.0.0.0', () => {
-    console.log(`Server running at http://0.0.0.0:${port}`);
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
 });
-
 
 app.use((req, res, next) => {
   res.locals.user = req.user;

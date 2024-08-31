@@ -103,49 +103,56 @@ const updateProduct = async (req, res) => {
     }
     const product = await Product.findById(productId);
 
-    if (product) {
-      const changes = [];
-      if (product.name !== name) changes.push("name");
-      if (product.description !== description) changes.push("description");
-      if (product.category.toString() !== category) changes.push("category");
-      if (product.price !== price) changes.push("price");
-      if (product.stock !== stock) changes.push("stock");
-      if (product.isListed !== status) changes.push("status");
+    if (!product) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
 
-      if (changes.length === 0 && !req.files) {
-        return res.json({ success: false, message: "No changes detected" });
-      }
+    const changes = [];
+    if (product.name !== name) changes.push("name");
+    if (product.description !== description) changes.push("description");
+    if (product.category.toString() !== category) changes.push("category");
+    if (product.price !== parseFloat(price)) changes.push("price");
+    if (product.stock !== parseInt(stock)) changes.push("stock");
+    if (product.isListed !== (status === 'true')) changes.push("status");
 
-      product.name = name;
-      product.description = description;
-      product.category = new mongoose.Types.ObjectId(category);
-      product.price = price;
-      product.discountedPrice = discountPrice;
-      product.stock = stock;
-      product.isListed = status;
+    product.name = name;
+    product.description = description;
+    product.category = new mongoose.Types.ObjectId(category);
+    product.price = parseFloat(price);
+    product.discountedPrice = parseFloat(discountPrice) || product.discountedPrice;
+    product.stock = parseInt(stock);
+    product.isListed = status === 'true';
 
-      if (req.files) {
-        for (let i = 1; i <= 3; i++) {
-          const fieldName = `productImage${i}`;
-          if (req.files[fieldName]) {
-            const file = req.files[fieldName][0];
-            const fileName = `cropped_${Date.now()}_${file.originalname}`;
-            const filePath = path.join(__dirname, '../public/assets/images/add-product/', fileName);
-            
+    // Handle image updates
+    if (req.files) {
+      for (let i = 1; i <= 3; i++) {
+        const fieldName = `productImage${i}`;
+        if (req.files[fieldName] && req.files[fieldName][0]) {
+          const file = req.files[fieldName][0];
+          const fileName = `cropped_${Date.now()}_${file.originalname}`;
+          const filePath = path.join(__dirname, '../public/assets/images/add-product/', fileName);
+          
+          try {
             await sharp(file.buffer)
-              .resize(300, 300)
+              .resize(300, 300, { fit: 'cover' })
               .toFile(filePath);
 
             product[`imageUrl_${i}`] = `/assets/images/add-product/${fileName}`;
+            changes.push(`image${i}`);
+          } catch (sharpError) {
+            console.error(`Error processing image ${i}:`, sharpError);
+            return res.status(400).json({ success: false, message: `Error processing image ${i}` });
           }
         }
       }
-
-      await product.save();
-      res.json({ success: true, product });
-    } else {
-      res.json({ success: false, message: "Product not found" });
     }
+
+    if (changes.length === 0) {
+      return res.json({ success: false, message: "No changes detected" });
+    }
+
+    await product.save();
+    res.json({ success: true, product, changes });
   } catch (error) {
     console.error("Error updating product:", error);
     res.status(500).json({ success: false, message: "Server error" });

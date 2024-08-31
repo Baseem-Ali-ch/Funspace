@@ -1059,36 +1059,39 @@
                 const response = await fetch(`/admin/update-product/${productId}`, {
                   method: 'PATCH',
                   body: formData
-                });
-                const data = await response.json();
+                })
+                
 
-                if (data.success) {
-                  swal({
-                    title: "Success",
-                    text: "Product updated successfully.",
-                    icon: "success",
-                    button: "OK"
-                  }).then(() => {
-                    location.reload();
-                  });
-                } else {
-                  swal({
-                    title: "Error",
-                    text: "Error updating product: " + (data.message || "Unknown error"),
-                    icon: "error",
-                    button: "OK"
-                  });
-                }
-              } catch (error) {
-                console.error('Error:', error);
-                swal({
-                  title: "Error",
-                  text: "Error updating product: " + error.message,
-                  icon: "error",
-                  button: "OK"
-                });
+                .then(response => response.json())
+                  .then(data => {
+                    if (data.success) {
+                      swal({
+                        title: "Success",
+                        text: "Product updated successfully.",
+                        icon: "success",
+                        button: "OK"
+                      }).then(() => {
+                        location.reload();
+                      });
+                    } else {
+                      swal({
+                        title: "Error",
+                        text: "Error updating product: " + (data.message || "Unknown error"),
+                        icon: "error",
+                        button: "OK"
+                      });
+                    }
+                  })
+                  } catch (error) {
+                    console.error('Error:', error);
+                    swal({
+                      title: "Error",
+                      text: "Error updating product: " + error.message,
+                      icon: "error",
+                      button: "OK"
+                    });
+                  }
               }
-            }
 
           </script>
 
@@ -1105,219 +1108,219 @@
 
           <script>
             function searchTable() {
-              const input = document.getElementById('search-input');
-              const filter = input.value.toLowerCase();
-              const tableBody = document.getElementById('category-table-body');
-              const rows = tableBody.getElementsByTagName('tr');
+                const input = document.getElementById('search-input');
+                const filter = input.value.toLowerCase();
+                const tableBody = document.getElementById('category-table-body');
+                const rows = tableBody.getElementsByTagName('tr');
 
-              for (let i = 0; i < rows.length; i++) {
-                const productName = rows[i].querySelector('.product-name .text-nowrap').textContent.toLowerCase();
-                const category = rows[i].querySelector('.category-title').textContent.toLowerCase();
-                const stock = rows[i].querySelector('.stock').textContent.toLowerCase();
+                for (let i = 0; i < rows.length; i++) {
+                  const productName = rows[i].querySelector('.product-name .text-nowrap').textContent.toLowerCase();
+                  const category = rows[i].querySelector('.category-title').textContent.toLowerCase();
+                  const stock = rows[i].querySelector('.stock').textContent.toLowerCase();
 
-                if (productName.includes(filter) || category.includes(filter) || stock.includes(filter)) {
-                  rows[i].style.display = '';
-                } else {
-                  rows[i].style.display = 'none';
-                }
-
-                // Highlight matching text
-                highlightMatch(rows[i], filter);
-              }
-            }
-
-            function highlightMatch(row, searchText) {
-              // Clear previous highlights
-              row.querySelectorAll('.highlighted').forEach(el => {
-                el.innerHTML = el.textContent; // Reset to original text
-              });
-
-              // Highlight new matches
-              const cells = row.querySelectorAll('.product-name .text-nowrap, .category-title, .stock');
-
-              cells.forEach(cell => {
-                let html = cell.textContent;
-                const regex = new RegExp(`(${searchText})`, 'gi');
-                html = html.replace(regex, '<span class="highlight">$1</span>');
-                cell.innerHTML = html;
-              });
-            }
-
-
-            let modalCroppers = {};
-
-            function previewModalImage(input, imageId) {
-              const file = input.files[0];
-              const reader = new FileReader();
-
-              reader.onload = function (e) {
-                const img = document.getElementById(imageId);
-                img.src = e.target.result;
-                img.style.display = 'block'; // Show the image
-                const actions = img.nextElementSibling.nextElementSibling; // Get the actions div
-                actions.style.display = 'flex'; // Show the action buttons
-              }
-
-              if (file) {
-                reader.readAsDataURL(file);
-              }
-            }
-
-
-
-            function deleteModalImage(previewId) {
-              const preview = document.getElementById(previewId);
-              const inputId = `modalInput${previewId.charAt(previewId.length - 1)}`;
-              const input = document.getElementById(inputId);
-              input.value = '';
-              preview.src = '#';
-              preview.style.display = 'none';
-              const actions = preview.nextElementSibling.nextElementSibling;
-              actions.style.display = 'none';
-              if (modalCroppers[previewId]) {
-                modalCroppers[previewId].destroy();
-                delete modalCroppers[previewId];
-              }
-            }
-
-            function cropModalImage(previewId, inputId) {
-              if (modalCroppers[previewId]) {
-                modalCroppers[previewId].getCroppedCanvas({ width: 300, height: 300 }).toBlob((blob) => {
-                  const file = new File([blob], `${inputId}.jpg`, { type: 'image/jpeg' });
-                  const dataTransfer = new DataTransfer();
-                  dataTransfer.items.add(file);
-                  document.getElementById(inputId).files = dataTransfer.files;
-
-                  // Update preview image with cropped version
-                  const reader = new FileReader();
-                  reader.onload = function (e) {
-                    document.getElementById(previewId).src = e.target.result;
-                  };
-                  reader.readAsDataURL(file);
-                }, 'image/jpeg');
-              }
-            }
-            document.getElementById('editProductForm').addEventListener('submit', async function (e) {
-              e.preventDefault();
-
-              const formData = new FormData(this);
-
-              // Crop all images before submission
-              for (let i = 1; i <= 3; i++) {
-                const previewId = `modalImage${i}`;
-                const inputId = `modalInputImage${i}`;
-                if (modalCroppers[previewId]) {
-                  await new Promise(resolve => {
-                    modalCroppers[previewId].getCroppedCanvas({ width: 300, height: 300 }).toBlob((blob) => {
-                      formData.set(inputId, blob, `${inputId}.jpg`);
-                      resolve();
-                    }, 'image/jpeg');
-                  });
-                }
-              }
-
-              // Submit the form with cropped images
-              fetch('/admin/edit-product', {
-                method: 'POST',
-                body: formData
-              })
-                .then(response => response.json())
-                .then(data => {
-                  if (data.success) {
-                    window.location.href = '/admin/products?edit=true';
+                  if (productName.includes(filter) || category.includes(filter) || stock.includes(filter)) {
+                    rows[i].style.display = '';
                   } else {
+                    rows[i].style.display = 'none';
+                  }
+
+                  // Highlight matching text
+                  highlightMatch(rows[i], filter);
+                }
+              }
+
+              function highlightMatch(row, searchText) {
+                // Clear previous highlights
+                row.querySelectorAll('.highlighted').forEach(el => {
+                  el.innerHTML = el.textContent; // Reset to original text
+                });
+
+                // Highlight new matches
+                const cells = row.querySelectorAll('.product-name .text-nowrap, .category-title, .stock');
+
+                cells.forEach(cell => {
+                  let html = cell.textContent;
+                  const regex = new RegExp(`(${searchText})`, 'gi');
+                  html = html.replace(regex, '<span class="highlight">$1</span>');
+                  cell.innerHTML = html;
+                });
+              }
+
+
+              let modalCroppers = {};
+
+              function previewModalImage(input, imageId) {
+                const file = input.files[0];
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                  const img = document.getElementById(imageId);
+                  img.src = e.target.result;
+                  img.style.display = 'block'; // Show the image
+                  const actions = img.nextElementSibling.nextElementSibling; // Get the actions div
+                  actions.style.display = 'flex'; // Show the action buttons
+                }
+
+                if (file) {
+                  reader.readAsDataURL(file);
+                }
+              }
+
+
+
+              function deleteModalImage(previewId) {
+                const preview = document.getElementById(previewId);
+                const inputId = `modalInput${previewId.charAt(previewId.length - 1)}`;
+                const input = document.getElementById(inputId);
+                input.value = '';
+                preview.src = '#';
+                preview.style.display = 'none';
+                const actions = preview.nextElementSibling.nextElementSibling;
+                actions.style.display = 'none';
+                if (modalCroppers[previewId]) {
+                  modalCroppers[previewId].destroy();
+                  delete modalCroppers[previewId];
+                }
+              }
+
+              function cropModalImage(previewId, inputId) {
+                if (modalCroppers[previewId]) {
+                  modalCroppers[previewId].getCroppedCanvas({ width: 300, height: 300 }).toBlob((blob) => {
+                    const file = new File([blob], `${inputId}.jpg`, { type: 'image/jpeg' });
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    document.getElementById(inputId).files = dataTransfer.files;
+
+                    // Update preview image with cropped version
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                      document.getElementById(previewId).src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                  }, 'image/jpeg');
+                }
+              }
+              document.getElementById('editProductForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                const formData = new FormData(this);
+
+                // Crop all images before submission
+                for (let i = 1; i <= 3; i++) {
+                  const previewId = `modalImage${i}`;
+                  const inputId = `modalInputImage${i}`;
+                  if (modalCroppers[previewId]) {
+                    await new Promise(resolve => {
+                      modalCroppers[previewId].getCroppedCanvas({ width: 300, height: 300 }).toBlob((blob) => {
+                        formData.set(inputId, blob, `${inputId}.jpg`);
+                        resolve();
+                      }, 'image/jpeg');
+                    });
+                  }
+                }
+
+                // Submit the form with cropped images
+                fetch('/admin/edit-product', {
+                  method: 'POST',
+                  body: formData
+                })
+                  .then(response => response.json())
+                  .then(data => {
+                    if (data.success) {
+                      window.location.href = '/admin/products?edit=true';
+                    } else {
+                      Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Failed to update product. Please try again.',
+                      });
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Error:', error);
                     Swal.fire({
                       icon: 'error',
                       title: 'Error',
-                      text: 'Failed to update product. Please try again.',
+                      text: 'An unexpected error occurred. Please try again.',
                     });
-                  }
-                })
-                .catch(error => {
-                  console.error('Error:', error);
-                  Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'An unexpected error occurred. Please try again.',
                   });
-                });
-            });
+              });
 
 
 
-            function validateForm() {
-              let isValid = true;
+              function validateForm() {
+                let isValid = true;
 
-              // Validate Name
-              const name = document.getElementById('productName').value;
-              if (!/^[a-zA-Z\s]+$/.test(name)) {
-                document.getElementById('nameError').textContent = 'Name should contain only letters and spaces.';
-                isValid = false;
-              } else {
-                document.getElementById('nameError').textContent = '';
-              }
-
-              // Validate Description
-              const description = document.getElementById('productDescription').value;
-              if (!/^[a-zA-Z\s]+$/.test(description)) {
-                document.getElementById('descriptionError').textContent = 'Description should contain only letters and spaces.';
-                isValid = false;
-              } else {
-                document.getElementById('descriptionError').textContent = '';
-              }
-
-              // Validate Price
-              const price = parseFloat(document.getElementById('productPrice').value);
-              if (isNaN(price) || price <= 0) {
-                document.getElementById('priceError').textContent = 'Price should be a positive number.';
-                isValid = false;
-              } else {
-                document.getElementById('priceError').textContent = '';
-              }
-
-              // Validate Stock
-              const stock = parseInt(document.getElementById('productStock').value);
-              if (isNaN(stock) || stock < 0) {
-                document.getElementById('stockError').textContent = 'Stock should be a non-negative integer.';
-                isValid = false;
-              } else {
-                document.getElementById('stockError').textContent = '';
-              }
-
-              // Validate Images
-              const imageInputs = document.querySelectorAll('input[type="file"]');
-              let imageError = '';
-              imageInputs.forEach(input => {
-                if (input.files.length > 0) {
-                  const file = input.files[0];
-                  const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-                  if (!validTypes.includes(file.type)) {
-                    imageError = 'Images should be in JPEG, JPG, or PNG format.';
-                    isValid = false;
-                  }
+                // Validate Name
+                const name = document.getElementById('productName').value;
+                if (!/^[a-zA-Z\s]+$/.test(name)) {
+                  document.getElementById('nameError').textContent = 'Name should contain only letters and spaces.';
+                  isValid = false;
+                } else {
+                  document.getElementById('nameError').textContent = '';
                 }
-              });
-              document.getElementById('imageError').textContent = imageError;
 
-              return isValid;
-            }
+                // Validate Description
+                const description = document.getElementById('productDescription').value;
+                if (!/^[a-zA-Z\s]+$/.test(description)) {
+                  document.getElementById('descriptionError').textContent = 'Description should contain only letters and spaces.';
+                  isValid = false;
+                } else {
+                  document.getElementById('descriptionError').textContent = '';
+                }
 
-            function validateAndSubmit() {
-              if (validateForm()) {
-                editProduct();
+                // Validate Price
+                const price = parseFloat(document.getElementById('productPrice').value);
+                if (isNaN(price) || price <= 0) {
+                  document.getElementById('priceError').textContent = 'Price should be a positive number.';
+                  isValid = false;
+                } else {
+                  document.getElementById('priceError').textContent = '';
+                }
+
+                // Validate Stock
+                const stock = parseInt(document.getElementById('productStock').value);
+                if (isNaN(stock) || stock < 0) {
+                  document.getElementById('stockError').textContent = 'Stock should be a non-negative integer.';
+                  isValid = false;
+                } else {
+                  document.getElementById('stockError').textContent = '';
+                }
+
+                // Validate Images
+                const imageInputs = document.querySelectorAll('input[type="file"]');
+                let imageError = '';
+                imageInputs.forEach(input => {
+                  if (input.files.length > 0) {
+                    const file = input.files[0];
+                    const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+                    if (!validTypes.includes(file.type)) {
+                      imageError = 'Images should be in JPEG, JPG, or PNG format.';
+                      isValid = false;
+                    }
+                  }
+                });
+                document.getElementById('imageError').textContent = imageError;
+
+                return isValid;
               }
-            }
 
-            // Add event listeners for real-time validation
-            document.addEventListener('DOMContentLoaded', function () {
-              document.getElementById('productName').addEventListener('input', validateForm);
-              document.getElementById('productDescription').addEventListener('input', validateForm);
-              document.getElementById('productPrice').addEventListener('input', validateForm);
-              document.getElementById('productStock').addEventListener('input', validateForm);
-              document.querySelectorAll('input[type="file"]').forEach(input => {
-                input.addEventListener('change', validateForm);
+              function validateAndSubmit() {
+                if (validateForm()) {
+                  editProduct();
+                }
+              }
+
+              // Add event listeners for real-time validation
+              document.addEventListener('DOMContentLoaded', function () {
+                document.getElementById('productName').addEventListener('input', validateForm);
+                document.getElementById('productDescription').addEventListener('input', validateForm);
+                document.getElementById('productPrice').addEventListener('input', validateForm);
+                document.getElementById('productStock').addEventListener('input', validateForm);
+                document.querySelectorAll('input[type="file"]').forEach(input => {
+                  input.addEventListener('change', validateForm);
+                });
               });
-            });
 
           </script>
 
