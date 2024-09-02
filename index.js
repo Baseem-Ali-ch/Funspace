@@ -99,9 +99,11 @@ app.get("/", (req, res) => {
   res.render("index", { user: req.user });
 });
 
-const port = process.env.PORT || 4000;
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+const PORT = process.env.PORT || 5068;
+const HOST = '0.0.0.0'; // Listen on all network interfaces
+
+app.listen(PORT, HOST, () => {
+    console.log(`Server running at http://${HOST}:${PORT}`);
 });
 
 app.use((req, res, next) => {
