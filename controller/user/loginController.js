@@ -75,7 +75,7 @@ const loadVerifyOtp = async (req, res) => {
       res.status(400).send("No OTP found for this email");
       return;
     }
-    res.render("verifyOtp", {
+    res.render("verifyOTP", {
       email,
       message: "Enter the OTP sent to your email.",
     });
