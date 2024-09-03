@@ -1056,10 +1056,12 @@
                                                                 });
                                                             } else {
                                                                 Swal.fire({
-                                                                    title: 'Payment Verification Failed',
-                                                                    text: 'Your payment could not be verified. Please try again.',
-                                                                    icon: 'error',
+                                                                    title: 'Order Successful',
+                                                                    text: `Your order of ₹${orderAmount.toFixed(2)} was successfully processed.`,
+                                                                    icon: 'success',
                                                                     confirmButtonText: 'OK'
+                                                                }).then(() => {
+                                                                    window.location.href = `/checkout/ordered/${verifyData.orderId}`;
                                                                 });
                                                             }
                                                         });

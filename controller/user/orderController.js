@@ -234,7 +234,7 @@ const placeOrder = async (req, res) => {
     } else if (paymentMethod === "Razorpay") {
       try {
         razorpayOrder = await createOrderId({
-          amount: Math.round(totalPrice * 100), // in paise, rounded to avoid fractional values
+          amount: Math.round(totalPrice * 100),
           currency: "INR",
           receipt: `order_rcptid_${Date.now()}`,
         });
