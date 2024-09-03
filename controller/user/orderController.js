@@ -134,7 +134,7 @@ const placeOrder = async (req, res) => {
   const user = req.session.user || req.user;
   const userId = user ? user._id : null;
   const { addressId, paymentMethod, couponCode } = req.body;
-  let orderId = null
+  
   try {
     if (!userId) {
       return res.status(401).json({ success: false, message: "User not authenticated" });
@@ -258,7 +258,6 @@ const placeOrder = async (req, res) => {
     });
 
     await newOrder.save();
-    orderId = newOrder._id; 
     await Cart.findOneAndUpdate({ userId }, { $set: { items: [] } }, { new: true });
 
     const responseData = {
@@ -279,7 +278,7 @@ const placeOrder = async (req, res) => {
     res.status(200).json(responseData);
   } catch (error) {
     console.error("Error placing order:", error);
-    res.status(500).json({ success: false, message: `Error placing order. Order ID: ${orderId || "N/A"}`, error: error.message  });
+    res.status(500).json({ success: false, message: "Error placing order", error: error.message });
   }
 };
 
@@ -493,7 +492,9 @@ const verifyPayment = async (req, res) => {
 
     if (generatedSignature === razorpaySignature) {
       // Use orderId to find the order, as it's the field defined in the schema
-      const order = await Order.findOne({ orderId: razorpayOrderId });
+      // const order = await Order.findOne({ orderId: razorpayOrderId });
+      const order = await Order.findOne({ razorpayOrderId: razorpayOrderId });
+
 
       if (!order) {
         console.error(`Order not found for orderId: ${razorpayOrderId}`);
