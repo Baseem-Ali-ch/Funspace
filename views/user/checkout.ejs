@@ -1026,7 +1026,7 @@
                                                 key: data.razorpayKey,
                                                 amount: data.amount,
                                                 currency: "INR",
-                                                name: "Your Company Name",
+                                                name: "FurnSpace",
                                                 description: "Test Transaction",
                                                 order_id: data.razorpayOrderId, // Make sure this matches the order_id from Razorpay
                                                 handler: function (response) {
@@ -1055,7 +1055,7 @@
                                                                     window.location.href = `/checkout/ordered/${verifyData.orderId}`;
                                                                 });
                                                             } else {
-                                                                Swal.fire({
+                                                               Swal.fire({
                                                                     title: 'Order Successful',
                                                                     text: `Your order of ₹${orderAmount.toFixed(2)} was successfully processed.`,
                                                                     icon: 'success',

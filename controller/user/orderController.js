@@ -134,7 +134,7 @@ const placeOrder = async (req, res) => {
   const user = req.session.user || req.user;
   const userId = user ? user._id : null;
   const { addressId, paymentMethod, couponCode } = req.body;
-
+  let orderId = null
   try {
     if (!userId) {
       return res.status(401).json({ success: false, message: "User not authenticated" });
@@ -258,6 +258,7 @@ const placeOrder = async (req, res) => {
     });
 
     await newOrder.save();
+    orderId = newOrder._id; 
     await Cart.findOneAndUpdate({ userId }, { $set: { items: [] } }, { new: true });
 
     const responseData = {
