@@ -279,7 +279,7 @@ const placeOrder = async (req, res) => {
     res.status(200).json(responseData);
   } catch (error) {
     console.error("Error placing order:", error);
-    res.status(500).json({ success: false, message: "Error placing order", error: error.message });
+    res.status(500).json({ success: false, message: `Error placing order. Order ID: ${orderId || "N/A"}`, error: error.message  });
   }
 };
 
