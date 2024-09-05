@@ -21,7 +21,6 @@ mongoose
 
 const app = express();
 
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -94,16 +93,21 @@ app.use("/admin", adminRoute);
 const authRoute = require("./routes/authRoutes");
 app.use("/", authRoute);
 
+app.set("view engine", "ejs");
+app.set("views", "./views/pages");
+app.use((req, res, next) => {
+  res.status(404).render("404admin", { message: "Page not found" });
+});
+
 // Render index page
 app.get("/", (req, res) => {
   res.render("index", { user: req.user });
 });
 
 const PORT = process.env.PORT || 5068;
-const HOST = '0.0.0.0'; // Listen on all network interfaces
 
-app.listen(PORT, HOST, () => {
-    console.log(`Server running at http://${HOST}:${PORT}`);
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
 });
 
 app.use((req, res, next) => {

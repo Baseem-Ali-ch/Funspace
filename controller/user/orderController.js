@@ -519,8 +519,8 @@ const fetch = require("node-fetch");
 
 exports.createOrderId = async (body, res) => {
   try {
-    const keyId = process.env.RAZORPAY_KEY_ID; // Ensure correct environment variable name
-    const keySecret = process.env.RAZORPAY_KEY_SECRET; // Ensure correct environment variable name
+    const keyId = process.env.RAZORPAY_KEY_ID;
+    const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
     const creds = btoa(`${keyId}:${keySecret}`);
     const response = await fetch("https://api.razorpay.com/v1/orders", {
@@ -544,31 +544,33 @@ exports.createOrderId = async (body, res) => {
   }
 };
 
-const cancelOrder = async (req, res) => {
+const cancelOrderItem = async (req, res) => {
   try {
-    const { orderId } = req.params;
+    const { orderId, itemId } = req.params;
     const { cancelReason } = req.body;
 
+    // Find the order by ID
     const order = await Order.findById(orderId);
     if (!order) {
       return res.status(404).send("Order not found");
     }
 
-    // Increase stock for each item in the order
-    for (const item of order.items) {
-      const product = await Product.findById(item.product._id);
-      if (product) {
-        product.stock += item.quantity;
-        await product.save();
-      }
+    // Find the specific item within the order
+    const item = order.items.find((item) => item._id.toString() === itemId);
+    if (!item) {
+      return res.status(404).send("Order item not found");
+    }
+
+    // Increase stock for the canceled item
+    const product = await Product.findById(item.product);
+    if (product) {
+      product.stock += item.quantity;
+      await product.save();
     }
 
     // Check if the order payment status is Razorpay or Paid
-    if (order.paymentMethod === "Razorpay" || order.payment_status === "Completed") {
-      // Calculate the total amount to be refunded
-      const refundAmount = order.items.reduce((total, item) => {
-        return total + item.discountedPrice * item.quantity;
-      }, 0);
+    if (order.paymentMethod === "razor payment" || order.payment_status === "Completed") {
+      const refundAmount = item.discountedPrice * item.quantity;
 
       // Find or create the user's wallet
       let wallet = await Wallet.findOne({ user: order.user });
@@ -581,27 +583,22 @@ const cancelOrder = async (req, res) => {
 
       // Add a transaction record
       wallet.transactions.push({
-        transactionId: `${order._id}`,
-        description: `Refund for cancelled order`,
+        transactionId: `${order._id}-${item._id}`,
+        description: `Refund for cancelled item in order ${order._id}`,
         amount: refundAmount,
         type: "credit",
       });
 
       await wallet.save();
 
-      console.log(`Refunded ${refundAmount} to user's wallet for order ${order._id}`);
+      console.log(`Refunded ${refundAmount} to user's wallet for item ${item._id} in order ${order._id}`);
     }
 
-    // Update the order status and reason for cancellation for each item
-    order.items.forEach((item) => {
-      item.order_status = "Cancelled";
-      item.cancelReason = cancelReason; // Save cancel reason for each item
-    });
+    // Update the order item status and reason for cancellation
+    item.order_status = "Cancelled";
+    item.cancelReason = cancelReason; // Save cancel reason for the item
 
-    // Update the overall order status
-    order.status = "Cancelled";
-    order.cancelledAt = new Date();
-
+    // Save the order
     await order.save();
     res.redirect("/order-list?status=cancelled");
   } catch (error) {
@@ -610,31 +607,34 @@ const cancelOrder = async (req, res) => {
   }
 };
 
-const returnOrder = async (req, res) => {
+
+const returnOrderItem = async (req, res) => {
   try {
-    const { orderId } = req.params;
+    const { orderId, itemId } = req.params;
     const { returnReason } = req.body;
 
+    // Find the order by ID
     const order = await Order.findById(orderId);
     if (!order) {
       return res.status(404).send("Order not found");
     }
 
-    // Increase stock for each item in the order
-    for (const item of order.items) {
-      const product = await Product.findById(item.product._id);
-      if (product) {
-        product.stock += item.quantity;
-        await product.save();
-      }
+    // Find the specific item within the order
+    const item = order.items.find((item) => item._id.toString() === itemId);
+    if (!item) {
+      return res.status(404).send("Order item not found");
+    }
+
+    // Increase stock for the returned item
+    const product = await Product.findById(item.product);
+    if (product) {
+      product.stock += item.quantity;
+      await product.save();
     }
 
     // Check if the order payment status is Razorpay or Paid
-    if (order.paymentMethod === "Razorpay" || order.payment_status === "Completed") {
-      // Calculate the total amount to be refunded
-      const refundAmount = order.items.reduce((total, item) => {
-        return total + item.discountedPrice * item.quantity;
-      }, 0);
+    if (order.paymentMethod === "razor payment" || order.payment_status === "Completed") {
+      const refundAmount = item.discountedPrice * item.quantity;
 
       // Find or create the user's wallet
       let wallet = await Wallet.findOne({ user: order.user });
@@ -647,27 +647,22 @@ const returnOrder = async (req, res) => {
 
       // Add a transaction record
       wallet.transactions.push({
-        transactionId: `REFUND-${order._id}`,
-        description: `Refund for returned order`,
+        transactionId: `${order._id}-${item._id}`,
+        description: `Refund for returned item in order ${order._id}`,
         amount: refundAmount,
         type: "credit",
       });
 
       await wallet.save();
 
-      console.log(`Refunded ${refundAmount} to user's wallet for order ${order._id}`);
+      console.log(`Refunded ${refundAmount} to user's wallet for item ${item._id} in order ${order._id}`);
     }
 
-    // Update the order status and reason for return for each item
-    order.items.forEach((item) => {
-      item.order_status = "Returned";
-      item.returnReason = returnReason; // Save return reason for each item
-    });
+    // Update the item status and reason for return
+    item.order_status = "Returned";
+    item.returnReason = returnReason; // Save return reason for the item
 
-    // Update the overall order status
-    order.status = "Returned";
-    order.returnedAt = new Date();
-
+    // Save the order
     await order.save();
     res.redirect("/order-list?status=returned");
   } catch (error) {
@@ -675,6 +670,7 @@ const returnOrder = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
+
 
 const returnRequest = async (req, res) => {
   try {
@@ -795,8 +791,8 @@ module.exports = {
   orderConfirm,
   updateStatus,
   verifyPayment,
-  cancelOrder,
-  returnOrder,
+  cancelOrderItem,
+  returnOrderItem,
   returnRequest,
   razorpayFailure,
   retryPayment,

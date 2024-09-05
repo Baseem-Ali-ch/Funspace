@@ -97,31 +97,51 @@ const addProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
   const productId = req.params.id;
   const { name, description, category, price, discountPrice, stock, status } = req.body;
+
   try {
+    // Validate category ID
     if (!mongoose.Types.ObjectId.isValid(category)) {
       return res.status(400).json({ success: false, message: "Invalid category ID" });
     }
-    const product = await Product.findById(productId);
 
+    // Validate product ID
+    const product = await Product.findById(productId);
     if (!product) {
       return res.status(404).json({ success: false, message: "Product not found" });
     }
 
+    // Track changes for response feedback
     const changes = [];
-    if (product.name !== name) changes.push("name");
-    if (product.description !== description) changes.push("description");
-    if (product.category.toString() !== category) changes.push("category");
-    if (product.price !== parseFloat(price)) changes.push("price");
-    if (product.stock !== parseInt(stock)) changes.push("stock");
-    if (product.isListed !== (status === 'true')) changes.push("status");
 
-    product.name = name;
-    product.description = description;
-    product.category = new mongoose.Types.ObjectId(category);
-    product.price = parseFloat(price);
-    product.discountedPrice = parseFloat(discountPrice) || product.discountedPrice;
-    product.stock = parseInt(stock);
-    product.isListed = status === 'true';
+    // Update product fields
+    if (product.name !== name) {
+      product.name = name;
+      changes.push("name");
+    }
+    if (product.description !== description) {
+      product.description = description;
+      changes.push("description");
+    }
+    if (product.category.toString() !== category) {
+      product.category = new mongoose.Types.ObjectId(category);
+      changes.push("category");
+    }
+    if (product.price !== parseFloat(price)) {
+      product.price = parseFloat(price);
+      changes.push("price");
+    }
+    if (product.discountedPrice !== parseFloat(discountPrice)) {
+      product.discountedPrice = parseFloat(discountPrice) || product.discountedPrice;
+      changes.push("discountedPrice");
+    }
+    if (product.stock !== parseInt(stock)) {
+      product.stock = parseInt(stock);
+      changes.push("stock");
+    }
+    if (product.isListed !== (status === 'true')) {
+      product.isListed = status === 'true';
+      changes.push("status");
+    }
 
     // Handle image updates
     if (req.files) {
@@ -129,16 +149,22 @@ const updateProduct = async (req, res) => {
         const fieldName = `productImage${i}`;
         if (req.files[fieldName] && req.files[fieldName][0]) {
           const file = req.files[fieldName][0];
-          const fileName = `cropped_${Date.now()}_${file.originalname}`;
-          const filePath = path.join(__dirname, '../public/assets/images/add-product/', fileName);
-          
           try {
-            await sharp(file.buffer)
-              .resize(300, 300, { fit: 'cover' })
-              .toFile(filePath);
+            const fileName = `cropped_${Date.now()}_${file.originalname}`;
+            const filePath = path.join(__dirname, '../public/assets/images/add-product/', fileName);
 
-            product[`imageUrl_${i}`] = `/assets/images/add-product/${fileName}`;
-            changes.push(`image${i}`);
+            // Verify the image buffer and process with sharp
+            if (file.buffer) {
+              await sharp(file.buffer)
+                .resize(300, 300, { fit: 'cover' })
+                .toFile(filePath);
+
+              product[`imageUrl_${i}`] = `/assets/images/add-product/${fileName}`;
+              changes.push(`image${i}`);
+            } else {
+              console.error(`Invalid input for image ${i}`);
+              return res.status(400).json({ success: false, message: `Invalid input for image ${i}` });
+            }
           } catch (sharpError) {
             console.error(`Error processing image ${i}:`, sharpError);
             return res.status(400).json({ success: false, message: `Error processing image ${i}` });
@@ -158,6 +184,8 @@ const updateProduct = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+
 
 //load category list in admin side
 const loadCategoryList = async (req, res) => {
@@ -245,70 +273,6 @@ const updateCategory = async (req, res) => {
   }
 };
 
-//sales report
-const moment = require("moment");
-
-// const salesReport = async (req, res) => {
-//   try {
-//     let { startDate, endDate } = req.query;
-
-//     if (!startDate || !endDate) {
-//       // Default to last 30 days if no date range is specified
-//       startDate = moment().subtract(30, "days").format("YYYY-MM-DD");
-//       endDate = moment().format("YYYY-MM-DD");
-//     }
-
-//     // Parse the dates and set the time
-//     const startDateTime = moment(startDate).startOf("day");
-//     const endDateTime = moment(endDate).endOf("day");
-
-//     const orders = await Order.find({
-//       createdAt: { $gte: startDateTime.toDate(), $lte: endDateTime.toDate() },
-//     })
-//       .populate("user", "name email")
-//       .populate("items.product", "name price")
-//       .sort({ createdAt: -1 });
-
-//     let totalRevenue = 0;
-//     let totalQuantity = 0;
-
-//     const salesData = orders.map((order) => {
-//       const orderTotal = order.totalPrice - order.couponDiscountAmt;
-//       totalRevenue += orderTotal;
-
-//       const orderQuantity = order.items.reduce((sum, item) => sum + item.quantity, 0);
-//       totalQuantity += orderQuantity;
-
-//       return {
-//         orderId: order._id,
-//         date: order.createdAt,
-//         user: order.user ? `${order.user.name} (${order.user.email})` : "Guest",
-//         items: order.items.map((item) => ({
-//           product: item.product.name,
-//           quantity: item.quantity,
-//           price: item.product.price,
-//         })),
-//         totalQuantity: orderQuantity,
-//         total: orderTotal,
-//         paymentMethod: order.paymentMethod,
-//         paymentStatus: order.payment_status,
-//         orderStatus: order.order_status,
-//       };
-//     });
-
-//     res.render("sales-report", {
-//       salesData,
-//       totalRevenue,
-//       totalQuantity,
-//       title: "Sales Report",
-//       startDate: startDateTime.format("YYYY-MM-DD"),
-//       endDate: endDateTime.format("YYYY-MM-DD"),
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).render("error", { message: "Internal Server Error" });
-//   }
-// };
 
 module.exports = {
   loadProductList,
@@ -317,6 +281,5 @@ module.exports = {
   updateProduct,
   loadCategoryList,
   addCategory,
-  updateCategory,
-  // salesReport,
+  updateCategory
 };

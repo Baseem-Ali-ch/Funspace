@@ -1283,9 +1283,9 @@
                       <div>
                         <div class="card-info">
                           <h5 class="mb-0 " style="text-decoration: underline;">Best Selling Product</h5>
-                          <p class="mb-0 mt-1 ">Product Name: <%= bestSellingProduct.name %>
+                          <p class="mb-0 mt-1 ">Product Name: <%= bestSellingProduct?.name %>
                           </p>
-                          <p class="mb-0 mt-1 ">Quantity Sold: <%= bestSellingProduct.quantity %>
+                          <p class="mb-0 mt-1 ">Quantity Sold: <%= bestSellingProduct?.quantity %>
                           </p>
                         </div>
                       </div>
@@ -1302,9 +1302,9 @@
                             <div class="d-flex align-items-center mb-4">
                               <div class="ms-3 d-flex flex-column">
                                 <h6 class="mb-1">
-                                  <%= bestSellingCategory.title %>
+                                  <%= bestSellingCategory?.title %>
                                 </h6>
-                                <p class="mb-0">Sold: <%= categorySales[bestSellingCategory._id].quantity %> units</p>
+                                <p class="mb-0">Sold: <%= categorySales[bestSellingCategory._id]?.quantity %> units</p>
                               </div>
                             </div>
                             <% } else { %>
@@ -1326,8 +1326,7 @@
                     <div class="row mb-3">
                       <div class="col-md-3">
                         <label for="startDateId" class="form-label">Start Date</label>
-                        <input type="date" id="startDateId" name="startDate" class="form-control"
-                          value="<%= startDate %>">
+                        <input type="date" id="startDateId" name="startDate" class="form-control" value="<%= startDate %>">
                       </div>
                       <div class="col-md-3">
                         <label for="endDateId" class="form-label">End Date</label>
@@ -1378,7 +1377,7 @@
                           <th class="text-truncate">Total Amount</th>
                           <th class="text-truncate">Payment Method</th>
                           <th class="text-truncate">Payment Status</th>
-                          <th class="text-truncate">Order Status</th> <!-- Display order status -->
+                  <!-- Display order status -->
                           <th class="text-truncate">Grand Total</th>
                           <th class="text-truncate">Offer Discount</th>
                         </tr>
@@ -1430,9 +1429,7 @@
                             <td class="text-truncate">
                               <%= sale.paymentStatus %>
                             </td>
-                            <td class="text-truncate">
-                              <%= sale.orderStatus %> <!-- Display order status -->
-                            </td>
+                            
                             <td class="text-truncate">
                               ₹<%= sale.grandTotal %>
                             </td>

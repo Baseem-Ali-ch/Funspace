@@ -165,43 +165,25 @@
                   <a href="/product-list" ">Product</a>
               </li>
 
-              <li>
-                <a href=" #" class="sf-with-ul">Category</a>
-                  <ul>
-                    <% categories.forEach(function(category) { %>
-
-                      <li><a href="/category/<%= category._id %>">
-                          <%= category.title %>
-                        </a></li>
-
-                      <% }) %>
-                  </ul>
-                </li>
+              
 
 
 
 
 
+
+                
 
                 <li>
-                  <a href=" #" class="sf-with-ul">Brand</a>
-                  <ul>
-                    <li><a href="#">IKEA</a></li>
-                    <li><a href="#">DURIAN</a></li>
-                    <li><a href="#">URBAN LADDER</a></li>
-                    <li><a href="#">FURNITURE PARK</a></li>
-                    <li><a href="#">HOME TOWN</a></li>
-                    <li><a href="#">WOODEN STREET</a></li>
-                  </ul>
-                </li>
-
-                <li>
-                  <a href="#" class="sf-with-ul">Pages</a>
+                  <a href=" #" class="sf-with-ul">Pages</a>
 
                   <ul>
                     <!-- <li><a href="about.html">About</a></li> -->
                     <li><a href="/contact-us">Contact</a></li>
                     <li><a href="/login">Login</a></li>
+                    <li><a href="/register">Register</a></li>
+                    <li><a href="/wallet">Wallet</a></li>
+
 
                     <!-- <li><a href="coming-soon.html">Coming Soon</a></li> -->
                   </ul>
@@ -340,36 +322,28 @@
                               <%= product.name %>
                             </a>
                           </h3>
-                          <% if(product.offer) { %>
-                            <div class="row">
-                              <!-- Discounted price after applying the offer -->
-                              <div class="product-price mx-3">
-                                ₹<%= (product.price - (product.price * (product.offer.discount / 100))).toFixed(2) %>
-                              </div>
+                          <div class="product-price mx-3">
+                            ₹<%= product.finalPrice.toFixed(2) %>
+                          </div>
 
-                              <!-- Original price with strikethrough -->
-                              <div class="product-price mx-3" style="font-size: 13px;">
-                                <del>₹<%= product.price %></del>
-                              </div>
-
-                              <!-- Discount percentage -->
-                              <% const discountPercentage=Math.round(product.offer.discount); %>
-                                <div class="product-price" style="font-size: 16px;">
-                                  <%= discountPercentage %>% off
-                                </div>
+                          <!-- If the product has a discount, display the original price and discount percentage -->
+                          <% if (product.discountPercentage> 0) { %>
+                            <!-- Display Original Price -->
+                            <div class="product-price mx-3" style="font-size: 16px;">
+                              <del>₹<%= product.price %></del>
                             </div>
-                            <% } else { %>
-                              <!-- If no offer, display the original price -->
-                              <div class="product-price">
-                                ₹<%= product.price %>
-                              </div>
-                              <% } %>
-                                <div class="ratings-container">
-                                  <div class="ratings">
-                                    <div class="ratings-val" style="width: 20%"></div>
-                                  </div>
-                                  <span class="ratings-text">( 2 Reviews )</span>
+
+                            <!-- Display Discount Percentage -->
+                            <div class="product-price" style="font-size: 16px;">
+                              <%= product.discountPercentage %>% off
+                            </div>
+                            <% } %>
+                              <div class="ratings-container">
+                                <div class="ratings">
+                                  <div class="ratings-val" style="width: 20%"></div>
                                 </div>
+                                <span class="ratings-text">( 2 Reviews )</span>
+                              </div>
                         </div>
                       </div>
                     </div>
@@ -422,29 +396,28 @@
                     <div class="widget-body">
                       <div class="filter-items filter-items-count">
                         <div class="filter-item">
-                          <% categories.forEach((category, index) => { %> <!-- Loop through all categories -->
+                          <% categories.forEach((category, index)=> { %> <!-- Loop through all categories -->
                             <div class="custom-control custom-checkbox">
                               <input type="checkbox" class="custom-control-input category-checkbox"
-                                id="cat-<%= category._id %>" value="<%= category._id %>"
-                                onchange="filterProducts()" />
+                                id="cat-<%= category._id %>" value="<%= category._id %>" onchange="filterProducts()" />
                               <label class="custom-control-label" for="cat-<%= category._id %>">
                                 <%= category.title %>
                               </label>
                             </div>
-                          <% }); %>
-                          <!-- Uncategorized option -->
-                          <div class="custom-control custom-checkbox" style="display: none;">
-                            <input type="checkbox" class="custom-control-input" id="cat-uncategorized"
-                              value="uncategorized" checked onchange="filterProducts()" />
-                            <label class="custom-control-label" for="cat-uncategorized">
-                              Uncategorized
-                            </label>
-                          </div>
+                            <% }); %>
+                              <!-- Uncategorized option -->
+                              <div class="custom-control custom-checkbox" style="display: none;">
+                                <input type="checkbox" class="custom-control-input" id="cat-uncategorized"
+                                  value="uncategorized" checked onchange="filterProducts()" />
+                                <label class="custom-control-label" for="cat-uncategorized">
+                                  Uncategorized
+                                </label>
+                              </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                  
+
 
                   <!-- End .widget-body -->
                 </div>
@@ -657,27 +630,27 @@
           </li>
           <li>
             <a href=" #" class="sf-with-ul">Category</a>
-              <ul>
-                <% categories.forEach(function(category) { %>
+            <ul>
+              <% categories.forEach(function(category) { %>
 
-                  <li><a href="/category/<%= category._id %>">
-                      <%= category.title %>
-                    </a></li>
+                <li><a href="/category/<%= category._id %>">
+                    <%= category.title %>
+                  </a></li>
 
-                  <% }) %>
-              </ul>
-            </li>
-            <li>
-              <a href=" #" class="sf-with-ul">Brand</a>
-              <ul>
-                <li><a href="#">IKEA</a></li>
-                <li><a href="#">DURIAN</a></li>
-                <li><a href="#">URBAN LADDER</a></li>
-                <li><a href="#">FURNITURE PARK</a></li>
-                <li><a href="#">HOME TOWN</a></li>
-                <li><a href="#">WOODEN STREET</a></li>
-              </ul>
-            </li>
+                <% }) %>
+            </ul>
+          </li>
+          <li>
+            <a href=" #" class="sf-with-ul">Brand</a>
+            <ul>
+              <li><a href="#">IKEA</a></li>
+              <li><a href="#">DURIAN</a></li>
+              <li><a href="#">URBAN LADDER</a></li>
+              <li><a href="#">FURNITURE PARK</a></li>
+              <li><a href="#">HOME TOWN</a></li>
+              <li><a href="#">WOODEN STREET</a></li>
+            </ul>
+          </li>
           <li>
             <a href="#">Pages</a>
             <ul>
@@ -926,14 +899,16 @@
           const discountedPrice = (product.price - (product.price * (product.offer.discount / 100))).toFixed(2);
           const discountPercentage = Math.round(product.offer.discount);
           priceHtml = `
-        <div class="row">
-          <div class="product-price mx-3">₹${discountedPrice}</div>
-          <div class="product-price mx-3" style="font-size: 13px;"><del>₹${product.price}</del></div>
-          <div class="product-price" style="font-size: 16px;">${discountPercentage}% off</div>
-        </div>
-      `;
+    <div class="product-price mx-3">₹${discountedPrice}</div>
+    <div class="product-price mx-3" style="font-size: 16px;">
+      <del>₹${product.price}</del>
+    </div>
+    <div class="product-price" style="font-size: 16px;">
+      ${discountPercentage}% off
+    </div>
+  `;
         } else {
-          priceHtml = `<div class="product-price">₹${product.price}</div>`;
+          priceHtml = `<div class="product-price mx-3">₹${product.price}</div>`;
         }
 
         productDiv.innerHTML = `

@@ -686,12 +686,17 @@
                                                     <button id="cancelButton_<%= item._id %>" class="btn btn-sm"
                                                         style="color: #c96;"
                                                         onclick="openCancelModal('<%= order._id %>', '<%= item._id %>')">Cancel</button>
+
                                                     <% } %>
                                         </td>
                                         <td>
                                             <% if (item.order_status==='Delivered' ) { %>
-                                                <a href="/download-invoice/<%= encodeURIComponent(order.orderId) %>/<%= item.product._id %>"
-                                                    class="btn btn-sm" style="color: #c96;">Invoice</a>
+                                                <!-- <a href="/download-invoice/<%= encodeURIComponent(order.orderId) %>/<%= item.product._id %>"
+                                                    class="btn btn-sm" style="color: #c96;">Invoice</a> -->
+                                                    <a href="/order-list/invoice?orderId=<%= order._id %>&productId=<%= item.product._id %>" class="action-btn invoice-btn">
+                                                        <i class="fas fa-file-invoice"></i>Invoice
+                                                    </a>
+                                                    
                                                 <% }else if(order.payment_status==='Failed' ){ %>
                                                     <button class="btn btn-sm btn-danger"
                                                         onclick="retryPayment('<%= order._id %>')">Retry
@@ -729,6 +734,8 @@
                                     <textarea class="form-control" id="cancelReason" name="cancelReason"
                                         required></textarea>
                                 </div>
+                                <input type="hidden" id="cancelOrderId" name="orderId">
+                                <input type="hidden" id="cancelItemId" name="itemId">
                             </div>
                             <div class="modal-footer">
                                 <button type="submit" class="btn btn-primary">Submit</button>
@@ -940,21 +947,26 @@
             <!-- Include SweetAlert CSS and JS files -->
             <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
             <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
-
+            <script src="https://cdn.jsdelivr.net/npm/easyinvoice/dist/easyinvoice.min.js"></script>
+            <script src="https://unpkg.com/easyinvoice/dist/easyinvoice.min.js"></script>
 
             <!-- trigger the modal -->
             <script>
-                function openCancelModal(orderId) {
-                    document.getElementById('cancelOrderForm').action = `/order-list/cancel/${orderId}`;
+                function openCancelModal(orderId, itemId) {
+                    document.getElementById("cancelOrderId").value = orderId;
+                    document.getElementById("cancelItemId").value = itemId;
+                    document.getElementById("cancelOrderForm").action = `/orders/${orderId}/items/${itemId}/cancel`;
                     $('#cancelOrderModal').modal('show');
                 }
 
+
                 function openReturnModal(orderId, itemId) {
-                    document.getElementById('returnOrderId').value = orderId;
-                    document.getElementById('returnItemId').value = itemId;
-                    var returnOrderModal = new bootstrap.Modal(document.getElementById('returnOrderModal'));
-                    returnOrderModal.show();
+                    document.getElementById("returnOrderId").value = orderId;
+                    document.getElementById("returnItemId").value = itemId;
+                    document.getElementById("returnOrderForm").action = `/order-list/return/${orderId}/${itemId}`;
+                    $('#returnOrderModal').modal('show');
                 }
+
             </script>
 
             <script>

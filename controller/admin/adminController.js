@@ -58,6 +58,11 @@ const verifyLogin = async (req, res) => {
 const loadHome = async (req, res) => {
   try {
     let { startDate, endDate, filterPeriod } = req.query;
+    console.log("Query Params:", { startDate, endDate, filterPeriod });
+
+    const now = moment();
+    let defaultStart = now.clone().subtract(30, "days").startOf("day");
+    let defaultEnd = now.clone().endOf("day");
 
     // Handle filter periods
     if (filterPeriod) {
@@ -83,21 +88,26 @@ const loadHome = async (req, res) => {
           endDate = moment().endOf("year").format("YYYY-MM-DD");
           break;
         default:
-          startDate = moment().subtract(30, "days").format("YYYY-MM-DD");
-          endDate = moment().format("YYYY-MM-DD");
+          startDate = moment(startDate).startOf("day");
+          endDate =  moment(endDate).endOf("day");
+
           break;
       }
     } else {
       // Default to last 30 days if no date range or filter period is specified
       if (!startDate || !endDate) {
-        startDate = moment().subtract(30, "days").format("YYYY-MM-DD");
-        endDate = moment().format("YYYY-MM-DD");
+        startDate = defaultStart.format("YYYY-MM-DD");
+        endDate = defaultEnd.format("YYYY-MM-DD");
       }
     }
 
     // Parse the dates and set the time
     const startDateTime = moment(startDate).startOf("day");
     const endDateTime = moment(endDate).endOf("day");
+
+    // Debugging logs
+    console.log('Parsed Start Date:', startDateTime.toDate());
+    console.log('Parsed End Date:', endDateTime.toDate());
 
     // Fetch orders based on the date range
     const orders = await Order.find({
@@ -107,9 +117,18 @@ const loadHome = async (req, res) => {
       .populate("items.product", "name price category")
       .sort({ createdAt: -1 });
 
+    console.log('Fetched Orders:', orders);
+
     // Extract product IDs and category IDs to fetch offers
-    const productIds = orders.flatMap((order) => order.items.filter((item) => item.product && item.product._id).map((item) => item.product._id));
-    const categoryIds = orders.flatMap((order) => order.items.filter((item) => item.product && item.product.category).map((item) => item.product.category));
+    const productIds = orders.flatMap((order) => 
+      order.items.filter((item) => item.product && item.product._id).map((item) => item.product._id)
+    );
+    const categoryIds = orders.flatMap((order) => 
+      order.items.filter((item) => item.product && item.product.category).map((item) => item.product.category)
+    );
+
+    console.log('Product IDs:', productIds);
+    console.log('Category IDs:', categoryIds);
 
     // Fetch offers related to products and categories
     const productOffers = await Offer.find({
@@ -252,139 +271,6 @@ const loadHome = async (req, res) => {
   }
 };
 
-//load order list in admin side
-const loadOrderList = async (req, res) => {
-  try {
-    const user = req.session.user || req.user;
-    const userId = user ? user._id : null;
-    const page = parseInt(req.query.page) || 1;
-    const limit = 10;
-    const skip = (page - 1) * limit;
-    const search = req.query.search || "";
-
-    const searchQuery = search
-      ? {
-          $or: [{ orderId: new RegExp(search, "i") }, { "user.name": new RegExp(search, "i") }, ...(ObjectId.isValid(search) ? [{ _id: search }] : [])],
-        }
-      : {};
-
-    const orders = await Order.find(searchQuery).populate("items.product").populate("address").populate("user").sort({ createdAt: -1 }).skip(skip).limit(limit).lean();
-
-    for (let order of orders) {
-      let totalPrice = 0;
-
-      for (let item of order.items) {
-        let finalPrice = item?.product?.price;
-        let offerDetails = null;
-
-        if (item.product) {
-          // Check for product-specific offers
-          const productOffers = await Offer.find({
-            offerType: "product",
-            status: "active",
-            _id: { $in: item.product.offerIds || [] },
-          }).exec();
-
-          // Check for category-specific offers
-          const categoryOffers = await Offer.find({
-            offerType: "category",
-            status: "active",
-            categoryIds: item.product.category,
-          }).exec();
-
-          let bestOffer = null;
-
-          // Determine the best product offer
-          if (productOffers.length > 0) {
-            bestOffer = productOffers.reduce((max, offer) => (offer.discount > max.discount ? offer : max), productOffers[0]);
-          }
-
-          // Determine the best category offer
-          if (categoryOffers.length > 0) {
-            const categoryBestOffer = categoryOffers.reduce((max, offer) => (offer.discount > max.discount ? offer : max), categoryOffers[0]);
-            if (!bestOffer || categoryBestOffer.discount > bestOffer.discount) {
-              bestOffer = categoryBestOffer;
-            }
-          }
-
-          // Apply the best offer to the product
-          if (bestOffer) {
-            finalPrice = item.product.price * (1 - bestOffer.discount / 100);
-            offerDetails = {
-              offerType: bestOffer.offerType,
-              discount: bestOffer.discount,
-              offerName: bestOffer.offerName,
-              description: bestOffer.description || "No additional details available",
-            };
-          }
-
-          // Calculate the total price
-          totalPrice += finalPrice * item.quantity;
-          item.product.finalPrice = finalPrice.toFixed(2);
-          item.product.offerDetails = offerDetails;
-        }
-      }
-
-      order.totalPrice = totalPrice.toFixed(2);
-    }
-
-    const totalOrders = await Order.countDocuments(searchQuery);
-    const totalPages = Math.ceil(totalOrders / limit);
-    const isAdmin = req.session.admin;
-
-    return res.render("order-list", {
-      isAdmin,
-      orders,
-      currentPage: page,
-      totalPages,
-      userId,
-      search,
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).send("Server Error");
-  }
-};
-
-//update the order status
-const updateOrderStatus = async (req, res) => {
-  console.log("Updating order status");
-
-  try {
-    const { orderId, productId, product_status } = req.body;
-    console.log("Order ID:", orderId);
-    console.log("Product ID:", productId);
-    console.log("New Status:", product_status);
-
-    const allowedStatuses = ["Pending", "Processing", "Shipped", "Delivered", "Cancelled", "Returned"];
-    if (!allowedStatuses.includes(product_status)) {
-      return res.status(400).json({ success: false, message: "Invalid order status" });
-    }
-
-    const updatedOrder = await Order.findOneAndUpdate({ _id: orderId, "items._id": productId }, { $set: { "items.$.order_status": product_status } }, { new: true });
-
-    if (!updatedOrder) {
-      console.error("Order or product not found");
-      return res.status(404).json({ success: false, message: "Order or product not found" });
-    }
-
-    console.log("Updated Order:", updatedOrder);
-    return res.status(200).json({ success: true, message: "Status updated successfully" });
-  } catch (error) {
-    console.error("Error updating order status:", error);
-    return res.status(500).json({ success: false, message: "Error updating order status" });
-  }
-};
-
-//load order details in admin side
-const loadOrderDeatails = async (req, res) => {
-  try {
-    const isAdmin = req.session.admin;
-    return res.render("order-details", { isAdmin });
-  } catch (error) {
-    console.log(error);
-  }
-};
 
 //load all user list in admin side
 const loadAllUser = async (req, res) => {
@@ -466,7 +352,7 @@ const loadAdmProfile = async (req, res) => {
 const generatePdf = (salesData, res) => {
   try {
     const doc = new PDFDocument({ margin: 50 });
-    let filename = "sales-report.pdf";
+    const filename = "sales-report.pdf";
 
     res.setHeader("Content-disposition", `attachment; filename="${filename}"`);
     res.setHeader("Content-type", "application/pdf");
@@ -475,11 +361,11 @@ const generatePdf = (salesData, res) => {
 
     // Title
     doc.fontSize(18).text("Sales Report", { align: "center", underline: true });
-    doc.moveDown(2);
+    doc.moveDown(1);
 
     // Define table
     const table = {
-      headers: ["Order ID", "Customer", "Total Amount", "Order Date"],
+      headers: ["Order ID", "Customer", "Total Amount", "Coupon Discount", "Offer Discount", "Grand Total", "Order Date"],
       rows: [],
     };
 
@@ -487,34 +373,38 @@ const generatePdf = (salesData, res) => {
 
     // Populate table rows and calculate the grand total
     salesData.forEach((order) => {
-      const total = order.totalPrice.toFixed(2);
-      grandTotal += parseFloat(total);
+      const total = order.total.toFixed(2);
+      const couponDiscount = order.couponDisc.toFixed(2);
+      const offerDiscount = order.offerDisc.toFixed(2);
+      const grandTotalRow = (order.total - order.couponDisc - order.offerDisc).toFixed(2);
 
-      table.rows.push([
-        order.orderId,
-        order.user ? order.user.name : "N/A",
-        `₹${total}`,
-        new Date(order.createdAt).toLocaleDateString(),
-      ]);
+      grandTotal += parseFloat(grandTotalRow);
+
+      table.rows.push([order.orderId, order.user ? order.user.name : "N/A", `₹${total}`, `₹${couponDiscount}`, `₹${offerDiscount}`, `₹${grandTotalRow}`, new Date(order.date).toLocaleDateString()]);
     });
 
     // Draw table
     const startX = 50;
     const startY = 150;
-    const rowHeight = 30;
+    const rowHeight = 25;
     const colWidth = (doc.page.width - 2 * startX) / table.headers.length;
 
     // Draw headers with styling
-    doc.font("Helvetica-Bold").fontSize(12).fillColor('white').rect(startX, startY - 20, colWidth * table.headers.length, rowHeight).fill('#4A4A4A').fillColor('black');
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(12)
+      .fillColor("white")
+      .rect(startX, startY - 20, colWidth * table.headers.length, rowHeight)
+      .fill("#4A4A4A");
     table.headers.forEach((header, i) => {
-      doc.text(header, startX + i * colWidth, startY - 10, {
+      doc.text(header, startX + i * colWidth, startY - 15, {
         width: colWidth,
         align: "center",
       });
     });
 
     // Draw rows with styling
-    doc.font("Helvetica").fontSize(10).fillColor('black');
+    doc.font("Helvetica").fontSize(10).fillColor("black");
     table.rows.forEach((row, rowIndex) => {
       row.forEach((cell, colIndex) => {
         doc.text(cell, startX + colIndex * colWidth, startY + rowIndex * rowHeight, {
@@ -525,26 +415,34 @@ const generatePdf = (salesData, res) => {
     });
 
     // Draw lines (for table borders)
-    doc.lineWidth(0.5);
+    doc.lineWidth(0.5).strokeColor("#4A4A4A");
 
     // Vertical lines
     for (let i = 0; i <= table.headers.length; i++) {
-      doc.moveTo(startX + i * colWidth, startY - 20)
-         .lineTo(startX + i * colWidth, startY + table.rows.length * rowHeight)
-         .stroke();
+      doc
+        .moveTo(startX + i * colWidth, startY - 20)
+        .lineTo(startX + i * colWidth, startY + table.rows.length * rowHeight)
+        .stroke();
     }
 
     // Horizontal lines
     for (let i = 0; i <= table.rows.length; i++) {
-      doc.moveTo(startX, startY + i * rowHeight - 20)
-         .lineTo(startX + table.headers.length * colWidth, startY + i * rowHeight - 20)
-         .stroke();
+      doc
+        .moveTo(startX, startY + i * rowHeight - 20)
+        .lineTo(startX + table.headers.length * colWidth, startY + i * rowHeight - 20)
+        .stroke();
     }
 
     // Grand total
     const grandTotalY = startY + table.rows.length * rowHeight + 10;
-    doc.moveTo(startX, grandTotalY).lineTo(startX + table.headers.length * colWidth, grandTotalY).stroke();
-    doc.font("Helvetica-Bold").fontSize(12).text(`Grand Total: ₹${grandTotal.toFixed(2)}`, startX + colWidth * 2, grandTotalY + 10, { align: "center" });
+    doc
+      .moveTo(startX, grandTotalY)
+      .lineTo(startX + table.headers.length * colWidth, grandTotalY)
+      .stroke();
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(12)
+      .text(`Grand Total: ₹${grandTotal.toFixed(2)}`, startX + colWidth * 3, grandTotalY + 10, { align: "center" });
 
     doc.end();
   } catch (error) {
@@ -552,8 +450,6 @@ const generatePdf = (salesData, res) => {
     res.status(500).send(`Error generating PDF: ${error.message}`);
   }
 };
-
-
 
 const salesReportPdf = async (req, res) => {
   try {
@@ -651,7 +547,7 @@ const salesReportExcel = async (req, res) => {
     // Add Grand Total row
     worksheet.addRow({});
     const totalRow = worksheet.addRow({
-      orderId: 'Grand Total',
+      orderId: "Grand Total",
       total: `₹${grandTotal.toFixed(2)}`,
     });
     totalRow.font = { bold: true };
@@ -672,75 +568,15 @@ const salesReportExcel = async (req, res) => {
   }
 };
 
-
-
-const acceptReturn = async (req, res) => {
-  try {
-    const { orderId, itemId, item_status } = req.body;
-
-    const order = await Order.findOne({ _id: orderId });
-    if (!order) {
-      return res.status(400).json({ success: false, message: "Order not found" });
-    }
-
-    const item = order.items.id(itemId);
-    if (!item) {
-      return res.status(400).json({ success: false, message: "Item not found" });
-    }
-
-    if (item.order_status === "Return Requested" && item_status === "Returned") {
-      item.order_status = "Returned";
-    } else if (item.order_status === "Return Requested" && item_status === "Delivered") {
-      item.order_status = "Delivered"; // Rejecting the return request
-    }
-
-    await order.save();
-    res.redirect("/admin/order-list?status=updated");
-  } catch (error) {
-    console.error("Error updating order status:", error);
-    res.status(500).json({ success: false, message: "Failed to update order status" });
-  }
-};
-
-// Reject return request
-const rejectReturn = async (req, res) => {
-  try {
-    const { orderId } = req.params;
-
-    const order = await Order.findById(orderId);
-    if (!order) {
-      return res.status(404).send("Order not found");
-    }
-
-    order.returnRequestStatus = "Rejected";
-    order.items.forEach((item) => {
-      if (item.order_status === "Return Requested") {
-        item.order_status = "Delivered"; // Assuming the return is rejected, reset to Delivered
-      }
-    });
-
-    await order.save();
-    res.redirect("/admin/order-list");
-  } catch (error) {
-    console.error("Error rejecting return request:", error);
-    res.status(500).send("Failed to reject return request");
-  }
-};
-
 module.exports = {
   loadLogin,
   verifyLogin,
   loadHome,
-  loadOrderList,
-  loadOrderDeatails,
   loadAllUser,
   updateCustomer,
   adminLogout,
   loadAdmProfile,
-  updateOrderStatus,
   generatePdf,
   salesReportPdf,
   salesReportExcel,
-  acceptReturn,
-  rejectReturn,
 };

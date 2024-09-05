@@ -651,140 +651,78 @@ const loadAddress = async (req, res) => {
 
 
 
-
-const downloadInvoice = async (req, res) => {
+const generateInvoice = async (req, res) => {
   try {
-    const { orderId, productId } = req.params;
+    const { orderId, productId } = req.query;
+    console.log(orderId, productId)
+    if (!orderId || !productId) {
+      return res.status(400).send("Invalid order or product ID.");
+    }
+    console.log(orderId,productId);
     
-    const order = await Order.findOne({ orderId: orderId })
-      .populate('items.product')
-      .populate('user');
+    // Fetch the order details from the database
+    const order = await Order.findOne({ _id:orderId }).populate("items.product").populate("user").populate("address");
 
     if (!order) {
-      return res.status(404).send('Order not found');
+      return res.status(404).send("Order not found.");
     }
 
-    const orderItem = order.items.find(item => item.product._id.toString() === productId);
-
+    // Check if the product exists in the order
+    const orderItem = order.items.find((item) => item.product._id.toString() === productId);
     if (!orderItem) {
-      return res.status(404).send('Product not found in the order');
+      return res.status(404).send("Product not found in the order.");
     }
 
-    const doc = new PDFDocument({ margin: 50 });
-    
-    // Set response headers for PDF download
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=invoice-${order.orderId}-${productId}.pdf`);
+    // Create a PDF document
+    const doc = new PDFDocument();
+    const fileName = `invoice-${orderId}-${productId}.pdf`;
+    const filePath = path.join(__dirname, '../../invoices', fileName);
 
-    // Pipe the PDF document to the response
-    doc.pipe(res);
+    doc.pipe(fs.createWriteStream(filePath)); // Write the PDF to a file
 
     // Add content to the PDF
-    doc.fontSize(18).text('Invoice', { align: 'center' });
+    doc.fontSize(20).text(`Invoice for Order: ${orderId}`, { align: 'center' });
+    doc.moveDown();
+    doc.fontSize(14).text(`Customer Name: ${order.user.name}`);
+    doc.text(`Email: ${order.user.email}`);
+    doc.text(`Phone: ${order.user.phone}`);
     doc.moveDown();
 
-    // Define table structure
-    const table = {
-      headers: ['Field', 'Value'],
-      rows: [
-        ['Order ID', order.orderId],
-        ['Date', order.createdAt.toLocaleDateString()],
-        ['Customer', order.address.fullName],
-        ['Address', `${order.address.streetAddress}, ${order.address.city}, ${order.address.state}, ${order.address.postcode}`]
-      ]
-    };
+    doc.text(`Shipping Address:`);
+    doc.text(`${order.address.street}, ${order.address.city}, ${order.address.state}, ${order.address.zipcode}`);
+    doc.moveDown();
 
-    // Draw table with padding and styling
-    const startX = 50;
-    let startY = 100;
-    const rowHeight = 30;
-    const colWidth = (doc.page.width - 100) / 2;
-    const cellPadding = 5;
+    doc.text(`Product Details:`);
+    doc.text(`Product Name: ${orderItem.product.name}`);
+    doc.text(`Quantity: ${orderItem.quantity}`);
+    doc.text(`Price: $${orderItem.product.finalPrice}`);
+    doc.text(`Total: $${(orderItem.product.finalPrice * orderItem.quantity).toFixed(2)}`);
+    doc.moveDown();
 
-    // Draw headers with bold font and background color
-    doc.font('Helvetica-Bold');
-    table.headers.forEach((header, i) => {
-      doc.rect(startX + i * colWidth, startY, colWidth, rowHeight)
-        .fillAndStroke('#f0f0f0', '#000')
-        .fill('#000')
-        .text(header, startX + i * colWidth + cellPadding, startY + cellPadding, {
-          width: colWidth - 2 * cellPadding,
-          align: 'left',
-          height: rowHeight - 2 * cellPadding
-        });
-    });
+    doc.fontSize(16).text(`Grand Total: $${order.totalPrice}`, { align: 'right' });
 
-    // Draw rows with padding
-    doc.font('Helvetica');
-    table.rows.forEach((row, rowIndex) => {
-      row.forEach((cell, colIndex) => {
-        doc.rect(startX + colIndex * colWidth, startY + (rowIndex + 1) * rowHeight, colWidth, rowHeight)
-          .stroke()
-          .text(cell, startX + colIndex * colWidth + cellPadding, startY + (rowIndex + 1) * rowHeight + cellPadding, {
-            width: colWidth - 2 * cellPadding,
-            align: 'left',
-            height: rowHeight - 2 * cellPadding
-          });
+    doc.end();
+
+    // After writing, send the file to the client
+    doc.on('end', () => {
+      res.download(filePath, fileName, (err) => {
+        if (err) {
+          console.log("Error downloading file:", err);
+          res.status(500).send("Could not download the invoice.");
+        }
+        // Optionally, delete the file after sending
+        fs.unlinkSync(filePath);
       });
     });
 
-    // Move to next section
-    startY += (table.rows.length + 1) * rowHeight + 10;
-
-    // Product details table
-    doc.fontSize(14).text('Product Details', startX, startY);
-    startY += 30;
-
-    const productTable = {
-      headers: ['Product', 'Quantity', 'Price', 'Total'],
-      rows: [[
-        orderItem.product.name,
-        orderItem.quantity.toString(),
-        `₹${orderItem.product.price.toFixed(2)}`,
-        `₹${(orderItem.quantity * orderItem.product.price).toFixed(2)}`
-      ]]
-    };
-
-    // Draw product table with padding and styling
-    doc.font('Helvetica-Bold');
-    productTable.headers.forEach((header, i) => {
-      doc.rect(startX + i * colWidth / 2, startY, colWidth / 2, rowHeight)
-        .fillAndStroke('#f0f0f0', '#000')
-        .fill('#000')
-        .text(header, startX + i * colWidth / 2 + cellPadding, startY + cellPadding, {
-          width: colWidth / 2 - 2 * cellPadding,
-          align: 'center',
-          height: rowHeight - 2 * cellPadding
-        });
-    });
-
-    doc.font('Helvetica');
-    productTable.rows[0].forEach((cell, i) => {
-      doc.rect(startX + i * colWidth / 2, startY + rowHeight, colWidth / 2, rowHeight)
-        .stroke()
-        .text(cell, startX + i * colWidth / 2 + cellPadding, startY + rowHeight + cellPadding, {
-          width: colWidth / 2 - 2 * cellPadding,
-          align: 'center',
-          height: rowHeight - 2 * cellPadding
-        });
-    });
-
-    // Move to next section
-    startY += 2 * rowHeight + 10;
-
-    // Add total and order status with padding and font size
-    doc.fontSize(14).text(`Total: ₹${(orderItem.quantity * orderItem.product.price).toFixed(2)}`, startX, startY, { align: 'right' });
-    startY += rowHeight;
-    doc.fontSize(12).text(`Order Status: ${orderItem.order_status}`, startX, startY);
-
-    // Finalize the PDF and end the stream
-    doc.end();
-
   } catch (error) {
-    console.error(error);
-    res.status(500).send('Error generating invoice');
+    console.error("Error generating invoice:", error);
+    res.status(500).send("Internal Server Error");
   }
 };
+
+
+
 
 
 module.exports = {
@@ -804,5 +742,5 @@ module.exports = {
   updateOrderStatus,
   loadOrderList,
   loadAddress,
-  downloadInvoice
+  generateInvoice 
 };
