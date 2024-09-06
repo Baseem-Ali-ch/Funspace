@@ -772,7 +772,7 @@
                             </div>
                             <div class="mb-3">
                               <label for="productCategory" class="form-label">Category</label>
-                              <select class="form-control" id="productCategory" name="category">
+                              <select class="form-control" id="productCategory" name="proCategory">
                                 <% categories.forEach(category=> { %>
                                   <option value="<%= category._id %>" <%=category._id.equals(category._id) ? 'selected'
                                     : '' %>>
@@ -968,11 +968,13 @@
 
               document.getElementById('productName').value = product.name;
               document.getElementById('productDescription').value = product.description;
-              document.getElementById('productCategory').value = product.category ? product.category._id : '';
+              const category = document.getElementById('productCategory').value = product.category ? product.category._id : '';
               document.getElementById('productPrice').value = product.price;
               document.getElementById('discountProductPrice').value = product.discountedPrice;
               document.getElementById('productStock').value = product.stock;
               document.getElementById('productStatus').value = product.isListed;
+
+              console.log('category', category)
 
               const imageElements = ['modalImage1', 'modalImage2', 'modalImage3'];
               const imageUrls = [product.imageUrl_1, product.imageUrl_2, product.imageUrl_3];
@@ -1101,14 +1103,23 @@
                 return;
               }
 
-              const formData = new FormData(form);
+              const formData = new FormData();
 
-              // Ensure all image inputs are included in the form data
+              // Add non-file fields
+              formData.append('name', document.getElementById('productName').value);
+              formData.append('description', document.getElementById('productDescription').value);
+              formData.append('proCategory', document.getElementById('productCategory').value);
+              formData.append('price', document.getElementById('productPrice').value);
+              formData.append('discountPrice', document.getElementById('discountProductPrice').value);
+              formData.append('stock', document.getElementById('productStock').value);
+              formData.append('status', document.getElementById('productStatus').value);
+
+              // Add image fields
               const imageInputs = ['modalInputImage1', 'modalInputImage2', 'modalInputImage3'];
-              imageInputs.forEach(inputId => {
+              imageInputs.forEach((inputId, index) => {
                 const input = document.getElementById(inputId);
                 if (input && input.files.length > 0) {
-                  formData.append(input.name, input.files[0]);
+                  formData.append(`productImage${index + 1}`, input.files[0]);
                 }
               });
 
@@ -1146,6 +1157,7 @@
                 });
               }
             }
+
 
             // Event listener for form submission
             document.addEventListener('DOMContentLoaded', function () {

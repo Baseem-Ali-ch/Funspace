@@ -347,12 +347,10 @@ const loadAdmProfile = async (req, res) => {
   }
 };
 
-//download report pdf
-
 const generatePdf = (salesData, res) => {
   try {
     const doc = new PDFDocument({ margin: 50 });
-    const filename = "sales-report.pdf";
+    let filename = "sales-report.pdf";
 
     res.setHeader("Content-disposition", `attachment; filename="${filename}"`);
     res.setHeader("Content-type", "application/pdf");
@@ -361,88 +359,89 @@ const generatePdf = (salesData, res) => {
 
     // Title
     doc.fontSize(18).text("Sales Report", { align: "center", underline: true });
-    doc.moveDown(1);
+    doc.moveDown(2);
 
     // Define table
     const table = {
-      headers: ["Order ID", "Customer", "Total Amount", "Coupon Discount", "Offer Discount", "Grand Total", "Order Date"],
+      headers: ["Order ID", "Customer", "Total Amount","discoutn", "Order Date"],
       rows: [],
     };
 
     let grandTotal = 0;
+    let grandDiscount = 0;
 
     // Populate table rows and calculate the grand total
     salesData.forEach((order) => {
-      const total = order.total.toFixed(2);
-      const couponDiscount = order.couponDisc.toFixed(2);
-      const offerDiscount = order.offerDisc.toFixed(2);
-      const grandTotalRow = (order.total - order.couponDisc - order.offerDisc).toFixed(2);
+      
+      const total = order.totalPrice.toFixed(2);
+      const discount = parseFloat(order.couponDiscountAmt.toFixed(2) || 0); 
+      grandTotal += parseFloat(total);
+      //grandDiscount += discount;
 
-      grandTotal += parseFloat(grandTotalRow);
-
-      table.rows.push([order.orderId, order.user ? order.user.name : "N/A", `₹${total}`, `₹${couponDiscount}`, `₹${offerDiscount}`, `₹${grandTotalRow}`, new Date(order.date).toLocaleDateString()]);
+      table.rows.push([
+        order.orderId,
+        order.user ? order.user.name : "N/A",
+        `₹${total}`,
+        //`₹${discount.toFixed(2)}`,
+        new Date(order.createdAt).toLocaleDateString(),
+      ]);
     });
 
-    // Draw table
+    // Draw table headers
     const startX = 50;
     const startY = 150;
-    const rowHeight = 25;
+    const rowHeight = 30;
     const colWidth = (doc.page.width - 2 * startX) / table.headers.length;
 
     // Draw headers with styling
-    doc
-      .font("Helvetica-Bold")
-      .fontSize(12)
-      .fillColor("white")
-      .rect(startX, startY - 20, colWidth * table.headers.length, rowHeight)
-      .fill("#4A4A4A");
+    doc.font("Helvetica-Bold").fontSize(12).fillColor('white');
+    doc.rect(startX, startY, colWidth * table.headers.length, rowHeight).fill('#4A4A4A');
+    doc.fillColor('black');
     table.headers.forEach((header, i) => {
-      doc.text(header, startX + i * colWidth, startY - 15, {
+      doc.text(header, startX + i * colWidth, startY + 10, {
         width: colWidth,
         align: "center",
       });
     });
 
     // Draw rows with styling
-    doc.font("Helvetica").fontSize(10).fillColor("black");
-    table.rows.forEach((row, rowIndex) => {
+    let currentY = startY + rowHeight; // Position after headers
+
+    doc.font("Helvetica").fontSize(10).fillColor('black');
+    table.rows.forEach((row) => {
       row.forEach((cell, colIndex) => {
-        doc.text(cell, startX + colIndex * colWidth, startY + rowIndex * rowHeight, {
+        doc.text(cell, startX + colIndex * colWidth, currentY + 5, {
           width: colWidth,
           align: "center",
         });
       });
+      currentY += rowHeight; // Move down to the next row
     });
 
     // Draw lines (for table borders)
-    doc.lineWidth(0.5).strokeColor("#4A4A4A");
+    doc.lineWidth(0.5);
 
     // Vertical lines
     for (let i = 0; i <= table.headers.length; i++) {
-      doc
-        .moveTo(startX + i * colWidth, startY - 20)
-        .lineTo(startX + i * colWidth, startY + table.rows.length * rowHeight)
+      doc.moveTo(startX + i * colWidth, startY)
+        .lineTo(startX + i * colWidth, currentY)
         .stroke();
     }
 
     // Horizontal lines
     for (let i = 0; i <= table.rows.length; i++) {
-      doc
-        .moveTo(startX, startY + i * rowHeight - 20)
-        .lineTo(startX + table.headers.length * colWidth, startY + i * rowHeight - 20)
+      doc.moveTo(startX, startY + i * rowHeight)
+        .lineTo(startX + table.headers.length * colWidth, startY + i * rowHeight)
         .stroke();
     }
 
+    // Draw bottom line for header
+    doc.moveTo(startX, startY).lineTo(startX + table.headers.length * colWidth, startY).stroke();
+
     // Grand total
-    const grandTotalY = startY + table.rows.length * rowHeight + 10;
-    doc
-      .moveTo(startX, grandTotalY)
-      .lineTo(startX + table.headers.length * colWidth, grandTotalY)
-      .stroke();
-    doc
-      .font("Helvetica-Bold")
-      .fontSize(12)
-      .text(`Grand Total: ₹${grandTotal.toFixed(2)}`, startX + colWidth * 3, grandTotalY + 10, { align: "center" });
+    const grandTotalY = currentY + 10;
+    doc.moveTo(startX, grandTotalY).lineTo(startX + table.headers.length * colWidth, grandTotalY).stroke();
+    doc.font("Helvetica-Bold").fontSize(12).text(`Grand Total: ₹${grandTotal.toFixed(2)}`, startX + colWidth * 2, grandTotalY + 10, { align: "center" });
 
     doc.end();
   } catch (error) {
@@ -450,6 +449,8 @@ const generatePdf = (salesData, res) => {
     res.status(500).send(`Error generating PDF: ${error.message}`);
   }
 };
+
+
 
 const salesReportPdf = async (req, res) => {
   try {
@@ -547,7 +548,7 @@ const salesReportExcel = async (req, res) => {
     // Add Grand Total row
     worksheet.addRow({});
     const totalRow = worksheet.addRow({
-      orderId: "Grand Total",
+      orderId: 'Grand Total',
       total: `₹${grandTotal.toFixed(2)}`,
     });
     totalRow.font = { bold: true };

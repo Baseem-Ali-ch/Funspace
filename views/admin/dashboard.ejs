@@ -1326,7 +1326,8 @@
                     <div class="row mb-3">
                       <div class="col-md-3">
                         <label for="startDateId" class="form-label">Start Date</label>
-                        <input type="date" id="startDateId" name="startDate" class="form-control" value="<%= startDate %>">
+                        <input type="date" id="startDateId" name="startDate" class="form-control"
+                          value="<%= startDate %>">
                       </div>
                       <div class="col-md-3">
                         <label for="endDateId" class="form-label">End Date</label>
@@ -1356,6 +1357,7 @@
                         <a id="salesReportDownloadExcelButton" href="#" class="btn btn-secondary mt-2 fs-4"
                           title="Excel Download"><i class="fa-regular fa-file-excel"></i></a>
                       </div>
+
                     </div>
                   </form>
 
@@ -1377,7 +1379,7 @@
                           <th class="text-truncate">Total Amount</th>
                           <th class="text-truncate">Payment Method</th>
                           <th class="text-truncate">Payment Status</th>
-                  <!-- Display order status -->
+                          <!-- Display order status -->
                           <th class="text-truncate">Grand Total</th>
                           <th class="text-truncate">Offer Discount</th>
                         </tr>
@@ -1429,7 +1431,7 @@
                             <td class="text-truncate">
                               <%= sale.paymentStatus %>
                             </td>
-                            
+
                             <td class="text-truncate">
                               ₹<%= sale.grandTotal %>
                             </td>
@@ -1537,6 +1539,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
 
     <script>
       function downloadReport(type) {

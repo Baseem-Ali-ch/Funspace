@@ -28,10 +28,8 @@ adminRoute.get("/dashboard", isAdminAuthenticated, adminController.loadHome);
 //product management
 adminRoute.get("/product-list", isAdminAuthenticated, productController.loadProductList);
 adminRoute.get("/add-product", isAdminAuthenticated, productController.loadAddProduct);
-adminRoute.post("/add-product", isAdminAuthenticated, productController.addProduct);
-
-// Route for updating a product
-adminRoute.patch("/admin/update-product/:id", isAdminAuthenticated, productController.updateProduct);
+adminRoute.post("/add-product", isAdminAuthenticated, upload, productController.addProduct);
+adminRoute.patch("/update-product/:id", isAdminAuthenticated, upload, productController.updateProduct);
 
 //category management
 adminRoute.get("/category-list", isAdminAuthenticated, productController.loadCategoryList);
@@ -75,9 +73,7 @@ adminRoute.post("/add-offer", offerController.addOffer);
 adminRoute.put("/offer-list", offerController.editOffer);
 adminRoute.delete("/add-offer/delete/:offerId", offerController.deleteOffer);
 
-// adminRoute.use((req, res, next) => {
-//   res.status(404).render('404admin'); // Renders the 404 view
-// });
+
 
 // Catch-all route for undefined paths
 adminRoute.get("*", (req, res) => {

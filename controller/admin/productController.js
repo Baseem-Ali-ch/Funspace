@@ -9,17 +9,14 @@ const mongoose = require("mongoose");
 
 //load product list in admin side
 const loadProductList = async (req, res) => {
-  const { search = '', page = 1 } = req.query;
+  const { search = "", page = 1 } = req.query;
   const limit = 10;
   const skip = (page - 1) * limit;
 
   try {
     const searchQuery = search
-      ? { 
-          $or: [
-            { name: new RegExp(search, 'i') },
-            { description: new RegExp(search, 'i') }
-          ]
+      ? {
+          $or: [{ name: new RegExp(search, "i") }, { description: new RegExp(search, "i") }],
         }
       : {};
 
@@ -35,14 +32,13 @@ const loadProductList = async (req, res) => {
       isAdmin,
       currentPage: parseInt(page),
       totalPages,
-      search
+      search,
     });
   } catch (error) {
     console.error("Error retrieving product list:", error);
     return res.status(500).send("Server Error");
   }
 };
-
 
 //load add product page
 const loadAddProduct = async (req, res) => {
@@ -59,8 +55,10 @@ const loadAddProduct = async (req, res) => {
 const addProduct = async (req, res) => {
   try {
     const { productTitle, productDescription, productPrice, productDiscountedPrice, category: categoryId, isListed, stock } = req.body;
-    const category = await Category.findById(categoryId);
 
+    console.log("Files received:", req.files); // Debugging log
+
+    const category = await Category.findById(categoryId);
     if (!category) {
       console.error("Category not found for ID:", categoryId);
       return res.status(404).send("Category not found");
@@ -69,8 +67,6 @@ const addProduct = async (req, res) => {
     let imageUrl_1 = req.files["productImage1"] ? "/assets/images/add-product/" + req.files["productImage1"][0].filename : "";
     let imageUrl_2 = req.files["productImage2"] ? "/assets/images/add-product/" + req.files["productImage2"][0].filename : "";
     let imageUrl_3 = req.files["productImage3"] ? "/assets/images/add-product/" + req.files["productImage3"][0].filename : "";
-
-    // The cropping will be done client-side, so we don't need to modify the images here
 
     const product = new Product({
       name: productTitle,
@@ -84,8 +80,8 @@ const addProduct = async (req, res) => {
       imageUrl_2: imageUrl_2,
       imageUrl_3: imageUrl_3,
     });
-    await product.save();
 
+    await product.save();
     return res.redirect("/admin/add-product?success=true");
   } catch (error) {
     console.error("Error adding product:", error);
@@ -96,86 +92,57 @@ const addProduct = async (req, res) => {
 //admin can edit product details
 const updateProduct = async (req, res) => {
   const productId = req.params.id;
-  const { name, description, category, price, discountPrice, stock, status } = req.body;
-
+  const { name, description, proCategory, price, discountPrice, stock, status } = req.body;
+  const updateData = req.body;
+  console.log("req body", req.body);
   try {
-    // Validate category ID
-    if (!mongoose.Types.ObjectId.isValid(category)) {
+    if (!mongoose.Types.ObjectId.isValid(proCategory)) {
       return res.status(400).json({ success: false, message: "Invalid category ID" });
     }
 
-    // Validate product ID
     const product = await Product.findById(productId);
     if (!product) {
       return res.status(404).json({ success: false, message: "Product not found" });
     }
 
-    // Track changes for response feedback
+    // Initialize an array to track changes
     const changes = [];
 
-    // Update product fields
-    if (product.name !== name) {
-      product.name = name;
-      changes.push("name");
-    }
-    if (product.description !== description) {
-      product.description = description;
-      changes.push("description");
-    }
-    if (product.category.toString() !== category) {
-      product.category = new mongoose.Types.ObjectId(category);
-      changes.push("category");
-    }
-    if (product.price !== parseFloat(price)) {
-      product.price = parseFloat(price);
-      changes.push("price");
-    }
-    if (product.discountedPrice !== parseFloat(discountPrice)) {
-      product.discountedPrice = parseFloat(discountPrice) || product.discountedPrice;
-      changes.push("discountedPrice");
-    }
-    if (product.stock !== parseInt(stock)) {
-      product.stock = parseInt(stock);
-      changes.push("stock");
-    }
-    if (product.isListed !== (status === 'true')) {
-      product.isListed = status === 'true';
-      changes.push("status");
-    }
-
-    // Handle image updates
+    // Check if files are present in the request
     if (req.files) {
-      for (let i = 1; i <= 3; i++) {
-        const fieldName = `productImage${i}`;
-        if (req.files[fieldName] && req.files[fieldName][0]) {
-          const file = req.files[fieldName][0];
-          try {
-            const fileName = `cropped_${Date.now()}_${file.originalname}`;
-            const filePath = path.join(__dirname, '../public/assets/images/add-product/', fileName);
+      // Update imageUrl_1 if a new file is provided; otherwise, keep the existing imageUrl_1
+      if (req.files.productImage1) {
+        updateData.imageUrl_1 = "/assets/images/add-product/" + req.files.productImage1[0].filename;
+      } else {
+        updateData.imageUrl_1 = product.imageUrl_1 || ""; // Keep the existing image or default to an empty string
+      }
 
-            // Verify the image buffer and process with sharp
-            if (file.buffer) {
-              await sharp(file.buffer)
-                .resize(300, 300, { fit: 'cover' })
-                .toFile(filePath);
+      // Update imageUrl_2 if a new file is provided; otherwise, keep the existing imageUrl_2
+      if (req.files.productImage2) {
+        updateData.imageUrl_2 = "/assets/images/add-product/" + req.files.productImage2[0].filename;
+      } else {
+        updateData.imageUrl_2 = product.imageUrl_2 || ""; // Keep the existing image or default to an empty string
+      }
 
-              product[`imageUrl_${i}`] = `/assets/images/add-product/${fileName}`;
-              changes.push(`image${i}`);
-            } else {
-              console.error(`Invalid input for image ${i}`);
-              return res.status(400).json({ success: false, message: `Invalid input for image ${i}` });
-            }
-          } catch (sharpError) {
-            console.error(`Error processing image ${i}:`, sharpError);
-            return res.status(400).json({ success: false, message: `Error processing image ${i}` });
-          }
-        }
+      // Update imageUrl_3 if a new file is provided; otherwise, keep the existing imageUrl_3
+      if (req.files.productImage3) {
+        updateData.imageUrl_3 = "/assets/images/add-product/" + req.files.productImage3[0].filename;
+      } else {
+        updateData.imageUrl_3 = product.imageUrl_3 || ""; // Keep the existing image or default to an empty string
       }
     }
 
-    if (changes.length === 0) {
-      return res.json({ success: false, message: "No changes detected" });
-    }
+    // Update fields
+    product.name = name;
+    product.description = description;
+    product.category = new mongoose.Types.ObjectId(proCategory);
+    product.price = parseFloat(price);
+    product.discountedPrice = parseFloat(discountPrice) || product.discountedPrice;
+    product.stock = parseInt(stock);
+    product.isListed = status === "true";
+    product.imageUrl_1 = updateData.imageUrl_1;
+    product.imageUrl_2 = updateData.imageUrl_2;
+    product.imageUrl_3 = updateData.imageUrl_3;
 
     await product.save();
     res.json({ success: true, product, changes });
@@ -185,18 +152,16 @@ const updateProduct = async (req, res) => {
   }
 };
 
-
-
 //load category list in admin side
 const loadCategoryList = async (req, res) => {
-  const { search = '', page = 1 } = req.query;
+  const { search = "", page = 1 } = req.query;
   const limit = 10;
   const skip = (page - 1) * limit;
 
   try {
     const searchQuery = search
-      ? { 
-          title: new RegExp(search, 'i') 
+      ? {
+          title: new RegExp(search, "i"),
         }
       : {};
 
@@ -210,14 +175,13 @@ const loadCategoryList = async (req, res) => {
       isAdmin,
       currentPage: parseInt(page),
       totalPages,
-      search
+      search,
     });
   } catch (error) {
     console.log(error);
     return res.status(500).send("Internal Server Error");
   }
 };
-
 
 //admin can add categories
 const addCategory = async (req, res) => {
@@ -273,7 +237,6 @@ const updateCategory = async (req, res) => {
   }
 };
 
-
 module.exports = {
   loadProductList,
   loadAddProduct,
@@ -281,5 +244,5 @@ module.exports = {
   updateProduct,
   loadCategoryList,
   addCategory,
-  updateCategory
+  updateCategory,
 };

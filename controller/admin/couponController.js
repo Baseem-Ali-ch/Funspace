@@ -134,6 +134,10 @@ const applyCoupon = async (req, res) => {
     const user = req.session.user || req.user;
     const userId = user ? user._id : null;
     
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Please log in to apply a coupon" });
+    }
+
     // Find the coupon
     const coupon = await Coupon.findOne({ couponCode: couponCode });
     if (!coupon) {
@@ -149,51 +153,93 @@ const applyCoupon = async (req, res) => {
       return res.status(400).json({ success: false, message: "Coupon usage limit reached" });
     }
 
-    // Assume cartId is available in the session or as part of the request
+    // Fetch the user's cart
     const cart = await Cart.findOne({ userId }).populate("items.productId");
 
-    // Calculate the cart total
-    let cartTotal = 0;
-    cart.items.forEach((item) => {
-      cartTotal += item.quantity * item.productId.price;
-    });
-
-    // Check if cart total meets the minimum amount required by the coupon
-    if (cartTotal < coupon.minAmount) {
-      return res.status(400).json({ success: false, message: "Minimum purchase amount not met" });
+    if (!cart || !cart.items) {
+      return res.status(400).json({ success: false, message: "Cart is empty" });
     }
 
-    // Calculate discount
-    let discount;
-    if (coupon.redeemAmount > cartTotal) {
-      // If redeem amount is greater than cart total, apply 50% discount
-      discount = cartTotal * 0.5;
+    // Calculate the cart total using the offer price if available
+    let totalPrice = 0;
+    let totalDiscountedPrice = 0;
+
+    for (let item of cart.items) {
+      if (item.productId) {
+        // Find active product-specific offers
+        const productOffer = await Offer.findOne({
+          offerType: "product",
+          status: "active",
+          productIds: item.productId._id,
+        }).exec();
+
+        // Find active category-specific offers
+        const categoryOffer = await Offer.findOne({
+          offerType: "category",
+          status: "active",
+          categoryIds: item.productId.category,
+        }).exec();
+
+        // Apply the highest offer available (either product or category)
+        let bestOffer = null;
+        if (productOffer && categoryOffer) {
+          bestOffer = productOffer.discount > categoryOffer.discount ? productOffer : categoryOffer;
+        } else {
+          bestOffer = productOffer || categoryOffer;
+        }
+
+        // Calculate the discounted price based on the best offer
+        let price = item.productId.price;
+        let discountedPrice = price;
+
+        if (bestOffer) {
+          discountedPrice = (price * (1 - bestOffer.discount / 100)).toFixed(2);
+        }
+
+        // Add to total calculations
+        totalPrice += price * item.quantity;
+        totalDiscountedPrice += discountedPrice * item.quantity;
+      }
+    }
+
+    // Calculate the discount difference
+    let discountAmount = totalPrice - totalDiscountedPrice;
+
+    // Check if the cart total meets the minimum amount required by the coupon
+    if (totalDiscountedPrice < coupon.minAmount) {
+      return res.status(400).json({ success: false, message: "Minimum purchase amount not met for coupon" });
+    }
+
+    // Calculate the coupon discount
+    let couponDiscount;
+    if (coupon.redeemAmount > totalDiscountedPrice) {
+      couponDiscount = totalDiscountedPrice * 0.5; // If redeem amount exceeds total, apply a 50% discount
     } else {
-      discount = coupon.redeemAmount;
+      couponDiscount = coupon.redeemAmount;
     }
 
-    // Apply discount to cart total
-    const newTotal = cartTotal - discount;
+    // Calculate the new total after applying the coupon
+    const newTotal = totalDiscountedPrice - couponDiscount;
 
-    // Save coupon usage and cart total
+    // Save coupon usage and updated total
     coupon.usedCount += 1;
     await coupon.save();
-    cart.total = newTotal;
-    cart.redeemAmount = discount;
-    await cart.save();
 
     res.json({
       success: true,
       message: "Coupon applied successfully!",
       newTotal: newTotal.toFixed(2),
-      redeemAmount: discount.toFixed(2),
-      subtotal: cartTotal.toFixed(2),
+      couponDiscount: couponDiscount.toFixed(2),
+      subtotal: totalDiscountedPrice.toFixed(2),
+      originalTotal: totalPrice.toFixed(2),
+      discountAmount: discountAmount.toFixed(2),
     });
   } catch (error) {
     console.error("Error applying coupon:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
 
 
 

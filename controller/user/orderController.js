@@ -134,6 +134,7 @@ const placeOrder = async (req, res) => {
   const user = req.session.user || req.user;
   const userId = user ? user._id : null;
   const { addressId, paymentMethod, couponCode } = req.body;
+  console.log(req.body);
   
   try {
     if (!userId) {
