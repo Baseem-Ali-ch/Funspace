@@ -92,6 +92,10 @@ const orderSchema = new Schema({
     type: Number,
     required: true,
   },
+  totalOfferDiscount: {
+    type: Number,
+    
+  },
   payment_status: {
     type: String,
     enum: ["Pending", "Completed", "Failed"],
@@ -110,6 +114,9 @@ const orderSchema = new Schema({
     type: String,
     unique: true,
     required: true,
+  },
+  razorpayOrderId:{
+    type:String
   },
 
   returnRequestStatus: {

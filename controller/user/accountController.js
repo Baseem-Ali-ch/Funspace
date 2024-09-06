@@ -651,75 +651,75 @@ const loadAddress = async (req, res) => {
 
 
 
-const generateInvoice = async (req, res) => {
-  try {
-    const { orderId, productId } = req.query;
-    console.log(orderId, productId)
-    if (!orderId || !productId) {
-      return res.status(400).send("Invalid order or product ID.");
-    }
-    console.log(orderId,productId);
-    
-    // Fetch the order details from the database
-    const order = await Order.findOne({ _id:orderId }).populate("items.product").populate("user").populate("address");
+const easyinvoice = require('easyinvoice');
 
-    if (!order) {
-      return res.status(404).send("Order not found.");
-    }
 
-    // Check if the product exists in the order
-    const orderItem = order.items.find((item) => item.product._id.toString() === productId);
-    if (!orderItem) {
-      return res.status(404).send("Product not found in the order.");
-    }
+// Function to generate the invoice
+const downloadInvoice = async (req, res) => {
+    try {
+        const { orderId, productId } = req.query;
 
-    // Create a PDF document
-    const doc = new PDFDocument();
-    const fileName = `invoice-${orderId}-${productId}.pdf`;
-    const filePath = path.join(__dirname, '../../invoices', fileName);
+        // Fetch the order and product details from your database using orderId and productId
+        // Replace this with actual data fetching logic
+        const order = await Order.findById(orderId).populate('items.product').populate('user').populate("address");
+        const product = order.items.find(item => item.product._id.toString() === productId);
 
-    doc.pipe(fs.createWriteStream(filePath)); // Write the PDF to a file
-
-    // Add content to the PDF
-    doc.fontSize(20).text(`Invoice for Order: ${orderId}`, { align: 'center' });
-    doc.moveDown();
-    doc.fontSize(14).text(`Customer Name: ${order.user.name}`);
-    doc.text(`Email: ${order.user.email}`);
-    doc.text(`Phone: ${order.user.phone}`);
-    doc.moveDown();
-
-    doc.text(`Shipping Address:`);
-    doc.text(`${order.address.street}, ${order.address.city}, ${order.address.state}, ${order.address.zipcode}`);
-    doc.moveDown();
-
-    doc.text(`Product Details:`);
-    doc.text(`Product Name: ${orderItem.product.name}`);
-    doc.text(`Quantity: ${orderItem.quantity}`);
-    doc.text(`Price: $${orderItem.product.finalPrice}`);
-    doc.text(`Total: $${(orderItem.product.finalPrice * orderItem.quantity).toFixed(2)}`);
-    doc.moveDown();
-
-    doc.fontSize(16).text(`Grand Total: $${order.totalPrice}`, { align: 'right' });
-
-    doc.end();
-
-    // After writing, send the file to the client
-    doc.on('end', () => {
-      res.download(filePath, fileName, (err) => {
-        if (err) {
-          console.log("Error downloading file:", err);
-          res.status(500).send("Could not download the invoice.");
+        if (!order || !product) {
+            return res.status(404).send('Order or Product not found');
         }
-        // Optionally, delete the file after sending
-        fs.unlinkSync(filePath);
-      });
-    });
 
-  } catch (error) {
-    console.error("Error generating invoice:", error);
-    res.status(500).send("Internal Server Error");
-  }
+        console.log('product add',order.address)
+        // Prepare data for the invoice
+        const data = {
+            "documentTitle": "INVOICE", // Defaults to 'INVOICE'
+            "currency": "USD",
+            "taxNotation": "vat", // Defaults to 'vat'
+            "marginTop": 25,
+            "marginRight": 25,
+            "marginLeft": 25,
+            "marginBottom": 25,
+            "sender": {
+                "company": "FurnSpace",
+                "address": "Malappuram",
+                "zip": "123455",
+                "city": "Malappuram",
+                "country": "India"
+            },
+            "client": {
+                "name": order.address.fullName, // Fetch the user's name
+                "address": order.address.streetAddress, // Get user's address details from order
+                "zip": order.address.postcode,
+                "city": order.address.city,
+                "country": order.address.state
+            },
+            "invoiceNumber": order.orderId,
+            "invoiceDate": new Date(order.createdAt).toISOString().split('T')[0],
+            "products": [
+                {
+                    "quantity": product.quantity,
+                    "description": product.product.name,
+                    "price": product.product.price
+                }
+            ],
+            "bottomNotice": "Thank you for your purchase!"
+        };
+
+        // Generate the invoice
+        const result = await easyinvoice.createInvoice(data);
+
+        // Set the content type to PDF
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=invoice_${orderId}.pdf`);
+
+        // Send the generated PDF invoice to the client
+        res.send(Buffer.from(result.pdf, 'base64'));
+
+    } catch (error) {
+        console.error('Error generating invoice:', error);
+        res.status(500).send('Internal Server Error');
+    }
 };
+
 
 
 
@@ -742,5 +742,5 @@ module.exports = {
   updateOrderStatus,
   loadOrderList,
   loadAddress,
-  generateInvoice 
+  downloadInvoice 
 };

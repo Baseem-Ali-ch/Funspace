@@ -482,15 +482,18 @@
                                             <table class="table table-cart table-mobile">
                                                 <thead>
                                                     <tr>
+                                                        <th style="width: 4%;">Date</th>
                                                         <th style="width: 4%;">Order ID</th>
                                                         <th style="width: 15%;">Address Name</th>
                                                         <th style="width: 10%;">Price</th>
-                                                        <th style="width: 10%;">Offer</th> <!-- New column for Offer -->
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     <% orders.forEach(order=> { %>
                                                         <tr>
+                                                            <td>
+                                                                <%= order.createdAt.toLocaleDateString() %>
+                                                            </td>
                                                             <td>
                                                                 <a href="#" style="color: #c96;" data-toggle="modal"
                                                                     data-target="#orderDetailsModal<%= order._id %>">
@@ -502,17 +505,6 @@
                                                             </td>
                                                             <td>
                                                                 ₹ <%= order.totalPrice %>
-                                                            </td>
-                                                            <td>
-                                                                <% let offerDescription='No offer' ;
-                                                                    order.items.forEach(item=> {
-                                                                    if (item.product.offerDetails) {
-                                                                    offerDescription =
-                                                                    item.product.offerDetails.offerName;
-                                                                    }
-                                                                    });
-                                                                    %>
-                                                                    <%= offerDescription %>
                                                             </td>
                                                         </tr>
                                                         <% }); %>
@@ -690,19 +682,15 @@
                                                     <% } %>
                                         </td>
                                         <td>
-                                            <% if (item.order_status==='Delivered' ) { %>
-                                                <!-- <a href="/download-invoice/<%= encodeURIComponent(order.orderId) %>/<%= item.product._id %>"
-                                                    class="btn btn-sm" style="color: #c96;">Invoice</a> -->
-                                                    <a href="/order-list/invoice?orderId=<%= order._id %>&productId=<%= item.product._id %>" class="action-btn invoice-btn">
-                                                        <i class="fas fa-file-invoice"></i>Invoice
-                                                    </a>
-                                                    
-                                                <% }else if(order.payment_status==='Failed' ){ %>
-                                                    <button class="btn btn-sm btn-danger"
-                                                        onclick="retryPayment('<%= order._id %>')">Retry
-                                                        Payment</button>
-                                                    <% } %>
+                                            <% if (item.order_status === 'Delivered') { %>
+                                                <a href="/order-list/invoice?orderId=<%= order._id %>&productId=<%= item.product._id %>" class="action-btn invoice-btn">
+                                                    <i class="fas fa-file-invoice"></i> Invoice
+                                                </a>
+                                            <% } else if (order.payment_status === 'Failed') { %>
+                                                <button class="btn btn-sm btn-danger" onclick="retryPayment('<%= order._id %>')">Retry Payment</button>
+                                            <% } %>
                                         </td>
+                                        
                                     </tr>
                                     <% }) %>
                             </tbody>

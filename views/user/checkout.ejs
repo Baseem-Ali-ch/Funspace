@@ -992,7 +992,7 @@
                         const totalValueElement = document.getElementById('totalValue');
                         const newTotalValueElement = document.getElementById('newTotalValue');
 
-                        
+
                         // Validate existence and parse values
                         const orderAmount = totalValueElement ? parseFloat(totalValueElement.innerText.trim()) : null;
                         const newOrderAmount = newTotalValueElement ? parseFloat(newTotalValueElement.innerText.trim()) : null;
@@ -1071,10 +1071,11 @@
                                                                     window.location.href = `/checkout/ordered/${verifyData.orderId}`;
                                                                 });
                                                             } else {
+                                                                console.error('Payment verification failed:', verifyData);
                                                                 Swal.fire({
-                                                                    title: 'Order Successful',
-                                                                    text: `Your order of ₹${orderAmount.toFixed(2)} was successfully processed.`,
-                                                                    icon: 'success',
+                                                                    title: 'Error',
+                                                                    text: 'failed to place order',
+                                                                    icon: 'Error',
                                                                     confirmButtonText: 'OK'
                                                                 })
                                                             }
@@ -1094,13 +1095,47 @@
                                             const rzp1 = new Razorpay(options);
                                             rzp1.on('payment.failed', function (response) {
                                                 console.error('Payment failed:', response.error);
-                                                Swal.fire({
-                                                    title: 'Payment Failed',
-                                                    text: 'The payment process failed. Please try again.',
-                                                    icon: 'error',
-                                                    confirmButtonText: 'OK'
-                                                });
+
+                                                // Send request to backend to update payment status to "Failed"
+                                                fetch('/checkout/razorpay-failure', {
+                                                    method: 'POST',
+                                                    headers: {
+                                                        'Content-Type': 'application/json'
+                                                    },
+                                                    body: JSON.stringify({
+                                                        orderId: data.orderId // Pass the relevant order ID
+                                                    })
+                                                })
+                                                    .then(res => res.json())
+                                                    .then(updateData => {
+                                                        if (updateData.success) {
+                                                            Swal.fire({
+                                                                title: 'Payment Failed',
+                                                                text: 'The payment process failed. Your order status has been updated.',
+                                                                icon: 'error',
+                                                                confirmButtonText: 'OK'
+                                                            });
+                                                        } else {
+                                                            console.error('Failed to update order status:', updateData.message);
+                                                            Swal.fire({
+                                                                title: 'Error',
+                                                                text: 'Failed to update order status. Please try again.',
+                                                                icon: 'error',
+                                                                confirmButtonText: 'OK'
+                                                            });
+                                                        }
+                                                    })
+                                                    .catch(error => {
+                                                        console.error('Error updating order status:', error);
+                                                        Swal.fire({
+                                                            title: 'Error',
+                                                            text: 'An error occurred while updating the order status. Please try again.',
+                                                            icon: 'error',
+                                                            confirmButtonText: 'OK'
+                                                        });
+                                                    });
                                             });
+
                                             rzp1.open();
                                         } else if (paymentMethod.value === 'Wallet') {
                                             Swal.fire({

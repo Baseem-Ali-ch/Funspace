@@ -134,8 +134,7 @@ const placeOrder = async (req, res) => {
   const user = req.session.user || req.user;
   const userId = user ? user._id : null;
   const { addressId, paymentMethod, couponCode } = req.body;
-  console.log(req.body);
-  
+
   try {
     if (!userId) {
       return res.status(401).json({ success: false, message: "User not authenticated" });
@@ -235,11 +234,10 @@ const placeOrder = async (req, res) => {
     } else if (paymentMethod === "Razorpay") {
       try {
         razorpayOrder = await createOrderId({
-          amount: Math.round(totalPrice * 100),
+          amount: Math.round(totalPrice * 100),  // Amount in paise
           currency: "INR",
           receipt: `order_rcptid_${Date.now()}`,
         });
-        
       } catch (error) {
         console.error("Error creating Razorpay order:", error);
         return res.status(500).json({ success: false, message: "Error creating Razorpay order" });
@@ -282,6 +280,7 @@ const placeOrder = async (req, res) => {
     res.status(500).json({ success: false, message: "Error placing order", error: error.message });
   }
 };
+
 
 
 
@@ -492,11 +491,12 @@ const verifyPayment = async (req, res) => {
       .digest("hex");
 
     if (generatedSignature === razorpaySignature) {
-      // Use orderId to find the order, as it's the field defined in the schema
-      const order = await Order.findOne({ orderId: razorpayOrderId });
+      // Use razorpayOrderId to find the order if that's the field in your schema
+      const order = await Order.findOne({ razorpayOrderId: razorpayOrderId });
+      console.log(`Order ID to find: ${razorpayOrderId}`);
 
       if (!order) {
-        console.error(`Order not found for orderId: ${razorpayOrderId}`);
+        console.error(`Order not found for razorpayOrderId: ${razorpayOrderId}`);
         return res.status(404).json({ success: false, message: "Order not found" });
       }
 
@@ -513,6 +513,7 @@ const verifyPayment = async (req, res) => {
     return res.status(500).json({ success: false, message: "Error verifying payment", error: error.message });
   }
 };
+
 
 
 const btoa = require("btoa");
@@ -584,7 +585,7 @@ const cancelOrderItem = async (req, res) => {
 
       // Add a transaction record
       wallet.transactions.push({
-        transactionId: `${order._id}-${item._id}`,
+        transactionId: `${order._id}`,
         description: `Refund for cancelled item in order ${order._id}`,
         amount: refundAmount,
         type: "credit",
@@ -648,8 +649,8 @@ const returnOrderItem = async (req, res) => {
 
       // Add a transaction record
       wallet.transactions.push({
-        transactionId: `${order._id}-${item._id}`,
-        description: `Refund for returned item in order ${order._id}`,
+        transactionId: `${order._id}`,
+        description: `Refund for returned item: ${product.name} in order.`,
         amount: refundAmount,
         type: "credit",
       });

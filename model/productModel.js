@@ -9,10 +9,22 @@ const productSchema = new mongoose.Schema({
   },
   description: { 
     type: String },
-  price: { type: Number, required: true },
-  discountedPrice: { type: Number },
-  category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true },
-  stock: { type: Number, required: true },
+  price: { 
+    type: Number, 
+    required: true 
+  },
+  discountedPrice: { 
+    type: Number 
+  },
+  category: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "Category", 
+    required: true 
+  },
+  stock: { 
+    type: Number, 
+    required: true 
+  },
   imageUrl_1: { type: String },
   imageUrl_2: { type: String },
   imageUrl_3: { type: String },

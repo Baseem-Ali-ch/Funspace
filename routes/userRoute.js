@@ -99,7 +99,7 @@ userRoute.post("/change-password", auth.isUserAuthenticated, accountController.c
 
 //order list
 userRoute.get("/order-list", auth.isUserAuthenticated, accountController.loadOrderList);
-userRoute.get('/order-list/invoice', accountController.generateInvoice);
+userRoute.get('/order-list/invoice',auth.isUserAuthenticated, accountController.downloadInvoice);
 
 
 //manage checkout address, order, dashboard
