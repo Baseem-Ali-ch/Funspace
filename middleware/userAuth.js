@@ -13,7 +13,7 @@ const isUserAuthenticated = (req, res, next) => {
 
 const isUserLogout = (req, res, next) => {
   try {
-    if (req.session.user) {
+    if (req.session.user || req.user) {
       res.redirect("/home");
     } else {
       next();
@@ -26,7 +26,7 @@ const isUserLogout = (req, res, next) => {
 
 const isUserWishlistPage = (req, res, next) => {
   try {
-    if (req.session.user) {
+    if (req.session.user || req.user) {
       res.render("wishlist", { user: req.session.user });
       next()
     } else {
@@ -40,7 +40,7 @@ const isUserWishlistPage = (req, res, next) => {
 
 const isUserContactPage = (req, res, next) => {
   try {
-    if (req.session.user) {
+    if (req.session.user || req.user) {
       res.render("contact-us", { user: req.session.user });
       next()
     } else {

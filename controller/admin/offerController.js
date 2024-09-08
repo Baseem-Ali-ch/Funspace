@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const { ObjectId } = mongoose.Types;
 
 
+//=================================render add offer page====================================
 const renderAddOfferPage = async (req, res) => {
     try {
       const products = await Product.find();
@@ -23,14 +24,13 @@ const renderAddOfferPage = async (req, res) => {
   };
   
 
-
+//=================================render offer list page====================================
 const offerList = async (req, res) => {
     const { search = "", page = 1 } = req.query;
     const limit = 10;
     const skip = (page - 1) * limit;
   
     try {
-      // Build search query
       const searchQuery = search
         ? {
             $or: [{ offerName: new RegExp(search, "i") }, { referralCode: new RegExp(search, "i") }],
@@ -41,10 +41,8 @@ const offerList = async (req, res) => {
   
       const offers = await Offer.find(searchQuery).populate("productIds").populate("categoryIds").skip(skip).limit(limit).lean();
   
-      // Calculate total pages
       const totalPages = Math.ceil(totalOffers / limit);
   
-      // Render the offer list with pagination and search term
       res.render("list-offer", {
         offers,
         search,
@@ -60,6 +58,8 @@ const offerList = async (req, res) => {
     }
   };
   
+
+  //===================================add offer page====================================
   const addOffer = async (req, res) => {
     try {
       const { offerType, offerName, discount, productIds, categoryIds, referralCode, startDate, endDate } = req.body;
@@ -68,8 +68,8 @@ const offerList = async (req, res) => {
         offerType,
         offerName,
         discount,
-        productIds: offerType === "product" ? productIds : undefined, // Handle array of product IDs
-        categoryIds: offerType === "category" ? categoryIds : undefined, // Handle array of category IDs
+        productIds: offerType === "product" ? productIds : undefined, 
+        categoryIds: offerType === "category" ? categoryIds : undefined,
         referralCode: offerType === "referral" ? referralCode : undefined,
         startDate,
         endDate,
@@ -83,13 +83,15 @@ const offerList = async (req, res) => {
     }
   };
   
+
+  //===================================== edit offer =================================
   const editOffer = async (req, res) => {
     console.log("Received data:", req.body);
     const { offerId, offerName, discount, offerType, status, products = [], categories = [] } = req.body;
   
     try {
       const offer = await Offer.findByIdAndUpdate(
-        offerId, // MongoDB will automatically convert this string to ObjectId
+        offerId,
         {
           offerName,
           discount,

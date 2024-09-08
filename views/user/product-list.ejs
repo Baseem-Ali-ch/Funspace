@@ -887,6 +887,7 @@
 
         let stockStatus = '';
         if (product.stock > 10) {
+          console.log('product stock', product.stock)
           stockStatus = '<p style="color: #50C878;">In stock</p>';
         } else if (product.stock > 0 && product.stock <= 10) {
           stockStatus = '<p style="color: #dbba00;">Few left</p>';
@@ -895,7 +896,8 @@
         }
 
         let priceHtml = '';
-        if (product.offer) {
+        if (product.discountPercentage) {
+          console.log('product offer', product.discountPercentage)
           const discountedPrice = (product.price - (product.price * (product.offer.discount / 100))).toFixed(2);
           const discountPercentage = Math.round(product.offer.discount);
           priceHtml = `

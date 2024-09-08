@@ -19,6 +19,8 @@ const PDFDocument = require('pdfkit');
 const fs = require('fs');
 
 
+
+//====================transport email==============================
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -27,6 +29,8 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+
+//=============================load profile page for user=============================
 const loadProfile = async (req, res) => {
   try {
     const user = req.session.user || req.user;
@@ -48,14 +52,14 @@ const loadProfile = async (req, res) => {
     const categories = await Category.find({ isListed: "true" });
     const orders = await Order.find({ user: userId }).populate("items.product").populate("address");
 
-    // Calculate the total amount for each order based on the offer price or regular price
+    
     for (let order of orders) {
       let totalPrice = 0;
 
       for (let item of order.items) {
         let finalPrice = item.product.price;
 
-        // Check for product and category offers
+       
         const productOffer = await Offer.findOne({
           offerType: "product",
           status: "active",
@@ -80,7 +84,7 @@ const loadProfile = async (req, res) => {
         }
 
         totalPrice += finalPrice * item.quantity;
-        item.product.finalPrice = finalPrice.toFixed(2); // Save the final price for display
+        item.product.finalPrice = finalPrice.toFixed(2);
       }
 
       order.totalPrice = totalPrice.toFixed(2);
@@ -108,7 +112,7 @@ const loadProfile = async (req, res) => {
   }
 };
 
-//user can edit their own
+//=========================user can edit their own==========================
 const updateProfile = async (req, res) => {
   try {
     const userId = req.session.user ? req.session.user._id : req.user ? req.user._id : null;
@@ -148,7 +152,7 @@ const updateProfile = async (req, res) => {
   }
 };
 
-//load forget password
+//==============================load forget password============================
 const forgetPassword = async (req, res) => {
   try {
     res.render("forgetPassword");
@@ -157,7 +161,7 @@ const forgetPassword = async (req, res) => {
   }
 };
 
-//load forget password page and send a token to email
+//=========================load forget password page and send a token to email=========================
 const verifyForgetPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -196,7 +200,7 @@ const verifyForgetPassword = async (req, res) => {
   }
 };
 
-//load reset password page
+//======================================load reset password page========================================
 const resetPasswordPage = async (req, res) => {
   try {
     const { token, id } = req.query;
@@ -213,7 +217,7 @@ const resetPasswordPage = async (req, res) => {
   }
 };
 
-//reset the password
+//===============================reset the password===============================
 const resetPassword = async (req, res) => {
   try {
     const { token, userId, password } = req.body;
@@ -236,17 +240,17 @@ const resetPassword = async (req, res) => {
   }
 };
 
-// add new address
+//===================================add new address==============================
 const addAddress = async (req, res) => {
   try {
-    const user = req.session.user || req.user; // Get user from session or request
+    const user = req.session.user || req.user;
     const userId = user ? user._id : null;
 
     if (!userId) {
       return res.status(401).json({ success: false, message: "User not authenticated" });
     }
 
-    const addressData = { ...req.body, userId }; // Set userId
+    const addressData = { ...req.body, userId }; 
     const address = new Address(addressData);
     await address.save();
 
@@ -257,6 +261,8 @@ const addAddress = async (req, res) => {
   }
 };
 
+
+//===============================display user address in account page===========================
 const getAddress = async (req, res) => {
   try {
     const user = req.session.user || req.user;
@@ -266,7 +272,7 @@ const getAddress = async (req, res) => {
       return res.status(401).json({ success: false, message: "User not authenticated" });
     }
 
-    const addresses = await Address.find({ userId }); // Fetch addresses for the user
+    const addresses = await Address.find({ userId }); 
     res.json({ success: true, addresses });
   } catch (error) {
     console.error("Error fetching addresses:", error);
@@ -274,6 +280,8 @@ const getAddress = async (req, res) => {
   }
 };
 
+
+//===========================update address =============================
 const updateAddress = async (req, res) => {
   try {
     const user = req.session.user || req.user;
@@ -286,13 +294,12 @@ const updateAddress = async (req, res) => {
     const addressId = req.params.id;
     const updatedData = req.body;
 
-    // Ensure address belongs to the user
+  
     const address = await Address.findOne({ _id: addressId, userId });
     if (!address) {
       return res.status(404).json({ success: false, message: "Address not found or unauthorized" });
     }
 
-    // Update the address
     const updatedAddress = await Address.findByIdAndUpdate(addressId, updatedData, { new: true });
 
     res.json({ success: true, message: "Address updated successfully", address: updatedAddress });
@@ -302,6 +309,8 @@ const updateAddress = async (req, res) => {
   }
 };
 
+
+//==============================delete address==============================
 const deleteAddress = async (req, res) => {
   console.log("Delete address request received:", req.params);
   try {
@@ -330,6 +339,8 @@ const deleteAddress = async (req, res) => {
   }
 };
 
+
+//==========================change the password==========================
 const changePassword = async (req, res) => {
   try {
     res.render("change-password");
@@ -338,34 +349,31 @@ const changePassword = async (req, res) => {
   }
 };
 
+
+//==========================change the password==========================
 const changedPassword = async (req, res) => {
   const { currentPassword, newPassword, confirmPassword } = req.body;
   const user = req.session.user || req.user;
-  const userId = user ? user._id : null; // Assuming you have the user ID stored in the session
+  const userId = user ? user._id : null;
 
-  // Validate new passwords match
   if (newPassword !== confirmPassword) {
     return res.status(400).json({ error: "New passwords do not match." });
   }
 
   try {
-    // Fetch user from database
     const user = await userModel.findById(userId);
 
     if (!user) {
       return res.status(404).json({ error: "User not found." });
     }
 
-    // Check current password
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
       return res.status(400).json({ error: "Current password is incorrect." });
     }
 
-    // Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    // Update password in database
     user.password = hashedPassword;
     await user.save();
 
@@ -376,15 +384,18 @@ const changedPassword = async (req, res) => {
   }
 };
 
+
+//====================generate order id==========================
 const generateOrderId = () => {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let orderId = "#";
   for (let i = 0; i < 5; i++) {
     orderId += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-  return orderId + Date.now().toString().slice(-5); // Append last 5 digits of timestamp
+  return orderId + Date.now().toString().slice(-5);
 };
 
+//=============================load wallet==============================
 const loadWallet = async (req, res) => {
   try {
     const user = req.session.user || req.user;
@@ -402,15 +413,13 @@ const loadWallet = async (req, res) => {
     if (userId) {
       const cart = await Cart.findOne({ userId }).populate("items.productId");
       cartItems = cart ? cart.items : [];
-    }
-
-    // Fetch the wallet
+    } 
     
     const wallet = await Wallet.findOne({ user: userId });
 
     res.render("wallet", {
       user,
-      wishlistItems: wishlistItems ? wishlistItems.products : [], // Handle null wishlistItems
+      wishlistItems: wishlistItems ? wishlistItems.products : [],
       categories,
       cartItems,
       transactions: wallet?.transactions,
@@ -422,6 +431,8 @@ const loadWallet = async (req, res) => {
   }
 };
 
+
+//=========================update order status ===============================
 const updateOrderStatus = async (req, res) => {
   try {
     const { orderId, status } = req.body;
@@ -468,7 +479,7 @@ const updateOrderStatus = async (req, res) => {
 
       await wallet.save();
 
-      console.log("Updated wallet:", wallet); // Add this for debugging
+      console.log("Updated wallet:", wallet);
 
       return res.status(200).json({ success: true, message: "Order status updated and amount credited to wallet successfully" });
     } else {
@@ -480,6 +491,8 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
+
+//===============================load order list=============================
 const loadOrderList = async (req, res) => {
   const { search = "", page = 1 } = req.query;
   const limit = 10;
@@ -522,64 +535,64 @@ const loadOrderList = async (req, res) => {
       .limit(limit)
       .lean();
 
-    for (let order of orders) {
-      let totalPrice = 0;
+    // for (let order of orders) {
+    //   let totalPrice = 0;
 
-      for (let item of order.items) {
-        let finalPrice = item.product.price;
-        let offerDetails = null;
+    //   for (let item of order.items) {
+    //     let finalPrice = item.product.price;
+    //     let offerDetails = null;
 
-        if (item.product) {
-          // Check for product-specific offers
-          const productOffers = await Offer.find({
-            offerType: "product",
-            status: "active",
-            _id: { $in: item.product.offerIds || [] }
-          }).exec();
+    //     if (item.product) {
+    //       // Check for product-specific offers
+    //       const productOffers = await Offer.find({
+    //         offerType: "product",
+    //         status: "active",
+    //         _id: { $in: item.product.offerIds || [] }
+    //       }).exec();
 
-          // Check for category-specific offers
-          const categoryOffers = await Offer.find({
-            offerType: "category",
-            status: "active",
-            categoryIds: item.product.category
-          }).exec();
+    //       // Check for category-specific offers
+    //       const categoryOffers = await Offer.find({
+    //         offerType: "category",
+    //         status: "active",
+    //         categoryIds: item.product.category
+    //       }).exec();
 
-          let bestOffer = null;
-          if (productOffers.length > 0) {
-            bestOffer = productOffers.reduce((max, offer) => offer.discount > max.discount ? offer : max, productOffers[0]);
-          }
+    //       let bestOffer = null;
+    //       if (productOffers.length > 0) {
+    //         bestOffer = productOffers.reduce((max, offer) => offer.discount > max.discount ? offer : max, productOffers[0]);
+    //       }
 
-          if (categoryOffers.length > 0) {
-            const categoryBestOffer = categoryOffers.reduce((max, offer) => offer.discount > max.discount ? offer : max, categoryOffers[0]);
-            if (!bestOffer || categoryBestOffer.discount > bestOffer.discount) {
-              bestOffer = categoryBestOffer;
-            }
-          }
+    //       if (categoryOffers.length > 0) {
+    //         const categoryBestOffer = categoryOffers.reduce((max, offer) => offer.discount > max.discount ? offer : max, categoryOffers[0]);
+    //         if (!bestOffer || categoryBestOffer.discount > bestOffer.discount) {
+    //           bestOffer = categoryBestOffer;
+    //         }
+    //       }
 
-          if (bestOffer) {
-            finalPrice = item.product.price * (1 - bestOffer.discount / 100);
-            offerDetails = {
-              offerType: bestOffer.offerType,
-              discount: bestOffer.discount,
-              offerName: bestOffer.offerName,
-              description: bestOffer.description || "No additional details available",
-            };
-            item.product.finalPrice = finalPrice.toFixed(2);
-            item.product.offerDetails = offerDetails;
-          } else {
-            item.product.finalPrice = item.product.price.toFixed(2);
-            item.product.offerDetails = null;
-          }
+    //       if (bestOffer) {
+    //         finalPrice = item.product.price * (1 - bestOffer.discount / 100);
+    //         offerDetails = {
+    //           offerType: bestOffer.offerType,
+    //           discount: bestOffer.discount,
+    //           offerName: bestOffer.offerName,
+    //           description: bestOffer.description || "No additional details available",
+    //         };
+    //         item.product.finalPrice = finalPrice.toFixed(2);
+    //         item.product.offerDetails = offerDetails;
+    //       } else {
+    //         item.product.finalPrice = item.product.price.toFixed(2);
+    //         item.product.offerDetails = null;
+    //       }
           
 
-          totalPrice += finalPrice * item.quantity;
-          item.product.finalPrice = finalPrice.toFixed(2);
-          item.product.offerDetails = offerDetails;
-        }
-      }
+    //       totalPrice += finalPrice * item.quantity;
+    //       item.product.finalPrice = finalPrice.toFixed(2);
+    //       item.product.offerDetails = offerDetails;
+    //     }
+    //   }
 
-      order.totalPrice = totalPrice.toFixed(2);
-    }
+    //   order.totalPrice = totalPrice.toFixed(2);
+    // }
 
     const totalPages = Math.ceil(totalOrders / limit);
     const categories = await Category.find({ isListed: "true" });
@@ -603,17 +616,7 @@ const loadOrderList = async (req, res) => {
 
 
 
-
-
-
-// Route to handle return requests
-
-
-
-
-
-
-
+//==============================load address =============================
 const loadAddress = async (req, res) => {
   try {
     const user = req.session.user || req.user;
@@ -654,13 +657,12 @@ const loadAddress = async (req, res) => {
 const easyinvoice = require('easyinvoice');
 
 
-// Function to generate the invoice
+//=======================================Function to generate the invoice=============================
 const downloadInvoice = async (req, res) => {
     try {
         const { orderId, productId } = req.query;
 
-        // Fetch the order and product details from your database using orderId and productId
-        // Replace this with actual data fetching logic
+    
         const order = await Order.findById(orderId).populate('items.product').populate('user').populate("address");
         const product = order.items.find(item => item.product._id.toString() === productId);
 
@@ -669,11 +671,11 @@ const downloadInvoice = async (req, res) => {
         }
 
         console.log('product add',order.address)
-        // Prepare data for the invoice
+       
         const data = {
-            "documentTitle": "INVOICE", // Defaults to 'INVOICE'
-            "currency": "USD",
-            "taxNotation": "vat", // Defaults to 'vat'
+            "documentTitle": "INVOICE",
+            "currency": "INR",
+            "taxNotation": "vat",
             "marginTop": 25,
             "marginRight": 25,
             "marginLeft": 25,
@@ -686,8 +688,8 @@ const downloadInvoice = async (req, res) => {
                 "country": "India"
             },
             "client": {
-                "name": order.address.fullName, // Fetch the user's name
-                "address": order.address.streetAddress, // Get user's address details from order
+                "name": order.address.fullName,
+                "address": order.address.streetAddress,
                 "zip": order.address.postcode,
                 "city": order.address.city,
                 "country": order.address.state
@@ -704,14 +706,11 @@ const downloadInvoice = async (req, res) => {
             "bottomNotice": "Thank you for your purchase!"
         };
 
-        // Generate the invoice
         const result = await easyinvoice.createInvoice(data);
 
-        // Set the content type to PDF
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename=invoice_${orderId}.pdf`);
 
-        // Send the generated PDF invoice to the client
         res.send(Buffer.from(result.pdf, 'base64'));
 
     } catch (error) {

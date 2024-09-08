@@ -647,10 +647,10 @@
                                             <%= item.quantity %>
                                         </td>
                                         <td>
-                                            ₹<%= item.product.finalPrice %>
+                                            ₹<%= order.totalPrice %>
                                         </td>
                                         <td>
-                                            ₹<%= (item.quantity * item.product.finalPrice).toFixed(2) %>
+                                            ₹<%= (order.totalPrice).toFixed(2) %>
                                         </td>
                                         <td>
                                             <% if (item.product.offerDetails) { %>

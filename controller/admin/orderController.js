@@ -11,6 +11,8 @@ const Category = require("../../model/categoryModel");
 const Product = require("../../model/productModel");
 const Offer = require("../../model/offerModel");
 
+
+//=========================================load order list==========================================
 const loadOrderList = async (req, res) => {
   try {
     const user = req.session.user || req.user;
@@ -28,63 +30,63 @@ const loadOrderList = async (req, res) => {
 
     const orders = await Order.find(searchQuery).populate("items.product").populate("address").populate("user").sort({ createdAt: -1 }).skip(skip).limit(limit).lean();
 
-    for (let order of orders) {
-      let totalPrice = 0;
+    // for (let order of orders) {
+    //   let totalPrice = 0;
 
-      for (let item of order.items) {
-        let finalPrice = item?.product?.price;
-        let offerDetails = null;
+    //   for (let item of order.items) {
+    //     let finalPrice = item?.product?.price;
+    //     let offerDetails = null;
 
-        if (item.product) {
-          // Check for product-specific offers
-          const productOffers = await Offer.find({
-            offerType: "product",
-            status: "active",
-            _id: { $in: item.product.offerIds || [] },
-          }).exec();
+    //     if (item.product) {
+    //       // Check for product-specific offers
+    //       const productOffers = await Offer.find({
+    //         offerType: "product",
+    //         status: "active",
+    //         _id: { $in: item.product.offerIds || [] },
+    //       }).exec();
 
-          // Check for category-specific offers
-          const categoryOffers = await Offer.find({
-            offerType: "category",
-            status: "active",
-            categoryIds: item.product.category,
-          }).exec();
+    //       // Check for category-specific offers
+    //       const categoryOffers = await Offer.find({
+    //         offerType: "category",
+    //         status: "active",
+    //         categoryIds: item.product.category,
+    //       }).exec();
 
-          let bestOffer = null;
+    //       let bestOffer = null;
 
-          // Determine the best product offer
-          if (productOffers.length > 0) {
-            bestOffer = productOffers.reduce((max, offer) => (offer.discount > max.discount ? offer : max), productOffers[0]);
-          }
+    //       // Determine the best product offer
+    //       if (productOffers.length > 0) {
+    //         bestOffer = productOffers.reduce((max, offer) => (offer.discount > max.discount ? offer : max), productOffers[0]);
+    //       }
 
-          // Determine the best category offer
-          if (categoryOffers.length > 0) {
-            const categoryBestOffer = categoryOffers.reduce((max, offer) => (offer.discount > max.discount ? offer : max), categoryOffers[0]);
-            if (!bestOffer || categoryBestOffer.discount > bestOffer.discount) {
-              bestOffer = categoryBestOffer;
-            }
-          }
+    //       // Determine the best category offer
+    //       if (categoryOffers.length > 0) {
+    //         const categoryBestOffer = categoryOffers.reduce((max, offer) => (offer.discount > max.discount ? offer : max), categoryOffers[0]);
+    //         if (!bestOffer || categoryBestOffer.discount > bestOffer.discount) {
+    //           bestOffer = categoryBestOffer;
+    //         }
+    //       }
 
-          // Apply the best offer to the product
-          if (bestOffer) {
-            finalPrice = item.product.price * (1 - bestOffer.discount / 100);
-            offerDetails = {
-              offerType: bestOffer.offerType,
-              discount: bestOffer.discount,
-              offerName: bestOffer.offerName,
-              description: bestOffer.description || "No additional details available",
-            };
-          }
+    //       // Apply the best offer to the product
+    //       if (bestOffer) {
+    //         finalPrice = item.product.price * (1 - bestOffer.discount / 100);
+    //         offerDetails = {
+    //           offerType: bestOffer.offerType,
+    //           discount: bestOffer.discount,
+    //           offerName: bestOffer.offerName,
+    //           description: bestOffer.description || "No additional details available",
+    //         };
+    //       }
 
-          // Calculate the total price
-          totalPrice += finalPrice * item.quantity;
-          item.product.finalPrice = finalPrice.toFixed(2);
-          item.product.offerDetails = offerDetails;
-        }
-      }
+    //       // Calculate the total price
+    //       totalPrice += finalPrice * item.quantity;
+    //       item.product.finalPrice = finalPrice.toFixed(2);
+    //       item.product.offerDetails = offerDetails;
+    //     }
+    //   }
 
-      order.totalPrice = totalPrice.toFixed(2);
-    }
+    //   order.totalPrice = totalPrice.toFixed(2);
+    // }
 
     const totalOrders = await Order.countDocuments(searchQuery);
     const totalPages = Math.ceil(totalOrders / limit);
@@ -104,6 +106,8 @@ const loadOrderList = async (req, res) => {
   }
 };
 
+
+//========================================update order status====================================
 const updateOrderStatus = async (req, res) => {
   console.log("Updating order status");
 
@@ -133,6 +137,7 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
+//========================================load order list====================================
 const loadOrderDeatails = async (req, res) => {
   try {
     const isAdmin = req.session.admin;
@@ -142,6 +147,7 @@ const loadOrderDeatails = async (req, res) => {
   }
 };
 
+//========================================accept return request====================================
 const acceptReturn = async (req, res) => {
   try {
     const { orderId, itemId, item_status } = req.body;
@@ -159,7 +165,7 @@ const acceptReturn = async (req, res) => {
     if (item.order_status === "Return Requested" && item_status === "Returned") {
       item.order_status = "Returned";
     } else if (item.order_status === "Return Requested" && item_status === "Delivered") {
-      item.order_status = "Delivered"; // Rejecting the return request
+      item.order_status = "Delivered";
     }
 
     await order.save();
@@ -170,7 +176,7 @@ const acceptReturn = async (req, res) => {
   }
 };
 
-// Reject return request
+//============================================Reject return request================================
 const rejectReturn = async (req, res) => {
   try {
     const { orderId } = req.params;
@@ -183,7 +189,7 @@ const rejectReturn = async (req, res) => {
     order.returnRequestStatus = "Rejected";
     order.items.forEach((item) => {
       if (item.order_status === "Return Requested") {
-        item.order_status = "Delivered"; // Assuming the return is rejected, reset to Delivered
+        item.order_status = "Delivered";
       }
     });
 

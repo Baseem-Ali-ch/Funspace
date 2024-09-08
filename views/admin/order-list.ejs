@@ -579,12 +579,12 @@
     <table class="datatables-order table dataTable no-footer dtr-column collapsed" id="DataTables_Table_0" aria-describedby="DataTables_Table_0_info" style="width: 1045px;">
       <thead>
         <tr>
-          <th class="sorting" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" style="width: 15%;" aria-label="order: activate to sort column ascending">Order</th>
-          <th class="sorting" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" style="width: 15%;" aria-label="date: activate to sort column ascending">Date</th>
-          <th class="sorting" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" style="width: 20%;" aria-label="customers: activate to sort column ascending">Customers</th>
-          <th class="sorting" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" style="width: 15%;" aria-label="payment: activate to sort column ascending">Payment</th>
-          <th class="sorting" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" style="width: 20%;" aria-label="offer: activate to sort column ascending">Offer</th> <!-- New Offer Column -->
-          <th class="sorting_disabled dtr-hidden" rowspan="1" colspan="1" style="width: 0px; display: none;" aria-label="Actions">Actions</th>
+          <th class="sorting" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" style="width: 25%;" aria-label="order: activate to sort column ascending">Order</th>
+          <th class="sorting" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" style="width: 25%;" aria-label="date: activate to sort column ascending">Date</th>
+          <th class="sorting" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" style="width: 25%;" aria-label="customers: activate to sort column ascending">Customers</th>
+          <th class="sorting" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" style="width: 25%;" aria-label="payment: activate to sort column ascending">Payment</th>
+          
+          <th class="sorting_disabled dtr-hidden" rowspan="1" colspan="1" style="width: 25%; display: none;" aria-label="Actions">Actions</th>
           <th></th>
         </tr>
       </thead>
@@ -622,16 +622,7 @@
                   <% } %>
                 </h6>
               </td>
-              <td>
-                <% if (item?.product?.offerDetails) { %>
-                  <div>
-                    <strong><%= item.product.offerDetails.offerName %></strong>
-                    <p>Discount: <%= item.product.offerDetails.discount %>%</p>
-                  </div>
-                <% } else { %>
-                  <p>No offer</p>
-                <% } %>
-              </td>
+             
               <td class="dtr-hidden" style="display: none;">
                 <div>
                   <button class="btn btn-sm btn-icon btn-text-secondary waves-effect waves-light rounded-pill dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
@@ -721,8 +712,7 @@
                 <th>Product</th>
                 <th>Quantity</th>
                 <th>Price</th>
-                <th>Offer</th> <!-- New Offer Column -->
-                <th>Final Price</th> <!-- New Final Price Column -->
+                
                 <th>Total</th>
                 <th>Status</th>
                 <th>Action</th>
@@ -734,19 +724,9 @@
                 <tr>
                   <td><%= item?.product?.name %></td>
                   <td><%= item.quantity %></td>
-                  <td>₹<%= item?.product?.price?.toFixed(2) %></td> <!-- Display the original price -->
-                  <td>
-                    <% if (item?.product?.offerDetails) { %>
-                      <div>
-                        <strong><%= item?.product?.offerDetails?.offerName %></strong>
-                        <p>Discount: <%= item?.product?.offerDetails?.discount %>%</p>
-                      </div>
-                    <% } else { %>
-                      <p>No offer</p>
-                    <% } %>
-                  </td>
-                  <td>₹<%= item?.product?.finalPrice %></td> <!-- Display the final price after discount -->
-                  <td>₹<%= (item.quantity * item?.product?.finalPrice)?.toFixed(2) %></td> <!-- Display the total price per item -->
+                  <td>₹<%= order.totalPrice %></td> <!-- Display the original price -->
+                  
+                  <td>₹<%= order.totalPrice %></td> <!-- Display the total price per item -->
                   <td><%= item.order_status %></td>
                   <td>
                     <!-- Existing action buttons and status select menu -->

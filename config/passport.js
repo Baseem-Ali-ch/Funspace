@@ -17,7 +17,7 @@ passport.use(
         if (user) {
           return done(null, user);
         }
-
+       
         user = new User({
           googleId: profile.id,
           displayName: profile.displayName || "N/A",
@@ -26,7 +26,11 @@ passport.use(
           password: "N/A",
         });
 
+        console.log('user in google',user)
         await user.save();
+        req.session.user = user
+      console.log('req session in passpoet',req.session.user)
+
         done(null, user);
       } catch (err) {
         done(err);
@@ -60,6 +64,7 @@ passport.use(
         });
 
         await user.save();
+        req.session.user = user
         done(null, user);
       } catch (err) {
         done(err);

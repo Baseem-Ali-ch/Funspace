@@ -6,7 +6,7 @@ const Category = require("../../model/categoryModel");
 const Offer = require("../../model/offerModel");
 const mongoose = require("mongoose");
 
-//load product detailed page for user
+//=========================load product detailed page for user==================================
 const loadProduct = async (req, res) => {
   try {
     const productId = req.params.id;
@@ -17,14 +17,12 @@ const loadProduct = async (req, res) => {
     const categories = await Category.find({ isListed: "true" });
     let relatedProduct = await Product.find({ category: product.category, _id: { $ne: productId } }).limit(4);
 
-    // Fetch product-specific offer
     const productOffer = await Offer.findOne({
       offerType: "product",
       status: "active",
       productIds: product._id,
     }).exec();
 
-    // Fetch category-specific offer
     let categoryOffer = null;
     if (product.category) {
       categoryOffer = await Offer.findOne({
@@ -34,7 +32,6 @@ const loadProduct = async (req, res) => {
       }).exec();
     }
 
-    // Calculate final price and discount percentage for the main product
     let finalPrice = product.price;
     let discountPercentage = 0;
 
@@ -48,24 +45,20 @@ const loadProduct = async (req, res) => {
       discountPercentage = Math.round(categoryOffer.discount);
     }
 
-    // Attach the offer details to the main product
     product.finalPrice = finalPrice;
     product.discountPercentage = discountPercentage;
 
-    // Calculate final price and discount for each related product
     relatedProduct = await Promise.all(
       relatedProduct.map(async (relatedProd) => {
         let relatedProdFinalPrice = relatedProd.price;
         let relatedProdDiscountPercentage = 0;
 
-        // Check for a product-specific offer for each related product
         const relatedProductOffer = await Offer.findOne({
           offerType: "product",
           status: "active",
           productIds: relatedProd._id,
         }).exec();
 
-        // Check for a category-specific offer for each related product
         let relatedCategoryOffer = null;
         if (relatedProd.category) {
           relatedCategoryOffer = await Offer.findOne({
@@ -131,25 +124,20 @@ const loadProduct = async (req, res) => {
   }
 };
 
-//load product list page, contain all product
+//============================load product list page, contain all product================================
 const loadProductList = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = 9;
     const skip = (page - 1) * limit;
 
-    // Fetch all categories, even those without products
     const categories = await Category.find({ isListed: "true" });
 
-    // Fetch products and populate their categories
     const products = await Product.find({ isListed: "true" })
       .populate({ path: "category", match: { isListed: "true" }, select: "title" })
       .skip(skip)
       .limit(limit);
-
-    // Loop through each product and calculate the offer price and discount
     for (let product of products) {
-      // Fetch product-specific offer
       const productOffer = await Offer.findOne({
         offerType: "product",
         status: "active",
@@ -158,7 +146,6 @@ const loadProductList = async (req, res) => {
 
       let categoryOffer = null;
       if (product.category) {
-        // Fetch category-specific offer if no product-specific offer is found
         categoryOffer = await Offer.findOne({
           offerType: "category",
           status: "active",
@@ -166,7 +153,6 @@ const loadProductList = async (req, res) => {
         }).exec();
       }
 
-      // Calculate the final price and discount percentage
       let finalPrice = product.price;
       let discountPercentage = 0;
 
@@ -180,32 +166,27 @@ const loadProductList = async (req, res) => {
         discountPercentage = Math.round(categoryOffer.discount);
       }
 
-      // Attach the offer details to the product
       product.finalPrice = finalPrice;
       product.discountPercentage = discountPercentage;
     }
 
-    // Calculate total pages
     const totalProducts = await Product.countDocuments({ isListed: "true" });
     const totalPages = Math.ceil(totalProducts / limit);
     const user = req.session.user || req.user;
     const userId = user ? user._id : null;
 
-    // Fetch wishlist items
     let wishlistItems = [];
     if (userId) {
       const wishlist = await Wishlist.findOne({ userId }).populate("products.productId");
       wishlistItems = wishlist ? wishlist.products : [];
     }
 
-    // Fetch cart items
     let cartItems = [];
     if (userId) {
       const cart = await Cart.findOne({ userId }).populate("items.productId");
       cartItems = cart ? cart.items : [];
     }
 
-    // Render the view and pass the necessary data
     res.render("product-list", {
       products,
       categories,
@@ -291,8 +272,6 @@ const filterAndSortProducts = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
-
 
 const searchProduct = async (req, res) => {
   try {

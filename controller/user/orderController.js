@@ -12,7 +12,7 @@ const Coupon = require("../../model/coupen");
 const Offer = require("../../model/offerModel");
 const Product = require("../../model/productModel");
 
-//load the check out page
+//==================================== load the check out page
 const loadCheckout = async (req, res) => {
   try {
     const user = req.session.user || req.user;
@@ -22,7 +22,6 @@ const loadCheckout = async (req, res) => {
       return res.status(401).send("User not authenticated");
     }
 
-    // Fetch user's wishlist and cart items
     let wishlistItems = [];
     if (userId) {
       const wishlist = await Wishlist.findOne({ userId }).populate("products.productId");
@@ -113,6 +112,8 @@ const razorpayInstance = new Razorpay({
 
 const createOrderId = async (body) => {
   try {
+    console.log("body", body);
+
     const order = await razorpayInstance.orders.create(body);
     return order;
   } catch (err) {
@@ -130,6 +131,7 @@ const generateOrderId = () => {
   return orderId + Date.now().toString().slice(-5);
 };
 
+//================================ Place order ==============================
 const placeOrder = async (req, res) => {
   const user = req.session.user || req.user;
   const userId = user ? user._id : null;
@@ -144,10 +146,7 @@ const placeOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid address ID" });
     }
 
-    const [cart, address] = await Promise.all([
-      Cart.findOne({ userId }).populate("items.productId"),
-      Address.findById(addressId)
-    ]);
+    const [cart, address] = await Promise.all([Cart.findOne({ userId }).populate("items.productId"), Address.findById(addressId)]);
 
     if (!cart || cart.items.length === 0) {
       return res.status(400).json({ success: false, message: "Cart is empty" });
@@ -160,21 +159,16 @@ const placeOrder = async (req, res) => {
     let totalPrice = 0;
     const orderedItems = await Promise.all(
       cart.items.map(async (item) => {
-        const [productOffer, categoryOffer] = await Promise.all([
-          Offer.findOne({ offerType: "product", status: "active", productId: item.productId._id }),
-          Offer.findOne({ offerType: "category", status: "active", categoryId: item.productId.category })
-        ]);
+        const [productOffer, categoryOffer] = await Promise.all([Offer.findOne({ offerType: "product", status: "active", productId: item.productId._id }), Offer.findOne({ offerType: "category", status: "active", categoryId: item.productId.category })]);
 
-        const bestOffer = productOffer && categoryOffer
-          ? (productOffer.discount > categoryOffer.discount ? productOffer : categoryOffer)
-          : (productOffer || categoryOffer);
+        const bestOffer = productOffer && categoryOffer ? (productOffer.discount > categoryOffer.discount ? productOffer : categoryOffer) : productOffer || categoryOffer;
 
-        const finalPrice = bestOffer 
-          ? (item.productId.price * (1 - bestOffer.discount / 100)).toFixed(2) 
-          : item.productId.price.toFixed(2);
+        const finalPrice = bestOffer ? (item.productId.price * (1 - bestOffer.discount / 100)).toFixed(2) : item.productId.price.toFixed(2);
 
         const itemTotal = parseFloat(finalPrice) * item.quantity;
         totalPrice += itemTotal;
+        console.log("finalPrice", finalPrice);
+        console.log("itemTotal", itemTotal);
 
         const product = await Product.findById(item.productId._id);
         if (!product) {
@@ -194,7 +188,7 @@ const placeOrder = async (req, res) => {
           discountedPrice: parseFloat(finalPrice),
           offerDiscount: bestOffer ? bestOffer.discount : 0,
         };
-      })
+      }),
     );
 
     if (paymentMethod === "COD" && totalPrice > 1000) {
@@ -216,6 +210,44 @@ const placeOrder = async (req, res) => {
     let razorpayOrder;
     let walletTransaction;
 
+    let cartItems = [];
+    if (userId) {
+      const cart = await Cart.findOne({ userId }).populate("items.productId");
+      cartItems = cart ? cart.items : [];
+    }
+
+    const offers = await Offer.find();
+    //find the discount amiunt uing cart,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+    cartItems = await Promise.all(
+      cartItems.map(async (item) => {
+        const productOffers = offers.filter((offer) => offer.offerType === "product" && offer.productIds.includes(item.productId._id));
+
+        const categoryOffers = offers.filter((offer) => offer.offerType === "category" && offer.categoryIds.includes(item.productId.category));
+
+        let bestOffer = null;
+        if (productOffers.length > 0 && categoryOffers.length > 0) {
+          const bestProductOffer = productOffers.reduce((a, b) => (a.discount > b.discount ? a : b));
+          const bestCategoryOffer = categoryOffers.reduce((a, b) => (a.discount > b.discount ? a : b));
+          bestOffer = bestProductOffer.discount > bestCategoryOffer.discount ? bestProductOffer : bestCategoryOffer;
+        } else if (productOffers.length > 0) {
+          bestOffer = productOffers.reduce((a, b) => (a.discount > b.discount ? a : b));
+        } else if (categoryOffers.length > 0) {
+          bestOffer = categoryOffers.reduce((a, b) => (a.discount > b.discount ? a : b));
+        }
+        if (bestOffer) {
+          item.productId.finalPrice = (item.productId.price * (1 - bestOffer.discount / 100)).toFixed(2);
+        } else {
+          item.productId.finalPrice = item.productId.price.toFixed(2);
+        }
+
+        return item;
+      }),
+    );
+
+    let totalvalue = cartItems.reduce((acc, item) => acc + parseFloat(item.productId.finalPrice) * item.quantity, 0);
+
+    console.log("totalvalue", totalvalue);
+
     if (paymentMethod === "Wallet") {
       const wallet = await Wallet.findOne({ user: userId });
       if (!wallet || wallet.balance < totalPrice) {
@@ -233,8 +265,10 @@ const placeOrder = async (req, res) => {
       await wallet.save();
     } else if (paymentMethod === "Razorpay") {
       try {
+        console.log();
+
         razorpayOrder = await createOrderId({
-          amount: Math.round(totalPrice * 100),  // Amount in paise
+          amount: Math.round(totalvalue * 100), // Amount in paise
           currency: "INR",
           receipt: `order_rcptid_${Date.now()}`,
         });
@@ -249,7 +283,7 @@ const placeOrder = async (req, res) => {
       address: address,
       paymentMethod: paymentMethod,
       items: orderedItems,
-      totalPrice: totalPrice,
+      totalPrice: totalvalue,
       couponDiscountAmt: couponDiscountAmt,
       razorpayOrderId: razorpayOrder ? razorpayOrder.id : null,
       payment_status: paymentMethod === "Wallet" ? "Completed" : "Pending",
@@ -280,9 +314,6 @@ const placeOrder = async (req, res) => {
     res.status(500).json({ success: false, message: "Error placing order", error: error.message });
   }
 };
-
-
-
 
 //confirm order page after place a order
 const orderConfirm = async (req, res) => {
@@ -514,10 +545,9 @@ const verifyPayment = async (req, res) => {
   }
 };
 
-
-
 const btoa = require("btoa");
 const fetch = require("node-fetch");
+const { log } = require("console");
 
 exports.createOrderId = async (body, res) => {
   try {
@@ -571,8 +601,8 @@ const cancelOrderItem = async (req, res) => {
     }
 
     // Check if the order payment status is Razorpay or Paid
-    if (order.paymentMethod === "razor payment" || order.payment_status === "Completed") {
-      const refundAmount = item.discountedPrice * item.quantity;
+    if ((order.paymentMethod === "Razorpay" || order.payment_status === "Completed") && order.payment_status !== "Failed") {
+      const refundAmount = order.totalPrice;
 
       // Find or create the user's wallet
       let wallet = await Wallet.findOne({ user: order.user });
@@ -609,7 +639,6 @@ const cancelOrderItem = async (req, res) => {
   }
 };
 
-
 const returnOrderItem = async (req, res) => {
   try {
     const { orderId, itemId } = req.params;
@@ -635,7 +664,7 @@ const returnOrderItem = async (req, res) => {
     }
 
     // Check if the order payment status is Razorpay or Paid
-    if (order.paymentMethod === "razor payment" || order.payment_status === "Completed") {
+    if ((order.paymentMethod === "Razorpay" || order.payment_status === "Completed") && order.payment_status !== "Failed") {
       const refundAmount = item.discountedPrice * item.quantity;
 
       // Find or create the user's wallet
@@ -672,7 +701,6 @@ const returnOrderItem = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
-
 
 const returnRequest = async (req, res) => {
   try {

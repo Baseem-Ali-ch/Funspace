@@ -11,7 +11,7 @@ const Category = require("../../model/categoryModel");
 const Product = require("../../model/productModel");
 const Offer = require("../../model/offerModel");
 
-//load login page for admin
+//================load login page for admin======================
 const loadLogin = async (req, res) => {
   try {
     return res.render("login");
@@ -21,7 +21,7 @@ const loadLogin = async (req, res) => {
   }
 };
 
-//verify admin login
+//=========================verify admin login========================
 const verifyLogin = async (req, res) => {
   try {
     const { "login-email": email, "login-password": password } = req.body;
@@ -54,7 +54,7 @@ const verifyLogin = async (req, res) => {
   }
 };
 
-//load admin dashboard
+//==============================load admin dashboard=============================
 const loadHome = async (req, res) => {
   try {
     let { startDate, endDate, filterPeriod } = req.query;
@@ -64,7 +64,7 @@ const loadHome = async (req, res) => {
     let defaultStart = now.clone().subtract(30, "days").startOf("day");
     let defaultEnd = now.clone().endOf("day");
 
-    // Handle filter periods
+    // ========Handle filter periods========
     if (filterPeriod) {
       switch (filterPeriod) {
         case "today":
@@ -89,48 +89,42 @@ const loadHome = async (req, res) => {
           break;
         default:
           startDate = moment(startDate).startOf("day");
-          endDate =  moment(endDate).endOf("day");
+          endDate = moment(endDate).endOf("day");
 
           break;
       }
     } else {
-      // Default to last 30 days if no date range or filter period is specified
       if (!startDate || !endDate) {
         startDate = defaultStart.format("YYYY-MM-DD");
         endDate = defaultEnd.format("YYYY-MM-DD");
       }
     }
 
-    // Parse the dates and set the time
     const startDateTime = moment(startDate).startOf("day");
     const endDateTime = moment(endDate).endOf("day");
 
-    // Debugging logs
-    console.log('Parsed Start Date:', startDateTime.toDate());
-    console.log('Parsed End Date:', endDateTime.toDate());
+    console.log("Parsed Start Date:", startDateTime.toDate());
+    console.log("Parsed End Date:", endDateTime.toDate());
 
-    // Fetch orders based on the date range
     const orders = await Order.find({
       createdAt: { $gte: startDateTime.toDate(), $lte: endDateTime.toDate() },
     })
       .populate("user", "name email")
       .populate("items.product", "name price category")
       .sort({ createdAt: -1 });
+    console.log('product name',)
 
-    console.log('Fetched Orders:', orders);
+console.log(orders,'its your orders');
 
-    // Extract product IDs and category IDs to fetch offers
-    const productIds = orders.flatMap((order) => 
-      order.items.filter((item) => item.product && item.product._id).map((item) => item.product._id)
-    );
-    const categoryIds = orders.flatMap((order) => 
-      order.items.filter((item) => item.product && item.product.category).map((item) => item.product.category)
-    );
 
-    console.log('Product IDs:', productIds);
-    console.log('Category IDs:', categoryIds);
+    console.log("Fetched Orders:", orders);
 
-    // Fetch offers related to products and categories
+    const productIds = orders.flatMap((order) => order.items.filter((item) => item.product && item.product._id).map((item) => item.product._id));
+    const categoryIds = orders.flatMap((order) => order.items.filter((item) => item.product && item.product.category).map((item) => item.product.category));
+
+    console.log("Product IDs:", productIds);
+    console.log("Category IDs:", categoryIds);
+
     const productOffers = await Offer.find({
       offerType: "product",
       productIds: { $in: productIds },
@@ -143,7 +137,6 @@ const loadHome = async (req, res) => {
       status: "active",
     });
 
-    // Prepare offer lookup
     const offerLookup = {};
     productOffers.forEach((offer) => {
       offer.productIds.forEach((productId) => {
@@ -169,6 +162,7 @@ const loadHome = async (req, res) => {
       const originalTotalPrice = order.items.reduce((sum, item) => {
         return item.product ? sum + item.product.price * item.quantity : sum;
       }, 0);
+      
       const offerDiscountAmt = order.items.reduce((sum, item) => {
         if (!item.product) return sum;
         const offer = offerLookup[item.product._id.toString()] || offerLookup[item.product.category.toString()];
@@ -177,18 +171,15 @@ const loadHome = async (req, res) => {
 
       const orderTotal = originalTotalPrice - order.couponDiscountAmt - offerDiscountAmt;
       totalRevenue += orderTotal;
+console.log('orginl prive',originalTotalPrice);
 
       const orderQuantity = order.items.reduce((sum, item) => {
         if (!item.product) return sum;
-
-        // Track product sales
         const productId = item.product._id.toString();
         if (!productSales[productId]) {
           productSales[productId] = { name: item.product.name, quantity: 0, category: item.product.category };
         }
         productSales[productId].quantity += item.quantity;
-
-        // Track category sales
         const categoryId = item.product.category.toString();
         if (!categorySales[categoryId]) {
           categorySales[categoryId] = { quantity: 0 };
@@ -237,7 +228,6 @@ const loadHome = async (req, res) => {
       };
     });
 
-    // Determine the best-selling product
     const bestSellingProductId = Object.keys(productSales).reduce((a, b) => (productSales[a].quantity > productSales[b].quantity ? a : b), Object.keys(productSales)[0]);
     const bestSellingProduct = productSales[bestSellingProductId];
 
@@ -271,18 +261,15 @@ const loadHome = async (req, res) => {
   }
 };
 
-
-//load all user list in admin side
+//==========================================load all user list in admin side===================================
 const loadAllUser = async (req, res) => {
   const { search = "", page = 1 } = req.query;
   const limit = 10;
   const skip = (page - 1) * limit;
 
   try {
-    // Build search query
     const searchQuery = search ? { $or: [{ name: new RegExp(search, "i") }, { email: new RegExp(search, "i") }] } : {};
 
-    // Fetch users with pagination and search filter
     const userData = await userModel.find(searchQuery).skip(skip).limit(limit);
     const totalUsers = await userModel.countDocuments(searchQuery);
     const totalPages = Math.ceil(totalUsers / limit);
@@ -301,7 +288,7 @@ const loadAllUser = async (req, res) => {
   }
 };
 
-//admin edit user details
+//=====================================admin edit user details===================================
 const updateCustomer = async (req, res) => {
   const customerId = req.params.id;
   const { name, email, phone, isListed } = req.body;
@@ -320,7 +307,7 @@ const updateCustomer = async (req, res) => {
   }
 };
 
-//admin logout
+//========================================admin logout=============================
 const adminLogout = async (req, res) => {
   try {
     req.session.destroy((error) => {
@@ -337,7 +324,7 @@ const adminLogout = async (req, res) => {
   }
 };
 
-//load admin profile
+//====================================load admin profile===================================
 const loadAdmProfile = async (req, res) => {
   try {
     const isAdmin = req.session.admin;
@@ -347,6 +334,7 @@ const loadAdmProfile = async (req, res) => {
   }
 };
 
+//====================================Generate pdf===================================
 const generatePdf = (salesData, res) => {
   try {
     const doc = new PDFDocument({ margin: 50 });
@@ -361,42 +349,48 @@ const generatePdf = (salesData, res) => {
     doc.fontSize(18).text("Sales Report", { align: "center", underline: true });
     doc.moveDown(2);
 
-    // Define table
-    const table = {
-      headers: ["Order ID", "Customer", "Total Amount","discoutn", "Order Date"],
-      rows: [],
-    };
-
+    // Calculate Grand Total and Grand Discount
     let grandTotal = 0;
     let grandDiscount = 0;
 
-    // Populate table rows and calculate the grand total
     salesData.forEach((order) => {
-      
       const total = order.totalPrice.toFixed(2);
-      const discount = parseFloat(order.couponDiscountAmt.toFixed(2) || 0); 
+      // const discount = (order.originalTotalPrice - order.totalPrice).toFixed(2);
       grandTotal += parseFloat(total);
-      //grandDiscount += discount;
-
-      table.rows.push([
-        order.orderId,
-        order.user ? order.user.name : "N/A",
-        `₹${total}`,
-        //`₹${discount.toFixed(2)}`,
-        new Date(order.createdAt).toLocaleDateString(),
-      ]);
+      // grandDiscount += parseFloat(discount);
     });
 
-    // Draw table headers
+    // Display "Grand Total" at the top
+    doc.font("Helvetica-Bold")
+      .fontSize(12)
+      .text(`Grand Total: ₹${grandTotal.toFixed(2)}`, 50, 100, { align: "left" });
+
+    // Display "Grand Discount" at the top (if needed)
+    // doc.font("Helvetica-Bold")
+    //   .fontSize(12)
+    //   .text(`Grand Discount: ₹${grandDiscount.toFixed(2)}`, 50, 120, { align: "left" });
+
+    doc.moveDown(2);
+
+    const table = {
+      headers: ["Order ID", "Customer", "Total Amount", "Order Date"],
+      rows: [],
+    };
+
+    salesData.forEach((order) => {
+      const total = order.totalPrice.toFixed(2);
+      table.rows.push([order.orderId, order.user ? order.user.name : "N/A", `₹${total}`, new Date(order.createdAt).toLocaleDateString()]);
+    });
+
     const startX = 50;
     const startY = 150;
     const rowHeight = 30;
     const colWidth = (doc.page.width - 2 * startX) / table.headers.length;
 
-    // Draw headers with styling
-    doc.font("Helvetica-Bold").fontSize(12).fillColor('white');
-    doc.rect(startX, startY, colWidth * table.headers.length, rowHeight).fill('#4A4A4A');
-    doc.fillColor('black');
+    // Draw table headers
+    doc.font("Helvetica-Bold").fontSize(12).fillColor("white");
+    doc.rect(startX, startY, colWidth * table.headers.length, rowHeight).fill("#4A4A4A");
+    doc.fillColor("white");
     table.headers.forEach((header, i) => {
       doc.text(header, startX + i * colWidth, startY + 10, {
         width: colWidth,
@@ -404,44 +398,52 @@ const generatePdf = (salesData, res) => {
       });
     });
 
-    // Draw rows with styling
-    let currentY = startY + rowHeight; // Position after headers
+    let currentY = startY + rowHeight;
 
-    doc.font("Helvetica").fontSize(10).fillColor('black');
+    doc.font("Helvetica").fontSize(10).fillColor("black");
     table.rows.forEach((row) => {
       row.forEach((cell, colIndex) => {
-        doc.text(cell, startX + colIndex * colWidth, currentY + 5, {
+        doc.text(cell, startX + colIndex * colWidth, currentY + 10, {
           width: colWidth,
           align: "center",
         });
       });
-      currentY += rowHeight; // Move down to the next row
+      currentY += rowHeight;
+
+      if (currentY + rowHeight > doc.page.height - 50) {
+        doc.addPage();
+        currentY = 50;
+      }
     });
 
-    // Draw lines (for table borders)
     doc.lineWidth(0.5);
 
-    // Vertical lines
+    // Draw vertical lines for the table
     for (let i = 0; i <= table.headers.length; i++) {
-      doc.moveTo(startX + i * colWidth, startY)
+      doc
+        .moveTo(startX + i * colWidth, startY)
         .lineTo(startX + i * colWidth, currentY)
         .stroke();
     }
 
-    // Horizontal lines
+    // Draw horizontal lines for the table
     for (let i = 0; i <= table.rows.length; i++) {
-      doc.moveTo(startX, startY + i * rowHeight)
+      doc
+        .moveTo(startX, startY + i * rowHeight)
         .lineTo(startX + table.headers.length * colWidth, startY + i * rowHeight)
         .stroke();
     }
 
-    // Draw bottom line for header
-    doc.moveTo(startX, startY).lineTo(startX + table.headers.length * colWidth, startY).stroke();
+    doc
+      .moveTo(startX, startY)
+      .lineTo(startX + table.headers.length * colWidth, startY)
+      .stroke();
 
-    // Grand total
     const grandTotalY = currentY + 10;
-    doc.moveTo(startX, grandTotalY).lineTo(startX + table.headers.length * colWidth, grandTotalY).stroke();
-    doc.font("Helvetica-Bold").fontSize(12).text(`Grand Total: ₹${grandTotal.toFixed(2)}`, startX + colWidth * 2, grandTotalY + 10, { align: "center" });
+    doc
+      .moveTo(startX, grandTotalY)
+      .lineTo(startX + table.headers.length * colWidth, grandTotalY)
+      .stroke();
 
     doc.end();
   } catch (error) {
@@ -451,12 +453,11 @@ const generatePdf = (salesData, res) => {
 };
 
 
-
+//=========================================sales report================================
 const salesReportPdf = async (req, res) => {
   try {
     const { startDate: startDateStr, endDate: endDateStr } = req.query;
 
-    // Validate and parse dates
     if (!startDateStr || !endDateStr) {
       return res.status(400).send("Start Date and End Date are required.");
     }
@@ -488,11 +489,11 @@ const salesReportPdf = async (req, res) => {
   }
 };
 
+//====================================sales report excel===================================
 const salesReportExcel = async (req, res) => {
   try {
     const { startDate: startDateStr, endDate: endDateStr } = req.query;
 
-    // Validate and parse dates
     if (!startDateStr || !endDateStr) {
       return res.status(400).send("Start Date and End Date are required.");
     }
@@ -545,15 +546,13 @@ const salesReportExcel = async (req, res) => {
       });
     });
 
-    // Add Grand Total row
     worksheet.addRow({});
     const totalRow = worksheet.addRow({
-      orderId: 'Grand Total',
+      orderId: "Grand Total",
       total: `₹${grandTotal.toFixed(2)}`,
     });
     totalRow.font = { bold: true };
 
-    // Adjust column widths and styles
     worksheet.columns.forEach((column) => {
       column.alignment = { vertical: "middle", horizontal: "center" };
     });

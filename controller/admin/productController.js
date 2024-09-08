@@ -7,7 +7,7 @@ const path = require("path");
 const fs = require("fs").promises;
 const mongoose = require("mongoose");
 
-//load product list in admin side
+//==============================================load product list in admin side====================================
 const loadProductList = async (req, res) => {
   const { search = "", page = 1 } = req.query;
   const limit = 10;
@@ -40,7 +40,7 @@ const loadProductList = async (req, res) => {
   }
 };
 
-//load add product page
+//====================================================load add product page=============================================
 const loadAddProduct = async (req, res) => {
   try {
     const isAdmin = req.session.admin;
@@ -51,13 +51,12 @@ const loadAddProduct = async (req, res) => {
   }
 };
 
-//admin can add product
+//================================================admin can add product===============================================
 const addProduct = async (req, res) => {
   try {
     const { productTitle, productDescription, productPrice, productDiscountedPrice, category: categoryId, isListed, stock } = req.body;
 
-    console.log("Files received:", req.files); // Debugging log
-
+    console.log("Files received:", req.files); 
     const category = await Category.findById(categoryId);
     if (!category) {
       console.error("Category not found for ID:", categoryId);
@@ -89,7 +88,7 @@ const addProduct = async (req, res) => {
   }
 };
 
-//admin can edit product details
+//============================================admin can edit product details======================================
 const updateProduct = async (req, res) => {
   const productId = req.params.id;
   const { name, description, proCategory, price, discountPrice, stock, status } = req.body;
@@ -105,34 +104,31 @@ const updateProduct = async (req, res) => {
       return res.status(404).json({ success: false, message: "Product not found" });
     }
 
-    // Initialize an array to track changes
     const changes = [];
 
-    // Check if files are present in the request
     if (req.files) {
-      // Update imageUrl_1 if a new file is provided; otherwise, keep the existing imageUrl_1
+
       if (req.files.productImage1) {
         updateData.imageUrl_1 = "/assets/images/add-product/" + req.files.productImage1[0].filename;
       } else {
-        updateData.imageUrl_1 = product.imageUrl_1 || ""; // Keep the existing image or default to an empty string
+        updateData.imageUrl_1 = product.imageUrl_1 || ""; 
       }
 
-      // Update imageUrl_2 if a new file is provided; otherwise, keep the existing imageUrl_2
+
       if (req.files.productImage2) {
         updateData.imageUrl_2 = "/assets/images/add-product/" + req.files.productImage2[0].filename;
       } else {
-        updateData.imageUrl_2 = product.imageUrl_2 || ""; // Keep the existing image or default to an empty string
+        updateData.imageUrl_2 = product.imageUrl_2 || "";
       }
 
-      // Update imageUrl_3 if a new file is provided; otherwise, keep the existing imageUrl_3
+
       if (req.files.productImage3) {
         updateData.imageUrl_3 = "/assets/images/add-product/" + req.files.productImage3[0].filename;
       } else {
-        updateData.imageUrl_3 = product.imageUrl_3 || ""; // Keep the existing image or default to an empty string
+        updateData.imageUrl_3 = product.imageUrl_3 || ""; 
       }
     }
 
-    // Update fields
     product.name = name;
     product.description = description;
     product.category = new mongoose.Types.ObjectId(proCategory);
@@ -152,7 +148,7 @@ const updateProduct = async (req, res) => {
   }
 };
 
-//load category list in admin side
+//========================================load category list in admin side==================================
 const loadCategoryList = async (req, res) => {
   const { search = "", page = 1 } = req.query;
   const limit = 10;
@@ -183,7 +179,7 @@ const loadCategoryList = async (req, res) => {
   }
 };
 
-//admin can add categories
+//============================================admin can add categories========================================
 const addCategory = async (req, res) => {
   try {
     const { title, slug, isListed } = req.body;
@@ -208,7 +204,7 @@ const addCategory = async (req, res) => {
   }
 };
 
-//admin can edit categories
+//===========================================admin can edit categories============================================
 const updateCategory = async (req, res) => {
   try {
     const categoryId = req.params.id;

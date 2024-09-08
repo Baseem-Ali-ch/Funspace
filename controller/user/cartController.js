@@ -7,7 +7,7 @@ const Offer = require("../../model/offerModel");
 const mongoose = require("mongoose");
 
 
-//load cart page who have an account
+//=================================load cart page who have an account================================
 const loadCart = async (req, res) => {
     try {
       const user = req.session.user || req.user;
@@ -26,23 +26,19 @@ const loadCart = async (req, res) => {
   
       const validCartItems = cart.items.filter((item) => item.productId != null);
   
-      // Calculate the offer price for each product in the cart
       for (let item of validCartItems) {
-        // Find active product-specific offers
         const productOffer = await Offer.findOne({
           offerType: "product",
           status: "active",
-          productIds: item.productId._id, // Note the use of productIds instead of productId
+          productIds: item.productId._id,
         }).exec();
-  
-        // Find active category-specific offers
+
         const categoryOffer = await Offer.findOne({
           offerType: "category",
           status: "active",
-          categoryIds: item.productId.category, // Note the use of categoryIds instead of categoryId
+          categoryIds: item.productId.category,
         }).exec();
   
-        // Apply the highest offer available (either product or category)
         let bestOffer = null;
         if (productOffer && categoryOffer) {
           bestOffer = productOffer.discount > categoryOffer.discount ? productOffer : categoryOffer;
@@ -50,7 +46,6 @@ const loadCart = async (req, res) => {
           bestOffer = productOffer || categoryOffer;
         }
   
-        // Attach the best offer to the product and calculate discounted price
         if (bestOffer) {
           item.productId.offer = bestOffer;
           item.productId.discountedPrice = (item.productId.price * (1 - bestOffer.discount / 100)).toFixed(2);
@@ -59,10 +54,9 @@ const loadCart = async (req, res) => {
         }
       }
   
-      // Calculate totals for price details in the summary section
       let totalPrice = 0;
       let totalDiscountedPrice = 0;
-      let deliveryCharge = 0; // Update this based on your delivery charge logic
+      let deliveryCharge = 0;
   
       validCartItems.forEach(item => {
         const price = item.productId.price;
@@ -96,10 +90,12 @@ const loadCart = async (req, res) => {
   };
   
   
-  //add a product to cart
+  //=======================add a product to cart==============================
   const addToCart = async (req, res) => {
     try {
+
       const userId = req.session.user ? req.session.user._id : null;
+      console.log('req session',req.session.user)
       let { productId, quantity } = req.body;
   
       if (!userId) {
@@ -109,7 +105,7 @@ const loadCart = async (req, res) => {
         return res.status(400).json({ message: "Product ID and quantity are required", success: false });
       }
   
-      // Ensure productId is a valid ObjectId string
+  
       if (typeof productId === "object" && productId.productId) {
         productId = productId.productId;
       }
@@ -117,17 +113,14 @@ const loadCart = async (req, res) => {
       if (!mongoose.Types.ObjectId.isValid(productId)) {
         return res.status(400).json({ message: "Invalid product ID", success: false });
       }
-  
-      // Convert productId to ObjectId
+
       const productObjectId = new mongoose.Types.ObjectId(productId);
-  
-      // Check the product stock
+
       const product = await Product.findById(productObjectId);
       if (!product) {
         return res.status(404).json({ message: "Product not found", success: false });
       }
-  
-      // Ensure the quantity does not exceed available stock and the limit of 5
+
       if (quantity > 5) {
         return res.status(400).json({ message: "You can only add up to 5 items of this product", success: false });
       }
@@ -135,10 +128,6 @@ const loadCart = async (req, res) => {
       if (product.stock < quantity) {
         return res.status(400).json({ message: "Not enough stock available", success: false });
       }
-  
-      // // Update the product quantity
-      // product.stock -= quantity;
-      // await product.save();
   
       const cart = await Cart.findOne({ userId });
       if (cart) {
@@ -171,7 +160,7 @@ const loadCart = async (req, res) => {
     }
   };
   
-  //update the cart item quantity
+  //======================================update the cart item quantity==================================
   const updateCartItemQty = async (req, res) => {
     try {
       const userId = req.session.user ? req.session.user._id : null;
@@ -185,8 +174,7 @@ const loadCart = async (req, res) => {
       if (!productId || quantity === undefined) {
         return res.status(400).json({ message: "Product ID and quantity are required", success: false });
       }
-  
-      // Limit the maximum quantity that can be added to the cart
+
       if (quantity > 5) {
         return res.status(400).json({ message: "Cannot add more than 5 units of a product to the cart", success: false });
       }
@@ -208,17 +196,14 @@ const loadCart = async (req, res) => {
       if (quantity > product.stock) {
         return res.status(400).json({ message: "Requested quantity exceeds available stock", success: false });
       }
-  
-      // Calculate total stock
+
       const totalStock = product.stock + cartItem.quantity;
       if (quantity > totalStock) {
         return res.status(400).json({ message: "Requested quantity exceeds available stock", success: false });
       }
-  
-      // Update the cart item quantity
+
       cartItem.quantity = quantity;
   
-      // Remove the item from the cart if quantity is set to zero
       if (quantity === 0) {
         cart.items = cart.items.filter((item) => !item.productId.equals(productObjectId));
       }
@@ -245,7 +230,7 @@ const loadCart = async (req, res) => {
     }
   };
   
-  //remove products from cart
+  //==============================remove products from cart===============================
   const removeFromCart = async (req, res) => {
     try {
       const userId = req.session.user ? req.session.user._id : null;
@@ -258,41 +243,29 @@ const loadCart = async (req, res) => {
       if (!productId) {
         return res.status(400).json({ message: "Product ID is required", success: false });
       }
-  
-      // Ensure productId is a valid ObjectId
+
       if (!mongoose.Types.ObjectId.isValid(productId)) {
         return res.status(400).json({ message: "Invalid product ID", success: false });
       }
   
       const productObjectId = new mongoose.Types.ObjectId(productId);
-  
-      // Find the user's cart
       const cart = await Cart.findOne({ userId });
   
       if (!cart) {
         return res.status(404).json({ message: "Cart not found", success: false });
       }
-  
-      // Find the item in the cart
       const cartItemIndex = cart.items.findIndex((item) => item.productId.equals(productObjectId));
   
       if (cartItemIndex === -1) {
         return res.status(404).json({ message: "Product not found in cart", success: false });
       }
   
-      // Get the quantity of the item being removed
       const removedQuantity = cart.items[cartItemIndex].quantity;
   
-      // Remove the item from the cart
+
       cart.items.splice(cartItemIndex, 1);
       await cart.save();
-  
-      // Update the product stock
-      // const product = await Product.findById(productObjectId);
-      // if (product) {
-      //   product.stock += removedQuantity;
-      //   await product.save();
-      // }
+
   
       res.status(200).json({ message: "Item removed from cart", success: true, redirecturl: "/cart" });
     } catch (error) {
