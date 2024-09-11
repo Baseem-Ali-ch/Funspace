@@ -901,14 +901,14 @@
           const discountedPrice = (product.price - (product.price * (product.offer.discount / 100))).toFixed(2);
           const discountPercentage = Math.round(product.offer.discount);
           priceHtml = `
-    <div class="product-price mx-3">₹${discountedPrice}</div>
-    <div class="product-price mx-3" style="font-size: 16px;">
-      <del>₹${product.price}</del>
-    </div>
-    <div class="product-price" style="font-size: 16px;">
-      ${discountPercentage}% off
-    </div>
-  `;
+          <div class="product-price mx-3">₹${discountedPrice}</div>
+          <div class="product-price mx-3" style="font-size: 16px;">
+          <del>₹${product.price}</del>
+          </div>
+          <div class="product-price" style="font-size: 16px;">
+            ${discountPercentage}% off
+          </div>
+        `;
         } else {
           priceHtml = `<div class="product-price mx-3">₹${product.price}</div>`;
         }

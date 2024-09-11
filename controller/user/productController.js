@@ -168,7 +168,11 @@ const loadProductList = async (req, res) => {
 
       product.finalPrice = finalPrice;
       product.discountPercentage = discountPercentage;
+
+      console.log("finalPrice", finalPrice);
+      console.log("discountPercentage", discountPercentage);
     }
+    
 
     const totalProducts = await Product.countDocuments({ isListed: "true" });
     const totalPages = Math.ceil(totalProducts / limit);
